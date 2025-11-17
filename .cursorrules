@@ -1,0 +1,382 @@
+# RaceWise (Paceline) - AI Ultramarathon Race Planning SaaS
+
+## Project Overview
+RaceWise is an AI-powered platform that transforms 30 hours of scattered ultramarathon race planning into a 10-minute automated process. We deliver personalized race-day execution guides that reduce pre-race anxiety and increase finish rates by 15%.
+
+## Key Documentation
+- **Full PRD:** `/docs/PRD_COMPLETE.md` - Complete product specifications
+- **Quick Reference:** `/docs/QUICK_REFERENCE.md` - Key numbers and APIs
+- **Claude Code Context:** `/.claude/CLAUDE.md` - Project context for Claude Code agent
+- **Tasks:** `/.claude/tasks/` - Current development tasks
+- **Decisions:** `/.claude/decisions/` - Architecture decision records
+
+## Product Context
+
+### Target User: Alex Chen
+- Age 38, Software Engineer, Salt Lake City
+- Training for Wasatch Front 100 (14 weeks away)
+- Pain: "I don't have 30 hours to piece together a race plan"
+- Fear: "I barely made mile 62 cutoff with 8 minutes to spare last race"
+- Goal: Finish with 3+ hour cutoff buffer, organized crew support
+
+### Core Value Proposition
+- **Time:** 30 hours DIY → 10 minutes automated
+- **Anxiety:** Overwhelming chaos → calm confidence  
+- **Quality:** Strava-powered, elevation-adjusted pacing strategies
+- **Comprehensive:** 8 sections (pacing, crew, nutrition, drop bags, cutoffs, weather, contingencies, mental)
+
+### Pricing Tiers
+- **Essential:** $29 (first-timers, basic planning)
+- **Custom:** $99 ★ Most Popular (Strava integration, full personalization)
+- **Ultra Bundle:** $299 (3 races, $100/race)
+
+### Success Metrics (6 Months)
+- 500 guides sold = $50,000 revenue
+- <5% refund rate
+- 8+/10 satisfaction score
+- <5 minute AI generation time
+- 15% finish rate improvement
+
+## Tech Stack (From Starter Kit)
+
+### Core Framework
+- **Next.js:** 15.3.1 with App Router
+- **TypeScript:** Strict mode enabled
+- **Styling:** Tailwind CSS v4 + shadcn/ui components
+- **Deployment:** Vercel (zero-config)
+
+### Database & Auth
+- **Database:** Neon PostgreSQL (serverless, autoscaling)
+- **ORM:** Drizzle ORM (type-safe queries)
+- **Authentication:** Better Auth v1.2.8
+  - Email/password + Google OAuth
+  - Database-backed sessions
+  - Built-in Polar.sh integration
+
+### Payment & Subscriptions
+- **Payment Provider:** Polar.sh
+- **Products:** Essential ($29), Custom ($99), Ultra Bundle ($299)
+- **Webhooks:** subscription.created, subscription.active, subscription.canceled
+
+### AI & Generation
+- **AI Provider:** OpenAI GPT-4 Turbo
+- **Architecture:** 8-step agent cascade
+- **Generation Time:** <5 minutes target
+- **Cost:** ~$0.50-1.00 per guide
+
+### File Storage & Email
+- **PDF Generation:** Puppeteer (HTML → PDF)
+- **Storage:** Cloudflare R2 (S3-compatible, zero egress fees)
+- **Email:** Resend (React email templates)
+
+### Analytics
+- **Analytics:** PostHog (product analytics, session replay)
+- **Monitoring:** Vercel Analytics
+
+## Database Schema
+
+### Core Tables
+```typescript
+// Users (Better Auth managed)
+users: id, email, name, image, createdAt, updatedAt
+
+// Purchases
+purchases: id, userId, tier, amount, polarSubscriptionId, status, createdAt
+
+// Questionnaires
+questionnaires: id, purchaseId, raceName, raceDate, goalFinishTime, 
+  stravaAthleteId, stravaData (jsonb), nutritionPreferences (jsonb),
+  recentRaceResults, biggestRaceFears, completedAt, createdAt
+
+// Guides (Generated PDFs)
+guides: id, purchaseId, questionnaireId, pdfUrl, sections (jsonb),
+  generationTime, aiCost, createdAt
+
+// Race Database
+races: id, name, distance, elevationGain, location, website,
+  courseProfile (jsonb), weatherPatterns (jsonb), createdAt
+
+// Subscriptions (Ultra Bundle)
+subscriptions: id, userId, polarSubscriptionId, status, 
+  guidesRemaining, createdAt
+```
+
+## Key Features & Specifications
+
+### Questionnaire Forms
+
+**Essential Tier (12 fields):**
+1. Race name (dropdown or custom)
+2. Race website (optional URL)
+3. Upload race docs (PDF/image, max 10MB)
+4. Race date (date picker)
+5. Goal finish time (HH:MM format)
+6. Ultras completed (0, 1-3, 4-10, 10+)
+7. Recent flat pace (MM:SS per mile)
+8. Climbing strength (Strong/Average/Struggle)
+9. Weekly training volume (miles)
+10. Crew support (Yes/Partial/No)
+11. Email (pre-filled from auth)
+12. First name (pre-filled from auth)
+
+**Custom Tier (+7 additional fields):**
+13. Connect Strava (OAuth, analyze 90 days)
+14. Recent race results (textarea, 500 char)
+15. Biggest climb trained (text)
+16. GI issues history (yes/no + details)
+17. Blister-prone areas (text)
+18. Nutrition preferences (checkboxes: vegan, gluten-free, caffeine-sensitive)
+19. Biggest race fears (textarea, 300 char)
+
+### 8-Step AI Agent Cascade
+
+**Total Generation Time:** <5 minutes  
+**OpenAI Cost:** ~$0.50-1.00 per guide
+
+1. **Race Overview (45s)** - Course description, elevation profile, aid stations, historical weather
+2. **Pacing Strategy (60s)** - Strava-based, elevation-adjusted, section-by-section pacing
+3. **Cutoff Management (30s)** - Buffer calculator with 🟢🟡🔴 status indicators
+4. **Crew Logistics (45s)** - Predicted arrival times, crew instructions per station
+5. **Drop Bag Strategy (30s)** - Station-specific packing lists, weather adjustments
+6. **Nutrition Timeline (30s)** - Personalized fueling plan, calorie/electrolyte targets
+7. **Contingency Protocols (45s)** - GI issues, blisters, falling behind, heat protocols
+8. **Mental Strategy (30s)** - Mantras, tough section tactics, motivation strategies
+
+### API Endpoints
+
+```typescript
+// Authentication (Better Auth)
+POST   /api/auth/signup
+POST   /api/auth/login
+GET    /api/auth/session
+GET    /api/auth/google
+
+// Payments (Polar.sh)
+POST   /api/webhooks/polar
+
+// Questionnaire
+POST   /api/questionnaire       // Submit questionnaire
+GET    /api/questionnaire/[id]  // Retrieve by ID
+PUT    /api/questionnaire/[id]  // Update (auto-save)
+
+// Strava Integration
+GET    /api/strava/authorize    // OAuth flow
+GET    /api/strava/callback     // OAuth callback
+POST   /api/strava/analyze      // Analyze fitness data
+
+// Guide Generation
+POST   /api/generate-guide      // Trigger AI cascade
+  // Request: { questionnaireId: uuid }
+  // Response: { guideId, pdfUrl, generationTime }
+
+// User Dashboard
+GET    /api/guides              // List user's guides
+GET    /api/guides/[id]         // Get specific guide
+GET    /api/guides/[id]/download // Download PDF
+```
+
+## Development Guidelines
+
+### Code Standards
+- **TypeScript:** Use strict mode, no `any` types
+- **Components:** React Server Components by default
+- **Styling:** Tailwind utility classes only (no custom CSS)
+- **Validation:** Zod schemas for all forms and API inputs
+- **Error Handling:** Try-catch with proper error messages
+- **Database:** Type-safe Drizzle queries, no raw SQL
+
+### File Structure Conventions
+```
+app/
+├── (auth)/              # Auth pages (login, signup)
+├── (marketing)/         # Public pages (landing, pricing)
+├── dashboard/           # Protected user dashboard
+│   ├── _components/     # Dashboard-specific components
+│   ├── guides/          # Guide listing & download
+│   └── questionnaire/   # Questionnaire forms
+└── api/                 # API routes
+
+components/
+├── ui/                  # shadcn/ui components
+└── shared/              # Reusable app components
+
+lib/
+├── auth/                # Better Auth config
+├── db/                  # Drizzle schema & connection
+└── utils/               # Helper functions
+```
+
+### Component Patterns
+- Use Server Components for data fetching
+- Use Client Components only when needed (forms, interactivity)
+- Mark client components with `'use client'` directive
+- Co-locate components with routes when possible
+- Keep components small and focused (single responsibility)
+
+### Database Patterns
+- Always use Drizzle ORM (type-safe)
+- Use transactions for multi-table operations
+- Index foreign keys and frequently queried fields
+- Store JSON data in `jsonb` columns (Strava data, guide sections)
+
+### API Design
+- RESTful conventions (GET, POST, PUT, DELETE)
+- Return proper HTTP status codes (200, 201, 400, 401, 404, 500)
+- Validate inputs with Zod before processing
+- Handle errors gracefully with user-friendly messages
+- Log errors to console for debugging
+
+## 90-Day Development Roadmap
+
+### Phase 1: Manual MVP (Weeks 1-4)
+**Goal:** Validate demand with 30-50 manual guides
+
+- [ ] Landing page (Next.js + Tailwind)
+- [ ] Pricing page (3 tiers)
+- [ ] Polar.sh payment integration
+- [ ] Google Forms questionnaire (temporary)
+- [ ] Manual guide generation (Claude prompts)
+- [ ] Email delivery (Resend)
+- [ ] First 5 beta testers
+
+**Success:** 30-50 guides sold, <5% refund, 8+/10 satisfaction
+
+### Phase 2: AI Automation (Weeks 5-12)
+**Goal:** Automate guide generation, scale to 100 guides
+
+- [ ] Better Auth setup (email + Google OAuth)
+- [ ] Neon database + Drizzle migrations
+- [ ] Questionnaire web forms (Essential + Custom)
+- [ ] Strava OAuth integration
+- [ ] 8-step AI cascade (OpenAI)
+- [ ] Puppeteer PDF generation
+- [ ] Cloudflare R2 storage
+- [ ] User dashboard
+- [ ] Email automation
+
+**Success:** 100 automated guides, <5 min generation, zero failures
+
+### Phase 3: Scale & Optimize (Months 4-6)
+**Goal:** Scale to 500 guides, $50K revenue
+
+- [ ] Weather integration
+- [ ] Plan version updates
+- [ ] Ultra Bundle management
+- [ ] Referral program
+- [ ] Race database expansion (50+ races)
+- [ ] Admin dashboard
+- [ ] A/B testing (landing page, pricing)
+- [ ] SEO content
+
+**Success:** 500 guides, $50K revenue, 15% repeat purchase
+
+## Performance Requirements
+
+| Metric | Target | Tool |
+|--------|--------|------|
+| Landing page load | <3 seconds | Vercel Analytics |
+| Guide generation | <5 minutes | Custom logs |
+| PDF generation | <30 seconds | Puppeteer timing |
+| Database queries | <100ms | Drizzle logging |
+| API response | <500ms | Vercel Edge |
+| Uptime | 99.5% | Vercel status |
+
+## Security Requirements
+
+- Better Auth handles session management (database-backed)
+- Strava OAuth tokens encrypted in database
+- Polar.sh handles payment processing (PCI DSS compliant)
+- HTTPS enforced by Vercel (automatic SSL)
+- Rate limiting on API routes (Vercel middleware)
+- Input validation with Zod on all forms
+- CORS configuration for API security
+
+## Brand Voice & Messaging
+
+### Personality
+- **Calm expert:** Never panicked, never hyped
+- **Tactically specific:** Numbers, details, exact instructions
+- **Data-forward but human-centered:** Tech serves humans
+
+### Key Messages
+- **Tagline:** "Stop piecing together advice. Start executing with confidence."
+- **Value Prop:** "30 hours DIY planning → 10 minutes AI-generated guide"
+- **Positioning:** "TrainingPeaks gets you fit. RaceWise gets you finished."
+
+### Voice Examples
+✅ **Good:** "At mile 62, slow your pace by 30 seconds/mile for the next 5 miles, eat 200 calories, take two salt tabs."
+
+❌ **Bad:** "Believe in yourself! You got this! CRUSH your race!"
+
+## Before Starting Any Feature
+
+1. **Check PRD:** Read relevant section in `/docs/PRD_COMPLETE.md`
+2. **Verify Tech Stack:** Use Neon (not Supabase), Better Auth (not NextAuth)
+3. **Follow Schema:** Database structure is documented in PRD Section 3
+4. **Reference Starter Kit:** Use existing patterns from the starter kit
+5. **Ask Clarifying Questions:** If PRD is unclear, ask before building
+
+## Common Pitfalls to Avoid
+
+❌ **Don't** use Supabase (we use Neon)
+❌ **Don't** use NextAuth (we use Better Auth)
+❌ **Don't** use Stripe (we use Polar.sh)
+❌ **Don't** write custom CSS (use Tailwind only)
+❌ **Don't** use `any` type (use proper TypeScript types)
+❌ **Don't** bypass Drizzle ORM (no raw SQL queries)
+❌ **Don't** ignore error handling (always try-catch)
+
+## Quick Reference Numbers
+
+- **ARPU:** $99
+- **Gross Margin:** 94% 
+- **CAC:** $25 (blended)
+- **LTV:** $247 (2.5 guides over 3 years)
+- **LTV:CAC:** 10:1
+- **AI Cost per Guide:** $0.50-1.00
+- **Total COGS:** $6.07 per guide
+
+## Environment Variables Needed
+
+```bash
+# Database
+DATABASE_URL="neon-postgres-connection-string"
+
+# Authentication
+BETTER_AUTH_SECRET="random-secret-key"
+GOOGLE_CLIENT_ID="google-oauth-client-id"
+GOOGLE_CLIENT_SECRET="google-oauth-secret"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Payments
+POLAR_ACCESS_TOKEN="polar-api-token"
+POLAR_WEBHOOK_SECRET="polar-webhook-secret"
+POLAR_ESSENTIAL_PRODUCT_ID="product-id-for-$29-tier"
+POLAR_CUSTOM_PRODUCT_ID="product-id-for-$99-tier"
+POLAR_ULTRA_PRODUCT_ID="product-id-for-$299-tier"
+
+# AI
+OPENAI_API_KEY="openai-api-key"
+
+# Storage
+CLOUDFLARE_ACCOUNT_ID="cloudflare-account-id"
+R2_ACCESS_KEY_ID="r2-access-key"
+R2_SECRET_ACCESS_KEY="r2-secret-key"
+R2_BUCKET_NAME="racewise-guides"
+R2_PUBLIC_DOMAIN="your-r2-public-domain"
+
+# Email
+RESEND_API_KEY="resend-api-key"
+
+# Analytics
+NEXT_PUBLIC_POSTHOG_KEY="posthog-project-key"
+NEXT_PUBLIC_POSTHOG_HOST="https://app.posthog.com"
+
+# Strava
+STRAVA_CLIENT_ID="strava-oauth-client-id"
+STRAVA_CLIENT_SECRET="strava-oauth-secret"
+```
+
+---
+
+**This file provides complete context for Cursor's AI features. For Claude Code agent context, see `/.claude/CLAUDE.md`**
