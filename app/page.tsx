@@ -1,18 +1,27 @@
-import FooterSection from "@/components/homepage/footer";
-import HeroSection from "@/components/homepage/hero-section";
-import Integrations from "@/components/homepage/integrations";
-import { getSubscriptionDetails } from "@/lib/subscription";
-import PricingTable from "./pricing/_component/pricing-table";
+import { Navigation } from "@/components/navigation"
+import { Hero } from "@/components/hero"
+import { ProblemSolution } from "@/components/problem-solution"
+import { Features } from "@/components/features"
+import { HowItWorks } from "@/components/how-it-works"
+import { Testimonials } from "@/components/testimonials"
+import { Pricing } from "@/components/pricing"
+import { FAQ } from "@/components/faq"
+import { FinalCTA } from "@/components/final-cta"
+import { Footer } from "@/components/footer"
 
-export default async function Home() {
-  const subscriptionDetails = await getSubscriptionDetails();
-
+export default function Home() {
   return (
-    <>
-      <HeroSection />
-      <Integrations />
-      <PricingTable subscriptionDetails={subscriptionDetails} />
-      <FooterSection />
-    </>
-  );
+    <main className="min-h-screen">
+      <Navigation />
+      <Hero />
+      <ProblemSolution />
+      <Features />
+      <HowItWorks />
+      <Testimonials />
+      <Pricing />
+      <FAQ />
+      <FinalCTA />
+      <Footer />
+    </main>
+  )
 }
