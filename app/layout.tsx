@@ -3,22 +3,36 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "../components/provider";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import { Inter, Source_Serif_4 } from "next/font/google"
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+})
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  variable: "--font-source-serif",
+  display: "swap",
+})
+
 export const metadata: Metadata = {
-  title: "Next.js Starter Kit - Launch Your SAAS",
+  title: "RaceWise by Paceline - Personalized Ultramarathon Race Plans",
   description:
-    "A modern, full-stack Next.js starter kit with authentication, payments, and dashboard. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
+    "Stop piecing together fragmented race plans. Get personalized ultramarathon race guides with nutrition timing, pacing splits, and terrain-specific strategies in 24-48 hours.",
   openGraph: {
-    title: "Next.js Starter Kit",
+    title: "RaceWise by Paceline - Personalized Ultramarathon Race Plans",
     description:
-      "A modern, full-stack Next.js starter kit with authentication, payments, and dashboard. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-    url: "nextstarter.xyz",
-    siteName: "Next.js Starter Kit",
+      "Stop piecing together fragmented race plans. Get personalized ultramarathon race guides with nutrition timing, pacing splits, and terrain-specific strategies in 24-48 hours.",
+    url: "racewise.run",
+    siteName: "RaceWise by Paceline",
     images: [
       {
-        url: "https://jdj14ctwppwprnqu.public.blob.vercel-storage.com/nsk-w9fFwBBmLDLxrB896I4xqngTUEEovS.png",
+        url: "/gritty-ultrarunner-mid-race-struggle-determination.jpg",
         width: 1200,
         height: 630,
-        alt: "Next.js Starter Kit",
+        alt: "Ultrarunner executing race strategy during ultramarathon",
       },
     ],
     locale: "en-US",
@@ -33,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-[-apple-system,BlinkMacSystemFont]antialiased`}>
+      <body className={`${inter.variable} ${sourceSerif.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
