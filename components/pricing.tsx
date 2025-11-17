@@ -1,8 +1,45 @@
+"use client";
 import { Check, X, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TopographicPattern } from "@/components/patterns"
+import { authClient } from "@/lib/auth-client"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export function Pricing() {
+  const router = useRouter();
+
+  const handleCheckout = async (productId: string, slug: string) => {
+    try {
+      const session = await authClient.getSession();
+
+      if (!session.data?.user) {
+        router.push("/sign-in");
+        return;
+      }
+
+      await authClient.checkout({
+        products: [productId],
+        slug: slug,
+      });
+    } catch (error) {
+      console.error("Checkout failed:", error);
+      toast.error("Oops, something went wrong");
+    }
+  };
+
+  const ESSENTIAL_TIER = process.env.NEXT_PUBLIC_ESSENTIAL_TIER;
+  const ESSENTIAL_SLUG = process.env.NEXT_PUBLIC_ESSENTIAL_SLUG;
+  const CUSTOM_TIER = process.env.NEXT_PUBLIC_CUSTOM_TIER;
+  const CUSTOM_SLUG = process.env.NEXT_PUBLIC_CUSTOM_SLUG;
+  const ULTRA_BUNDLE_TIER = process.env.NEXT_PUBLIC_ULTRA_BUNDLE_TIER;
+  const ULTRA_BUNDLE_SLUG = process.env.NEXT_PUBLIC_ULTRA_BUNDLE_SLUG;
+
+  if (!ESSENTIAL_TIER || !ESSENTIAL_SLUG || !CUSTOM_TIER || !CUSTOM_SLUG || !ULTRA_BUNDLE_TIER || !ULTRA_BUNDLE_SLUG) {
+    console.error("Missing pricing tier environment variables");
+    return null;
+  }
+
   return (
     <section id="pricing" className="relative py-20 bg-white overflow-hidden">
       <TopographicPattern />
@@ -66,6 +103,7 @@ export function Pricing() {
             <Button
               className="w-full border-2 border-[#4A5859] text-[#4A5859] hover:bg-[#4A5859] hover:text-white font-semibold bg-transparent"
               variant="outline"
+              onClick={() => handleCheckout(ESSENTIAL_TIER!, ESSENTIAL_SLUG!)}
             >
               Get Essential
             </Button>
@@ -118,7 +156,10 @@ export function Pricing() {
               </li>
             </ul>
 
-            <Button className="w-full h-14 bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold text-lg shadow-lg">
+            <Button
+              className="w-full h-14 bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold text-lg shadow-lg"
+              onClick={() => handleCheckout(CUSTOM_TIER!, CUSTOM_SLUG!)}
+            >
               Get Custom → $99
             </Button>
           </div>
@@ -176,6 +217,7 @@ export function Pricing() {
             <Button
               className="w-full border-2 border-[#4A5859] text-[#4A5859] hover:bg-[#4A5859] hover:text-white font-semibold bg-transparent"
               variant="outline"
+              onClick={() => handleCheckout(ULTRA_BUNDLE_TIER!, ULTRA_BUNDLE_SLUG!)}
             >
               Get Ultra Bundle
             </Button>

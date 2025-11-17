@@ -1,7 +1,9 @@
-# RaceWise (Paceline) - Claude Code Agent Instructions
+# Paceline - Claude Code Agent Instructions
 
-**Version:** 1.0 | **Last Updated:** January 2025  
-**Purpose:** Complete context for Claude Code agent to build, maintain, and extend RaceWise
+⚠️ **IMPORTANT: This project is called "Paceline" (previously RaceWise). Always use "Paceline" in all code, variables, comments, and agent prompts. Never use "RaceWise" in new code.**
+
+**Version:** 1.0 | **Last Updated:** January 2025
+**Purpose:** Complete context for Claude Code agent to build, maintain, and extend Paceline
 
 ---
 

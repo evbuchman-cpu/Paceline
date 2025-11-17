@@ -1148,6 +1148,101 @@
 
 ---
 
+## 🚨 PRE-LAUNCH CHECKLIST (CRITICAL - DO NOT SKIP!)
+
+**Complete these tasks BEFORE launching to production:**
+
+### Environment & Credentials
+- [ ] **Switch Polar.sh from sandbox to production**
+  - [ ] Create production products in https://polar.sh (not sandbox.polar.sh)
+  - [ ] Get production product IDs and slugs for all 3 tiers
+  - [ ] Create production access token with full permissions
+  - [ ] Update `.env.local` → `.env.production` with production credentials:
+    ```bash
+    # Change from sandbox to production
+    POLAR_ACCESS_TOKEN=polar_oat_PRODUCTION_TOKEN_HERE
+    NEXT_PUBLIC_ESSENTIAL_TIER=production_product_id
+    NEXT_PUBLIC_ESSENTIAL_SLUG=Paceline-Essential
+    NEXT_PUBLIC_CUSTOM_TIER=production_product_id
+    NEXT_PUBLIC_CUSTOM_SLUG=Paceline-Custom
+    NEXT_PUBLIC_ULTRA_BUNDLE_TIER=production_product_id
+    NEXT_PUBLIC_ULTRA_BUNDLE_SLUG=Paceline-Ultra-Bundle
+    ```
+  - [ ] Verify `lib/auth.ts` uses production mode (already configured to auto-detect)
+  - [ ] Test checkout with REAL credit card (small amount)
+  - [ ] Verify webhooks work in production
+
+- [ ] **Update all environment variables for production**
+  - [ ] `DATABASE_URL` - Production Neon database (not dev)
+  - [ ] `NEXT_PUBLIC_APP_URL` - Production domain (not localhost)
+  - [ ] `OPENAI_API_KEY` - Production key with billing enabled
+  - [ ] `R2_PUBLIC_DOMAIN` - Production CDN domain
+  - [ ] `RESEND_API_KEY` - Production email domain verified
+  - [ ] `GOOGLE_CLIENT_ID/SECRET` - Add production domain to OAuth allowed origins
+
+- [ ] **Security checks**
+  - [ ] Remove all console.log statements
+  - [ ] No API keys exposed in frontend code
+  - [ ] All sensitive data in `.env` (not `.env.local`)
+  - [ ] Add `.env` to `.gitignore`
+  - [ ] Enable CORS only for production domain
+  - [ ] Add rate limiting to API routes
+
+### Product & Pricing Verification
+- [ ] **Verify Polar.sh products are published**
+  - [ ] Essential ($29) - Status: Published
+  - [ ] Custom ($99) - Status: Published
+  - [ ] Ultra Bundle ($497) - Status: Published
+  - [ ] All products have correct prices
+  - [ ] Checkout links work
+  - [ ] Success URL points to production domain
+
+- [ ] **Test payment flow end-to-end**
+  - [ ] Test Essential tier purchase with real card
+  - [ ] Test Custom tier purchase with real card
+  - [ ] Test Ultra Bundle purchase with real card
+  - [ ] Verify webhooks trigger correctly
+  - [ ] Verify emails are sent
+  - [ ] Verify database records are created
+
+### Deployment
+- [ ] **Vercel production deployment**
+  - [ ] Push to `main` branch
+  - [ ] Verify build succeeds
+  - [ ] Add production environment variables in Vercel dashboard
+  - [ ] Test production URL works
+  - [ ] Verify custom domain (if configured)
+
+- [ ] **Database migration to production**
+  - [ ] Run migrations on production Neon database
+  - [ ] Verify all tables exist
+  - [ ] Test database connection from production
+
+### Monitoring & Support
+- [ ] **Set up error monitoring**
+  - [ ] Configure Sentry or similar
+  - [ ] Test error notifications work
+  - [ ] Add alerting for critical errors
+
+- [ ] **Analytics configured**
+  - [ ] PostHog tracking events work
+  - [ ] Conversion funnel tracking works
+  - [ ] Payment tracking works
+
+- [ ] **Customer support ready**
+  - [ ] Support email configured (support@paceline.com)
+  - [ ] Auto-responder set up
+  - [ ] FAQ page completed
+  - [ ] Refund policy documented
+
+### Legal & Compliance
+- [ ] **Terms of Service** - Published and linked
+- [ ] **Privacy Policy** - Published and linked
+- [ ] **Refund Policy** - Published and linked (30-day money-back guarantee)
+- [ ] **Cookie notice** - If using analytics
+
+---
+
 ## Quick Start: Next 3 Actions
 
 **Today:**

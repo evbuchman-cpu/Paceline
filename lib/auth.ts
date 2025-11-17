@@ -21,7 +21,7 @@ function safeParseDate(value: string | Date | null | undefined): Date | null {
 
 const polarClient = new Polar({
   accessToken: process.env.POLAR_ACCESS_TOKEN,
-  server: "sandbox",
+  server: process.env.NODE_ENV === "production" ? "production" : "sandbox",
 });
 
 export const auth = betterAuth({
@@ -56,17 +56,49 @@ export const auth = betterAuth({
           products: [
             {
               productId:
-                process.env.NEXT_PUBLIC_STARTER_TIER ||
+                process.env.NEXT_PUBLIC_ESSENTIAL_TIER ||
                 (() => {
                   throw new Error(
-                    "NEXT_PUBLIC_STARTER_TIER environment variable is required",
+                    "NEXT_PUBLIC_ESSENTIAL_TIER environment variable is required",
                   );
                 })(),
               slug:
-                process.env.NEXT_PUBLIC_STARTER_SLUG ||
+                process.env.NEXT_PUBLIC_ESSENTIAL_SLUG ||
                 (() => {
                   throw new Error(
-                    "NEXT_PUBLIC_STARTER_SLUG environment variable is required",
+                    "NEXT_PUBLIC_ESSENTIAL_SLUG environment variable is required",
+                  );
+                })(),
+            },
+            {
+              productId:
+                process.env.NEXT_PUBLIC_CUSTOM_TIER ||
+                (() => {
+                  throw new Error(
+                    "NEXT_PUBLIC_CUSTOM_TIER environment variable is required",
+                  );
+                })(),
+              slug:
+                process.env.NEXT_PUBLIC_CUSTOM_SLUG ||
+                (() => {
+                  throw new Error(
+                    "NEXT_PUBLIC_CUSTOM_SLUG environment variable is required",
+                  );
+                })(),
+            },
+            {
+              productId:
+                process.env.NEXT_PUBLIC_ULTRA_BUNDLE_TIER ||
+                (() => {
+                  throw new Error(
+                    "NEXT_PUBLIC_ULTRA_BUNDLE_TIER environment variable is required",
+                  );
+                })(),
+              slug:
+                process.env.NEXT_PUBLIC_ULTRA_BUNDLE_SLUG ||
+                (() => {
+                  throw new Error(
+                    "NEXT_PUBLIC_ULTRA_BUNDLE_SLUG environment variable is required",
                   );
                 })(),
             },

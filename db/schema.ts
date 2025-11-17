@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -82,4 +83,89 @@ export const subscription = pgTable("subscription", {
   metadata: text("metadata"), // JSON string
   customFieldData: text("customFieldData"), // JSON string
   userId: text("userId").references(() => user.id),
+});
+
+// Paceline-specific Tables
+
+// Purchases (one-time purchases or bundle credits)
+export const purchase = pgTable("purchase", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  tier: text("tier").notNull(), // "essential" | "custom" | "ultra_bundle"
+  amount: integer("amount").notNull(), // in cents
+  polarSubscriptionId: text("polarSubscriptionId"), // if from Polar.sh
+  polarOrderId: text("polarOrderId"), // if from Polar.sh order
+  status: text("status").notNull().default("pending"), // "pending" | "completed" | "refunded"
+  guidesRemaining: integer("guidesRemaining").default(1), // for Ultra Bundle
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+// Questionnaires (user responses)
+export const questionnaire = pgTable("questionnaire", {
+  id: text("id").primaryKey(),
+  purchaseId: text("purchaseId")
+    .notNull()
+    .references(() => purchase.id, { onDelete: "cascade" }),
+  // Essential fields (12)
+  raceName: text("raceName").notNull(),
+  raceWebsite: text("raceWebsite"),
+  raceDate: timestamp("raceDate").notNull(),
+  goalFinishTime: text("goalFinishTime").notNull(), // "HH:MM" format
+  ultrasCompleted: text("ultrasCompleted").notNull(), // "0" | "1-3" | "4-10" | "10+"
+  recentFlatPace: text("recentFlatPace"), // "MM:SS" per mile
+  climbingStrength: text("climbingStrength"), // "strong" | "average" | "struggle"
+  weeklyTrainingVolume: integer("weeklyTrainingVolume"), // miles
+  crewSupport: text("crewSupport"), // "yes" | "partial" | "no"
+  firstName: text("firstName"),
+  email: text("email"),
+  // Custom tier fields (+7)
+  stravaAthleteId: text("stravaAthleteId"),
+  stravaData: jsonb("stravaData"), // 90-day analysis JSON
+  recentRaceResults: text("recentRaceResults"), // textarea, max 500 chars
+  biggestClimbTrained: text("biggestClimbTrained"),
+  giIssuesHistory: text("giIssuesHistory"), // yes/no + details
+  blisterProneAreas: text("blisterProneAreas"),
+  nutritionPreferences: jsonb("nutritionPreferences"), // { vegan, glutenFree, caffeineSensitive }
+  biggestRaceFears: text("biggestRaceFears"), // textarea, max 300 chars
+  // Status
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+// Guides (generated PDFs)
+export const guide = pgTable("guide", {
+  id: text("id").primaryKey(),
+  purchaseId: text("purchaseId")
+    .notNull()
+    .references(() => purchase.id, { onDelete: "cascade" }),
+  questionnaireId: text("questionnaireId")
+    .notNull()
+    .references(() => questionnaire.id, { onDelete: "cascade" }),
+  pdfUrl: text("pdfUrl").notNull(), // Cloudflare R2 URL
+  sections: jsonb("sections").notNull(), // 8 sections as JSON
+  generationTime: integer("generationTime"), // milliseconds
+  aiCost: integer("aiCost"), // cost in cents ($0.50-1.00)
+  status: text("status").notNull().default("generating"), // "generating" | "completed" | "failed"
+  error: text("error"), // error message if failed
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+// Races (database of known races)
+export const race = pgTable("race", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  distance: integer("distance"), // miles
+  elevationGain: integer("elevationGain"), // feet
+  location: text("location"), // city, state
+  website: text("website"),
+  courseProfile: jsonb("courseProfile"), // elevation data, GPX
+  weatherPatterns: jsonb("weatherPatterns"), // historical weather
+  aidStations: jsonb("aidStations"), // station locations, cutoffs
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
