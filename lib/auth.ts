@@ -1,5 +1,5 @@
 import { db } from "@/db/drizzle";
-import { account, session, subscription, user, verification } from "@/db/schema";
+import { account, session, subscription, user, verification, purchase } from "@/db/schema";
 import {
   checkout,
   polar,
@@ -11,12 +11,24 @@ import { Polar } from "@polar-sh/sdk";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { eq } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
 // Utility function to safely parse dates
 function safeParseDate(value: string | Date | null | undefined): Date | null {
   if (!value) return null;
   if (value instanceof Date) return value;
   return new Date(value);
+}
+
+// Map Polar productId to Paceline tier
+function mapProductIdToTier(productId: string): "essential" | "custom" | "ultra_bundle" | null {
+  const tierMap: Record<string, "essential" | "custom" | "ultra_bundle"> = {
+    [process.env.NEXT_PUBLIC_ESSENTIAL_TIER || ""]: "essential",
+    [process.env.NEXT_PUBLIC_CUSTOM_TIER || ""]: "custom",
+    [process.env.NEXT_PUBLIC_ULTRA_BUNDLE_TIER || ""]: "ultra_bundle",
+  };
+  return tierMap[productId] || null;
 }
 
 const polarClient = new Polar({
@@ -207,6 +219,57 @@ export const auth = betterAuth({
                   });
 
                 console.log("✅ Upserted subscription:", data.id);
+
+                // STEP 4: Create or update purchase record
+                if (userId && data.productId) {
+                  const tier = mapProductIdToTier(data.productId);
+
+                  if (tier) {
+                    try {
+                      // Check if purchase already exists for this subscription
+                      const existingPurchase = await db
+                        .select()
+                        .from(purchase)
+                        .where(eq(purchase.polarSubscriptionId, data.id))
+                        .limit(1);
+
+                      if (existingPurchase.length === 0) {
+                        // Create new purchase record
+                        const guidesRemaining = tier === "ultra_bundle" ? 3 : 1;
+
+                        await db.insert(purchase).values({
+                          id: randomUUID(),
+                          userId: userId,
+                          tier: tier,
+                          amount: data.amount || 0,
+                          polarSubscriptionId: data.id,
+                          polarOrderId: data.checkoutId || null,
+                          status: data.status === "active" ? "completed" : "pending",
+                          guidesRemaining: guidesRemaining,
+                          createdAt: new Date(),
+                          updatedAt: new Date(),
+                        });
+
+                        console.log("✅ Created purchase record for subscription:", data.id);
+                      } else {
+                        // Update existing purchase
+                        await db
+                          .update(purchase)
+                          .set({
+                            status: data.status === "active" ? "completed" : "pending",
+                            updatedAt: new Date(),
+                          })
+                          .where(eq(purchase.polarSubscriptionId, data.id));
+
+                        console.log("✅ Updated purchase record for subscription:", data.id);
+                      }
+                    } catch (purchaseError) {
+                      console.error("💥 Error creating/updating purchase:", purchaseError);
+                    }
+                  } else {
+                    console.warn("⚠️ Unknown product ID, skipping purchase creation:", data.productId);
+                  }
+                }
               } catch (error) {
                 console.error(
                   "💥 Error processing subscription webhook:",

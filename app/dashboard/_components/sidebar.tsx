@@ -9,6 +9,8 @@ import {
   MessageCircleIcon,
   Settings,
   Upload,
+  ClipboardList,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -24,6 +26,16 @@ const navItems: NavItem[] = [
     label: "Overview",
     href: "/dashboard",
     icon: HomeIcon,
+  },
+  {
+    label: "Questionnaire",
+    href: "/dashboard/questionnaire",
+    icon: ClipboardList,
+  },
+  {
+    label: "My Guides",
+    href: "/dashboard/guides",
+    icon: FileText,
   },
   {
     label: "Chat",
