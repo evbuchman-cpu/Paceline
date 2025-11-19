@@ -31,6 +31,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { StravaConnect } from "./StravaConnect";
 
 interface CustomFormProps {
   purchaseId: string;
@@ -156,9 +157,11 @@ export function CustomForm({
     }
   };
 
-  const handleStravaConnect = () => {
-    // TODO: Implement Strava OAuth flow (Week 2)
-    toast.info("Strava integration coming soon!");
+  const handleStravaAnalysisComplete = (data: any) => {
+    // Update form with Strava data
+    form.setValue("stravaAthleteId", data.totalActivities ? "connected" : "");
+    form.setValue("stravaData", data);
+    toast.success("Strava analysis complete! Your pacing will be personalized.");
   };
 
   return (
@@ -390,27 +393,14 @@ export function CustomForm({
             </div>
 
             {/* Strava Integration Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Strava Integration</h3>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Connect your Strava account to get personalized pacing recommendations based on your 90-day training data
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleStravaConnect}
-                  className="w-full"
-                >
-                  {initialData?.stravaAthleteId ? "Reconnect Strava" : "Connect Strava Account"}
-                </Button>
-                {initialData?.stravaAthleteId && (
-                  <p className="text-sm text-green-600">
-                    ✓ Connected to Strava (Athlete ID: {initialData.stravaAthleteId})
-                  </p>
-                )}
-              </div>
-            </div>
+            {questionnaireId && (
+              <StravaConnect
+                questionnaireId={questionnaireId}
+                isConnected={!!initialData?.stravaAthleteId}
+                stravaData={initialData?.stravaData as any}
+                onAnalysisComplete={handleStravaAnalysisComplete}
+              />
+            )}
 
             {/* Health & Nutrition Section */}
             <div className="space-y-4">

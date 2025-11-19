@@ -2,8 +2,30 @@
 
 ⚠️ **IMPORTANT: This project is called "Paceline" (previously RaceWise). Always use "Paceline" in all code, variables, comments, and agent prompts. Never use "RaceWise" in new code.**
 
-**Version:** 1.0 | **Last Updated:** January 2025
+**Version:** 2.0 | **Last Updated:** November 2025
 **Purpose:** Complete context for Claude Code agent to build, maintain, and extend Paceline
+
+---
+
+## 🚨 CRITICAL: Task Tracking
+
+**ALWAYS check `/PacelineBusinessDocs/PacelineTasks.md` for current sprint tasks and priorities.**
+
+This file (CLAUDE.md) provides:
+- Strategic context and vision
+- Technical architecture and patterns
+- Coding principles and best practices
+
+`PacelineTasks.md` provides:
+- **Week-by-week task breakdown** (current source of truth)
+- **Priority levels** (P0/P1/P2/P3)
+- **Detailed implementation checklists**
+- **Agent assignments** for each task
+
+When starting work, **always**:
+1. Read the relevant section in this file for context
+2. Check `PacelineTasks.md` for the specific task details
+3. Follow the coding principles below
 
 ---
 
@@ -567,82 +589,92 @@ export async function uploadToR2(buffer: Buffer, fileName: string): Promise<stri
 
 ## 4. Development Workflow
 
-### 90-Day Roadmap
+### Development Strategy: Automated MVP from Day 1
 
-#### Phase 1: Manual MVP (Weeks 1-4)
-**Goal:** Validate demand with 30-50 manual guides
+**⚠️ CRITICAL DECISION: We are skipping the manual MVP phase and going straight to automation.**
 
-**Tasks:**
-- [ ] Landing page (`app/page.tsx`) - ✅ Exists, may need updates
-- [ ] Pricing page (`app/pricing/page.tsx`) - ✅ Exists, verify 3 tiers
-- [ ] Polar.sh payment integration - ✅ Configured in `lib/auth.ts`
-- [ ] Google Forms questionnaire (temporary) - Manual process
-- [ ] Manual guide generation (Claude prompts) - Manual process
-- [ ] Email delivery (Resend) - TODO: Set up templates
-- [ ] First 5 beta testers
+**Why:**
+- ✅ Infrastructure already built (30% complete)
+- ✅ No throwaway work - build once, use forever
+- ✅ Faster to market (4-8 weeks vs 12 weeks)
+- ✅ Same difficulty - AI prompts are hard either way
+- ✅ Better validation - working product > manual process
+
+### 8-Week Roadmap to Launch
+
+**See `/PacelineBusinessDocs/PacelineTasks.md` for detailed week-by-week tasks.**
+
+#### Phase 1: Core MVP Build (Weeks 1-4)
+**Goal:** Build fully automated guide generation system
+
+**Current Status:** 30% complete (infrastructure done)
+- ✅ Next.js 15, TypeScript, Tailwind, shadcn/ui
+- ✅ Neon PostgreSQL + Drizzle ORM
+- ✅ Better Auth + Google OAuth
+- ✅ Polar.sh payment integration
+- ✅ Landing page, pricing page, auth pages
+
+**Week 1 - Database & Forms:**
+- Add Paceline tables (purchase, questionnaire, guide, race)
+- Build Essential + Custom questionnaire forms
+- Implement auto-save functionality
+
+**Week 2 - Strava & AI Start:**
+- Strava OAuth integration
+- AI Cascade Steps 1-4 (Race Overview, Pacing, Cutoffs, Crew)
+- OpenAI client setup
+
+**Week 3 - AI Complete + PDF:**
+- AI Cascade Steps 5-8 (Drop Bags, Nutrition, Contingencies, Mental)
+- PDF generation with Puppeteer
+- Cloudflare R2 storage setup
+
+**Week 4 - Integration & Testing:**
+- User dashboard (guide listing, download)
+- Email automation (Resend templates)
+- Polar.sh webhook handler
+- E2E testing
 
 **Success Criteria:**
-- 30-50 guides sold
+- System works end-to-end
+- Guide generation <5 minutes
+- AI cost <$1 per guide
+- Zero critical bugs
+
+#### Phase 2: Beta Testing & Launch (Weeks 5-8)
+**Goal:** Launch to beta testers, iterate, public launch
+
+**Week 5-6 - Beta Testing:**
+- Recruit 20 beta testers (Reddit, Facebook, Strava)
+- Monitor guide generation (time, cost, quality)
+- Collect feedback and testimonials
+- Fix critical bugs
+
+**Week 7-8 - Polish & Launch:**
+- Landing page optimization (testimonials, sample guide)
+- Analytics setup (PostHog events)
+- Public launch (Reddit, Facebook, Product Hunt)
+- Target: 25-50 sales in Week 8
+
+**Success Criteria:**
+- 50-100 automated guides generated
+- 25-50 guides sold in Week 8
 - <5% refund rate
 - 8+/10 satisfaction
-- <2hr fulfillment per guide
+- 5+ testimonials
 
-#### Phase 2: AI Automation (Weeks 5-12)
-**Goal:** Automate guide generation, scale to 100 guides
-
-**Tasks:**
-
-**Week 5-6: Database & Auth**
-- [ ] Add RaceWise tables to `db/schema.ts` (purchase, questionnaire, guide, race)
-- [ ] Run Drizzle migrations (`npx drizzle-kit generate`, `npx drizzle-kit push`)
-- [ ] Verify Better Auth setup (✅ Already done in `lib/auth.ts`)
-- [ ] Test signup/login flows
-
-**Week 7-8: Questionnaire App**
-- [ ] Create `app/dashboard/questionnaire/page.tsx` (Essential + Custom forms)
-- [ ] Build form components (`components/questionnaire/`)
-- [ ] Implement auto-save (PUT /api/questionnaire/[id] every 30s)
-- [ ] Strava OAuth integration (`app/api/strava/authorize`, `/callback`)
-- [ ] Strava data analysis (`app/api/strava/analyze`)
-
-**Week 9-10: AI Cascade + PDF**
-- [ ] Implement 8-step AI cascade (`app/api/generate-guide/route.ts`)
-- [ ] OpenAI integration (`lib/openai-client.ts`)
-- [ ] PDF generation (`lib/pdf-generator.ts`)
-- [ ] Cloudflare R2 setup (`lib/r2-storage.ts`)
-- [ ] Error handling + retry logic
-
-**Week 11: Dashboard & Email**
-- [ ] User dashboard (`app/dashboard/guides/page.tsx`)
-- [ ] Guide listing (`GET /api/guides`)
-- [ ] PDF download (`GET /api/guides/[id]/download`)
-- [ ] Email automation (Resend templates)
-- [ ] Race database seed (20 popular races)
-
-**Week 12: QA & Soft Launch**
-- [ ] E2E testing (purchase → questionnaire → guide delivery)
-- [ ] Soft launch to 20 beta users
-- [ ] Monitor generation time (<5 min target)
-- [ ] Bug fixes and optimization
-
-**Success Criteria:**
-- 100 automated guides generated
-- <5 min avg generation time
-- <5% refund rate
-- Zero failed generations
-
-#### Phase 3: Scale & Optimize (Months 4-6)
+#### Phase 3: Scale & Optimize (Months 3-6)
 **Goal:** Scale to 500 guides, $50K revenue
 
-**Tasks:**
-- [ ] Weather integration (live forecast 7 days before race)
-- [ ] Plan version updates (request guide revision)
-- [ ] Ultra Bundle management (3-guide credit tracking)
-- [ ] Referral program ($10 credit per friend)
-- [ ] Race database expansion (50+ races)
-- [ ] Admin dashboard (order management, analytics)
-- [ ] A/B testing (landing page, pricing)
-- [ ] SEO content (blog posts)
+**Features to Add:**
+- Weather integration (live forecast 7 days before race)
+- Plan version updates (guide revision system)
+- Ultra Bundle management (3-guide credit tracking)
+- Referral program ($10-20 credits)
+- Race database expansion (50+ races)
+- Admin dashboard (order/analytics management)
+- A/B testing (landing page, pricing)
+- SEO content (blog posts)
 
 **Success Criteria:**
 - 500 guides sold (cumulative)
@@ -650,6 +682,7 @@ export async function uploadToR2(buffer: Buffer, fileName: string): Promise<stri
 - <5% refund rate
 - 15% repeat purchase rate
 - 20+ testimonials
+- 15% finish rate improvement (validated)
 
 ### How to Work with Claude on Features
 
@@ -950,21 +983,23 @@ import { Input } from '@/components/ui/input';
 
 ## 7. Success Metrics
 
-### Phase 1 Success (Weeks 1-4)
-- ✅ 30-50 guides sold
-- ✅ <5% refund rate
-- ✅ 8+/10 satisfaction score
-- ✅ <2hr fulfillment per guide
-- ✅ 3+ testimonials collected
-
-### Phase 2 Success (Weeks 5-12)
-- ✅ 100 automated guides generated
-- ✅ <5 min avg generation time
-- ✅ <5% refund rate
-- ✅ Zero failed generations
+### Phase 1 Success (Weeks 1-4) - Core MVP Built
+- ✅ System works end-to-end
+- ✅ Guide generation <5 minutes
+- ✅ AI cost <$1 per guide
+- ✅ Zero critical bugs
+- ✅ All 8 sections generate correctly
 - ✅ Strava OAuth working for Custom tier
 
-### Phase 3 Success (Months 4-6)
+### Phase 2 Success (Weeks 5-8) - Beta Testing & Public Launch
+- ✅ 50-100 automated guides generated
+- ✅ 25-50 guides sold in Week 8
+- ✅ <5% refund rate
+- ✅ 8+/10 satisfaction score
+- ✅ 5+ testimonials collected
+- ✅ Zero failed generations
+
+### Phase 3 Success (Months 3-6) - Scale & Optimize
 - ✅ 500 guides sold (cumulative)
 - ✅ $50K revenue
 - ✅ <5% refund rate
@@ -1009,9 +1044,12 @@ import { Input } from '@/components/ui/input';
 - `/docs/PacelinePRD.md` - Complete PRD (35,000+ words, 6 sections)
 - `/docs/PRD_QUICK_REFERENCE.md` - Quick lookup guide
 
+**Task Management:**
+- `/PacelineBusinessDocs/PacelineTasks.md` - **Current sprint tasks** (week-by-week breakdown, priorities, checklists)
+
 **Project Context:**
 - `/.cursorrules` - Cursor AI rules (project context for Cursor IDE)
-- `/.claude/Claude.md` - This file (Claude Code agent context)
+- `/.claude/CLAUDE.md` - This file (Claude Code agent context for strategic/technical guidance)
 
 ### Codebase Files
 
@@ -1096,7 +1134,8 @@ import { Input } from '@/components/ui/input';
 
 Before starting any feature:
 
-- [ ] Read relevant PRD section in `/docs/PacelinePRD.md`
+- [ ] **Check `/PacelineBusinessDocs/PacelineTasks.md`** for current task details and priority
+- [ ] Read relevant PRD section in `/docs/PacelinePRD.md` for product context
 - [ ] Check existing codebase for similar patterns
 - [ ] Verify tech stack (Neon, Better Auth, Drizzle, Polar.sh)
 - [ ] Review database schema (`db/schema.ts`)
@@ -1119,8 +1158,15 @@ Common pitfalls to avoid:
 
 ---
 
-**This file provides complete context for Claude Code agent development. For Cursor IDE context, see `/.cursorrules`.**
+## Document Hierarchy
 
-**Last Updated:** January 2025  
-**Version:** 1.0
+1. **`/PacelineBusinessDocs/PacelineTasks.md`** - Current sprint tasks (ALWAYS CHECK FIRST)
+2. **`/.claude/CLAUDE.md`** (this file) - Strategic context, technical architecture, coding principles
+3. **`/docs/PacelinePRD.md`** - Complete product specification
+4. **`/.cursorrules`** - Cursor IDE-specific context
+
+**This file provides strategic and technical context for Claude Code agent development.**
+
+**Last Updated:** November 2025
+**Version:** 2.0
 
