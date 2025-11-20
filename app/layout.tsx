@@ -18,15 +18,15 @@ const sourceSerif = Source_Serif_4({
 })
 
 export const metadata: Metadata = {
-  title: "RaceWise by Paceline - Personalized Ultramarathon Race Plans",
+  title: "Paceline - Personalized Ultramarathon Race Plans",
   description:
-    "Stop piecing together fragmented race plans. Get personalized ultramarathon race guides with nutrition timing, pacing splits, and terrain-specific strategies in 24-48 hours.",
+    "Stop piecing together advice. Start executing with confidence. Get personalized ultramarathon race guides with nutrition timing, pacing splits, and terrain-specific strategies in 24-48 hours.",
   openGraph: {
-    title: "RaceWise by Paceline - Personalized Ultramarathon Race Plans",
+    title: "Paceline - Personalized Ultramarathon Race Plans",
     description:
-      "Stop piecing together fragmented race plans. Get personalized ultramarathon race guides with nutrition timing, pacing splits, and terrain-specific strategies in 24-48 hours.",
-    url: "racewise.run",
-    siteName: "RaceWise by Paceline",
+      "Stop piecing together advice. Start executing with confidence. Get personalized ultramarathon race guides with nutrition timing, pacing splits, and terrain-specific strategies in 24-48 hours.",
+    url: "paceline.run",
+    siteName: "Paceline",
     images: [
       {
         url: "/gritty-ultrarunner-mid-race-struggle-determination.jpg",

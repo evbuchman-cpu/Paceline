@@ -51,7 +51,7 @@ export function HowItWorks() {
                   <div className="mb-4">
                     <step.icon className="w-12 h-12 text-[#C87350] mx-auto" />
                   </div>
-                  <h3 className="font-sans font-semibold text-xl text-[#2C5F4D] mb-3">{step.title}</h3>
+                  <h3 className="font-sans font-medium text-xl text-[#2C5F4D] mb-3">{step.title}</h3>
                   <p className="font-serif text-[#4A5859] leading-relaxed mb-4">{step.description}</p>
                   <span className="inline-block px-3 py-1 bg-[#D4B896] text-[#2C5F4D] font-sans font-semibold text-sm rounded">
                     {step.time}
@@ -75,7 +75,7 @@ export function HowItWorks() {
                   <div className="mb-4">
                     <step.icon className="w-12 h-12 text-[#C87350]" />
                   </div>
-                  <h3 className="font-sans font-semibold text-xl text-[#2C5F4D] mb-3">{step.title}</h3>
+                  <h3 className="font-sans font-medium text-xl text-[#2C5F4D] mb-3">{step.title}</h3>
                   <p className="font-serif text-[#4A5859] leading-relaxed mb-4">{step.description}</p>
                   <span className="inline-block px-3 py-1 bg-[#D4B896] text-[#2C5F4D] font-sans font-semibold text-sm rounded">
                     {step.time}

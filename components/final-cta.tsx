@@ -39,7 +39,7 @@ export function FinalCTA() {
 
           {/* Right: CTA Form */}
           <div className="bg-[#F5F1EA] p-8 rounded-lg border-2 border-[#D4B896] shadow-xl">
-            <h3 className="font-sans font-semibold text-2xl text-[#2C5F4D] mb-6">Get Your Personalized Race Plan</h3>
+            <h3 className="font-sans font-medium text-2xl text-[#2C5F4D] mb-6">Get Your Personalized Race Plan</h3>
 
             <form className="space-y-4">
               <div>

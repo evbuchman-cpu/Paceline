@@ -65,7 +65,7 @@ export function Features() {
                   </span>
                 )}
               </div>
-              <h3 className="font-sans font-semibold text-xl text-[#2C5F4D] mb-2">{feature.title}</h3>
+              <h3 className="font-sans font-medium text-xl text-[#2C5F4D] mb-2">{feature.title}</h3>
               <p className="font-serif text-[#4A5859] leading-relaxed">{feature.description}</p>
             </div>
           ))}

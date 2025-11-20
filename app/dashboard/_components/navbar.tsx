@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
+import Image from "next/image";
 
 export default function DashboardTopNav({ children }: { children: ReactNode }) {
   return (
@@ -31,8 +32,8 @@ export default function DashboardTopNav({ children }: { children: ReactNode }) {
           </SheetTrigger>
           <SheetContent side="left">
             <SheetHeader>
-              <Link prefetch={true} href="/">
-                <SheetTitle>Pass Builder</SheetTitle>
+              <Link prefetch={true} href="/" className="flex items-center">
+                <span className="font-sans font-bold text-xl text-[#2C5F4D]">PACELINE</span>
               </Link>
             </SheetHeader>
             <div className="flex flex-col space-y-3 mt-[1rem]">
@@ -45,10 +46,10 @@ export default function DashboardTopNav({ children }: { children: ReactNode }) {
                 </Link>
               </DialogClose>
               <DialogClose asChild>
-                <Link prefetch={true} href="/dashboard/create">
+                <Link prefetch={true} href="/dashboard/questionnaire">
                   <Button variant="outline" className="w-full">
                     <Brush className="mr-2 h-4 w-4" />
-                    Create Pass
+                    New Guide
                   </Button>
                 </Link>
               </DialogClose>

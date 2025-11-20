@@ -23,9 +23,9 @@ export function Hero() {
           <div className="space-y-6">
             <div className="space-y-4">
               <h1 className="text-4xl sm:text-4xl lg:text-5xl xl:text-5xl font-semibold text-foreground leading-tight">
-                Stop piecing together
+                Stop piecing together advice.
                 <br />
-                <span className="text-[#2C5F4D]">fragmented race plans</span>
+                <span className="text-[#2C5F4D]">Start executing with confidence.</span>
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground font-serif leading-relaxed">
                 Personalized ultramarathon race guides with nutrition timing, pacing splits, and

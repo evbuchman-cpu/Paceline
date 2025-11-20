@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface NavItem {
   label: string;
@@ -64,10 +65,10 @@ export default function DashboardSideBar() {
         <div className="flex h-[3.45rem] items-center border-b px-4">
           <Link
             prefetch={true}
-            className="flex items-center font-semibold hover:cursor-pointer"
+            className="flex items-center hover:cursor-pointer"
             href="/"
           >
-            <span>Nextjs Starter Kit</span>
+            <span className="font-sans font-bold text-xl text-[#2C5F4D]">PACELINE</span>
           </Link>
         </div>
 

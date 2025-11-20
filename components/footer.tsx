@@ -1,4 +1,5 @@
-import { TrendingUp, Instagram, Facebook } from "lucide-react"
+import { Instagram, Facebook } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
   return (
@@ -8,8 +9,13 @@ export function Footer() {
           {/* Branding */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-6 h-6" />
-              <span className="font-sans font-semibold text-xl">PACELINE</span>
+              <Image
+                src="/PaceLine Logo.png"
+                alt="Paceline Logo"
+                width={150}
+                height={40}
+                className="h-8 w-auto brightness-0 invert"
+              />
             </div>
             <p className="font-serif text-sm text-white/80 leading-relaxed">
               Stop piecing together advice. Start executing with confidence.

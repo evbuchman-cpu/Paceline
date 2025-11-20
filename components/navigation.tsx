@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Menu, X, TrendingUp } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -13,8 +14,14 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-[#2C5F4D]" />
-            <span className="font-sans font-semibold text-xl text-[#2C5F4D]">PACELINE</span>
+            <Image
+              src="/PaceLine Logo.png"
+              alt="Paceline Logo"
+              width={150}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
           </div>
 
           {/* Desktop Menu */}

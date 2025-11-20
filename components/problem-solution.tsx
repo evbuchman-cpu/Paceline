@@ -18,7 +18,7 @@ export function ProblemSolution() {
               <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
                 <X className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-sans font-semibold text-2xl text-[#2C5F4D]">How Most Ultrarunners Plan</h3>
+              <h3 className="font-sans font-medium text-2xl text-[#2C5F4D]">How Most Ultrarunners Plan</h3>
             </div>
             <ul className="space-y-3">
               {[
@@ -44,7 +44,7 @@ export function ProblemSolution() {
               <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
                 <Check className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-sans font-semibold text-2xl text-[#2C5F4D]">How Paceline Users Plan</h3>
+              <h3 className="font-sans font-medium text-2xl text-[#2C5F4D]">How Paceline Users Plan</h3>
             </div>
             <ul className="space-y-3">
               {[

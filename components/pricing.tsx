@@ -54,7 +54,7 @@ export function Pricing() {
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {/* Essential Plan */}
           <div className="p-8 bg-white border-2 border-stone-200 rounded-lg">
-            <h3 className="font-sans font-semibold text-2xl text-[#2C5F4D] mb-2">Essential</h3>
+            <h3 className="font-sans font-medium text-2xl text-[#2C5F4D] mb-2">Essential</h3>
             <div className="mb-4">
               <span className="font-sans font-bold text-4xl text-[#2C5F4D]">$29</span>
               <span className="font-serif text-[#4A5859]"> per race</span>
@@ -118,7 +118,7 @@ export function Pricing() {
               </span>
             </div>
 
-            <h3 className="font-sans font-semibold text-2xl text-[#2C5F4D] mb-2">Custom</h3>
+            <h3 className="font-sans font-medium text-2xl text-[#2C5F4D] mb-2">Custom</h3>
             <div className="mb-4">
               <span className="font-sans font-bold text-4xl text-[#2C5F4D]">$99</span>
               <span className="font-serif text-[#4A5859]"> per race</span>
@@ -172,7 +172,7 @@ export function Pricing() {
               </span>
             </div>
 
-            <h3 className="font-sans font-semibold text-2xl text-[#2C5F4D] mb-2">Ultra Bundle</h3>
+            <h3 className="font-sans font-medium text-2xl text-[#2C5F4D] mb-2">Ultra Bundle</h3>
             <div className="mb-4">
               <span className="font-sans font-bold text-4xl text-[#2C5F4D]">$497</span>
               <span className="font-serif text-[#4A5859]"> for 5 races</span>
