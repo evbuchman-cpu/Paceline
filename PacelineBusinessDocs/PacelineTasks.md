@@ -3,7 +3,7 @@
 **Project:** RaceWise (Paceline) - Ultramarathon Race Planning Platform
 **Approach:** Automated MVP from Day 1 (Skip Manual Process)
 **Timeline:** 4-8 weeks to launch
-**Last Updated:** November 16, 2025
+**Last Updated:** November 20, 2025
 
 ---
 
@@ -32,7 +32,7 @@
 
 ## Current Status
 
-### ✅ Already Completed (30% of MVP)
+### ✅ Already Completed (~65% of MVP)
 
 | Component | Status | Location | Notes |
 |-----------|--------|----------|-------|
@@ -46,9 +46,19 @@
 | **Polar.sh** | ✅ Done | `lib/auth.ts` | Payment integration |
 | **Auth Pages** | ✅ Done | `app/sign-in/`, `app/sign-up/` | Login/signup flows |
 | **Landing Page** | ✅ Done | `app/page.tsx` | May need copy updates |
-| **Pricing Page** | ✅ Done | `app/pricing/page.tsx` | Verify 3 tiers |
+| **Pricing Page** | ✅ Done | `app/pricing/page.tsx` | 3 tiers configured |
+| **Database Tables** | ✅ Done | `db/schema.ts` | purchase, questionnaire, guide, race |
+| **Questionnaire Forms** | ✅ Done | `components/questionnaire/` | Essential (12) + Custom (19) fields |
+| **Questionnaire API** | ✅ Done | `app/api/questionnaire/` | Full CRUD operations |
+| **Strava OAuth** | ✅ Done | `app/api/strava/` | authorize, callback, analyze |
+| **Strava Client** | ✅ Done | `lib/strava-client.ts` | 90-day fitness analysis |
+| **AI Cascade (8 steps)** | ✅ Done | `lib/ai-cascade/` | All 8 sections with Anthropic |
+| **Guide Schemas** | ✅ Done | `lib/schemas/guide-sections.ts` | Zod validation for all sections |
+| **Polar Webhooks** | ✅ Done | `app/api/webhooks/polar/` | subscription events handled |
+| **Dashboard Layout** | ✅ Done | `app/dashboard/layout.tsx` | Auth-protected with navigation |
+| **Guides List Page** | ✅ Done | `app/dashboard/guides/page.tsx` | List & download UI |
 
-### ⏳ TODO: Core Features (70% remaining)
+### ⏳ TODO: Core Features (~35% remaining)
 
 **Priority Levels:**
 - **P0** = Blocker (must complete to launch)
@@ -58,16 +68,17 @@
 
 | Feature | Priority | Status | Week | Agent |
 |---------|----------|--------|------|-------|
-| **Database Tables** | P0 | ⏳ Not Started | Week 1 | Database Architect |
-| **Questionnaire Forms** | P0 | ⏳ Not Started | Week 1 | Fullstack MVP Builder |
-| **Strava OAuth** | P0 | ⏳ Not Started | Week 2 | Fullstack MVP Builder |
-| **AI Cascade (Steps 1-4)** | P0 | ⏳ Not Started | Week 2 | AI Integration Specialist |
-| **AI Cascade (Steps 5-8)** | P0 | ⏳ Not Started | Week 3 | AI Integration Specialist |
-| **PDF Generation** | P0 | ⏳ Not Started | Week 3 | Fullstack MVP Builder |
+| **Database Tables** | P0 | ✅ Done | Week 1 | Database Architect |
+| **Questionnaire Forms** | P0 | ✅ Done | Week 1 | Fullstack MVP Builder |
+| **Strava OAuth** | P0 | ✅ Done | Week 2 | Fullstack MVP Builder |
+| **AI Cascade (Steps 1-4)** | P0 | ✅ Done | Week 2 | AI Integration Specialist |
+| **AI Cascade (Steps 5-8)** | P0 | ✅ Done | Week 3 | AI Integration Specialist |
+| **PDF Generation** | P0 | ✅ Done | Week 3 | Fullstack MVP Builder |
 | **Cloudflare R2** | P0 | ⏳ Not Started | Week 3 | Fullstack MVP Builder |
-| **User Dashboard** | P0 | ⏳ Not Started | Week 4 | Fullstack MVP Builder |
+| **Generate Guide API** | P0 | ⏳ Not Started | Week 3 | Fullstack MVP Builder |
+| **User Dashboard** | P0 | ⏳ Partial | Week 4 | Fullstack MVP Builder |
 | **Email Automation** | P0 | ⏳ Not Started | Week 4 | Fullstack MVP Builder |
-| **Polar Webhooks** | P0 | ⏳ Not Started | Week 4 | Fullstack MVP Builder |
+| **Polar Webhooks** | P0 | ✅ Done | Week 4 | Fullstack MVP Builder |
 | **E2E Testing** | P1 | ⏳ Not Started | Week 4 | QA & Code Guardian |
 | **Beta Launch** | P1 | ⏳ Not Started | Week 5-6 | Growth & Conversion |
 | **Analytics Setup** | P2 | ⏳ Not Started | Week 6 | Growth & Conversion |
@@ -75,11 +86,11 @@
 
 ---
 
-## Week 1: Database & Forms (15-20 hrs)
+## Week 1: Database & Forms (15-20 hrs) ✅ COMPLETED
 
 **Goal:** Set up data layer and build questionnaire forms
 
-### Task 1.1: Add RaceWise Database Tables (P0)
+### Task 1.1: Add RaceWise Database Tables (P0) ✅ DONE
 **Agent:** @Database-Architect
 **Time:** 3-4 hours
 **Priority:** BLOCKER - Do this first!
@@ -182,7 +193,7 @@
 
 ---
 
-### Task 1.2: Build Essential Questionnaire Form (P0)
+### Task 1.2: Build Essential Questionnaire Form (P0) ✅ DONE
 **Agent:** @Fullstack-MVP-Builder
 **Time:** 6-8 hours
 **Priority:** BLOCKER
@@ -242,7 +253,7 @@
 
 ---
 
-### Task 1.3: Build Custom Questionnaire Form (P0)
+### Task 1.3: Build Custom Questionnaire Form (P0) ✅ DONE
 **Agent:** @Fullstack-MVP-Builder
 **Time:** 4-5 hours
 **Priority:** BLOCKER
@@ -274,11 +285,11 @@
 
 ---
 
-## Week 2: Strava & AI Cascade Start (20-25 hrs)
+## Week 2: Strava & AI Cascade Start (20-25 hrs) ✅ COMPLETED
 
 **Goal:** Integrate Strava OAuth and build first 4 AI cascade steps
 
-### Task 2.1: Strava OAuth Integration (P0)
+### Task 2.1: Strava OAuth Integration (P0) ✅ DONE
 **Agent:** @Fullstack-MVP-Builder
 **Time:** 4-5 hours
 **Priority:** BLOCKER
@@ -329,10 +340,11 @@
 
 ---
 
-### Task 2.2: OpenAI Setup & AI Cascade Steps 1-4 (P0)
+### Task 2.2: Anthropic Setup & AI Cascade Steps 1-4 (P0) ✅ DONE
 **Agent:** @AI-Integration-Specialist
 **Time:** 12-15 hours
 **Priority:** BLOCKER
+**Note:** Implemented with Anthropic Claude instead of OpenAI
 
 **Setup:**
 - [ ] Install OpenAI SDK: `npm install openai`
@@ -442,11 +454,11 @@
 
 ---
 
-## Week 3: AI Cascade Complete + PDF (20-25 hrs)
+## Week 3: AI Cascade Complete + PDF (20-25 hrs) ⏳ IN PROGRESS
 
 **Goal:** Finish AI cascade (Steps 5-8) and build PDF generation
 
-### Task 3.1: AI Cascade Steps 5-8 (P0)
+### Task 3.1: AI Cascade Steps 5-8 (P0) ✅ DONE
 **Agent:** @AI-Integration-Specialist
 **Time:** 10-12 hours
 **Priority:** BLOCKER
@@ -560,7 +572,7 @@
 
 ---
 
-### Task 3.2: PDF Generation with Puppeteer (P0)
+### Task 3.2: PDF Generation with Puppeteer (P0) ✅ DONE
 **Agent:** @Fullstack-MVP-Builder
 **Time:** 6-8 hours
 **Priority:** BLOCKER
@@ -618,6 +630,92 @@
 - All 8 sections render correctly
 - PDF is <5MB
 - Branding looks professional
+
+---
+
+### Task 3.2.5: Guide Validation & Consistency Checker (P0)
+**Agent:** @AI-Integration-Specialist
+**Time:** 4-6 hours
+**Priority:** BLOCKER
+
+**Why this matters:**
+AI-generated content can have mathematical errors and inconsistencies. Before generating the PDF, we MUST validate the data to ensure accuracy. This protects users and our reputation.
+
+**What to build:**
+- [ ] Create `lib/guide-validator.ts`
+  ```typescript
+  export interface ValidationResult {
+    isValid: boolean;
+    errors: Array<{ section: string; field: string; message: string }>;
+    warnings: Array<{ section: string; field: string; message: string }>;
+  }
+
+  export function validateGuideData(guideData: GuideData): ValidationResult {
+    const errors: ValidationResult['errors'] = [];
+    const warnings: ValidationResult['warnings'] = [];
+
+    // Run all validations
+    validateCutoffBuffers(guideData, errors);
+    validateNutritionTotals(guideData, errors, warnings);
+    validateTimeConsistency(guideData, errors);
+    validateCrossSection(guideData, errors);
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+      warnings
+    };
+  }
+  ```
+
+**Validations to implement:**
+
+1. **Cutoff Buffer Calculations**
+   - [ ] For each station: `bufferMinutes = cutoffTime - predictedArrival`
+   - [ ] Status matches buffer: red (<60 min), yellow (60-180 min), green (>180 min)
+   - [ ] Flag if any arrival > cutoff (impossible)
+
+2. **Nutrition Totals**
+   - [ ] Sum of timeline calories = summary.totalCalories
+   - [ ] Calories/hour within bounds (150-300 cal/hr)
+   - [ ] Fluids/hour within bounds (12-24 oz/hr)
+   - [ ] Sodium/hour within bounds (100-400 mg/hr)
+
+3. **Time Consistency**
+   - [ ] All cumulative times are sequential (each > previous)
+   - [ ] Race time matches sum of section times
+   - [ ] AM/PM indicators are correct based on race start + elapsed time
+
+4. **Cross-Section Consistency**
+   - [ ] Aid station names match across: raceOverview, cutoffManagement, crewLogistics, dropBagStrategy
+   - [ ] Aid station mileages match across all sections
+   - [ ] Tough sections in raceOverview match toughSections in mentalStrategy
+   - [ ] Crew stations reference only crew-accessible aid stations
+
+5. **Pacing Consistency**
+   - [ ] Section distances sum to total distance
+   - [ ] Elevation gains/losses are reasonable for terrain
+   - [ ] Target paces are realistic for elevation
+
+**Integration:**
+- [ ] Call `validateGuideData()` after AI cascade completes
+- [ ] If `isValid === false`: Log errors, notify admin, DO NOT generate PDF
+- [ ] If warnings exist: Log warnings, proceed with PDF but flag for review
+- [ ] Store validation results in `guide.validationResults` (JSONB)
+
+**Files to create:**
+- `lib/guide-validator.ts`
+- `lib/validation/cutoff-validator.ts`
+- `lib/validation/nutrition-validator.ts`
+- `lib/validation/time-validator.ts`
+- `lib/validation/consistency-validator.ts`
+
+**Success criteria:**
+- All numerical calculations are validated
+- Cross-section data is consistent
+- Invalid guides are blocked from generation
+- Warnings are logged for review
+- No false positives (valid guides pass)
 
 ---
 
@@ -1091,6 +1189,27 @@
 - [ ] Show referral stats in dashboard
 - Agent: @Fullstack-MVP-Builder + @Growth-Conversion-Specialist
 
+**Tier-Based Guide Differentiation (P2)**
+- [ ] Update AI cascade prompts to generate different content depth per tier
+  - **Essential tier**: Generic advice, flat pacing (no Strava), basic checklists, simplified protocols
+  - **Custom tier**: Strava-personalized pacing, elevation-adjusted strategies, detailed protocols, personalized mantras
+- [ ] Files to update: `lib/ai-cascade/step*.ts` (all 8 steps)
+- [ ] Add `tier` parameter to all AI cascade functions
+- [ ] Adjust prompts to output appropriate detail level based on tier
+- [ ] Test both tiers generate correctly with appropriate content depth
+- [ ] Optional: Add tier-aware conditional rendering to PDF templates
+  ```typescript
+  // Example: In cutoffs section
+  ${questionnaire.tier === 'custom' ? `
+    <div class="status-badge ${getStatusClass(station.status)}">
+      ${station.statusEmoji} ${station.bufferFormatted}
+    </div>
+  ` : `
+    <span>${station.bufferFormatted}</span>
+  `}
+  ```
+- Agent: @AI-Integration-Specialist
+
 ---
 
 ### Month 5-6: Marketing & Scale (P3)
@@ -1246,13 +1365,13 @@
 ## Quick Start: Next 3 Actions
 
 **Today:**
-1. **@Database-Architect**: Add RaceWise tables to `db/schema.ts`, run migrations
+1. **@Fullstack-MVP-Builder**: Set up Cloudflare R2 Storage (`lib/r2-storage.ts`)
 
 **This Week:**
-2. **@Fullstack-MVP-Builder**: Build Essential questionnaire form (12 fields)
+2. **@Fullstack-MVP-Builder**: Create Generate Guide API (`app/api/generate-guide/route.ts`) - ties AI cascade → PDF → R2 together
 
-**Next Week:**
-3. **@AI-Integration-Specialist**: Implement AI cascade Steps 1-4
+**Next:**
+3. **@Fullstack-MVP-Builder**: Complete User Dashboard (`app/dashboard/guides/page.tsx`) - guide listing and download
 
 ---
 
