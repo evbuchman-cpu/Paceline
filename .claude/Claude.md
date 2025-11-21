@@ -29,6 +29,24 @@ When starting work, **always**:
 
 ---
 
+## 🏷️ Subagent Identification Protocol
+
+**MANDATORY:** When using the Task tool to launch any subagent, ALWAYS include this instruction at the START of the prompt:
+
+---
+**FIRST LINE REQUIREMENT:**
+Your response MUST begin with exactly:
+AGENT = <agent_type>
+
+Where <agent_type> matches your subagent_type (e.g., Explore, Plan, general-purpose, Fullstack-MVP-Builder).
+Do not wrap in backticks, quotes, or code blocks. Print it plain on line 1, then continue with your response.
+
+---
+
+This ensures all subagent responses are traceable. See `.claude/sub-agents/AGENT_ARCHITECTURE.md` for the full list of agent names.
+
+---
+
 ## Table of Contents
 
 1. [Project Overview](#1-project-overview)

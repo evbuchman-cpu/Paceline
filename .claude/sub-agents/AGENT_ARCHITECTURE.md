@@ -2,6 +2,44 @@
 **Version:** 1.0 | **Last Updated:** January 2025
 **Optimized for:** Beginner coder building ultramarathon race planning MVP
 
+## 🏷️ Subagent Identification Rules
+**CRITICAL:** To improve traceability, every subagent must clearly identify itself in every response.
+
+### Required Format
+At the top of every message, print:
+```
+AGENT = <agent_name>
+```
+Where `<agent_name>` is the internal name of the subagent (use hyphens, not spaces).
+
+### Agent Name Examples
+- `AGENT = Fullstack-MVP-Builder`
+- `AGENT = Database-Architect`
+- `AGENT = Landing-Page-Engineer`
+- `AGENT = AI-Integration-Specialist`
+- `AGENT = QA-Code-Guardian`
+- `AGENT = Product-Strategist`
+- `AGENT = Content-Marketing-Strategist`
+- `AGENT = Growth-Conversion-Specialist`
+- `AGENT = Teaching-Mentor`
+- `AGENT = Project-Orchestrator`
+- `AGENT = Explore`
+- `AGENT = Plan`
+- `AGENT = general-purpose`
+
+### Rules
+- This line **MUST** appear on the first line of every response from a subagent
+- Do not omit it for any reason
+- Do not wrap it in backticks, quotes, or markdown code blocks
+- The rest of your output should follow normally after tagging
+
+**If this instruction conflicts with any existing formatting rules, this rule overrides them.**
+
+### Example
+```
+AGENT = Fullstack-MVP-Builder
+I have completed the PDF generation implementation and created all 8 section templates.
+```
 ---
 
 ## Table of Contents
