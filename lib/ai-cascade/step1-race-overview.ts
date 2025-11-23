@@ -1,5 +1,5 @@
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
-import { withRetry, parseAndValidate } from "./utils";
+import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
   raceOverviewSchema,
   RaceOverview,
@@ -7,18 +7,24 @@ import {
   AIStepResponse,
 } from "../schemas/guide-sections";
 
-const SYSTEM_PROMPT = `You are an expert ultramarathon race analyst with deep knowledge of trail races, mountain ultras, and endurance events worldwide. Your role is to provide comprehensive, accurate race overviews that help runners plan their race day execution.
+const MAX_TOKENS = 8192;
 
-When analyzing a race, you must:
-1. Provide accurate aid station names, locations (mile markers), and cutoff times when known
-2. Create realistic elevation profiles with key landmarks
-3. Identify the toughest sections and explain why they're challenging
-4. Include historical weather patterns for the race month
-5. Note any assumptions in the courseNotes field when exact data is unavailable
+const SYSTEM_PROMPT = `You are an ultramarathon race analyst. Provide accurate race overviews for race day planning.
 
-Be specific and tactical. Runners rely on this information for race planning.
+Include:
+- Aid stations with mile markers, cutoffs, crew/drop bag access
+- Elevation profile at key points
+- Tough sections with tactical advice
+- Historical weather for race month
 
-CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanation text, just the JSON object matching the exact schema provided.`;
+OUTPUT CONSTRAINTS (critical for downstream steps):
+- "description": Max 100 words
+- "elevationProfile": Max 12 points (start, finish, major climbs/descents, aid stations)
+- "aidStations": Include only essential services (water, medical, food types)
+- "toughSections": 3-5 sections, notes max 30 words each
+- "courseNotes": Max 80 words
+
+Return ONLY valid JSON. No markdown.`;
 
 export async function generateRaceOverview(
   input: RaceOverviewInput
@@ -26,72 +32,58 @@ export async function generateRaceOverview(
   const startTime = Date.now();
   console.log("🚀 Step 1 - Race Overview:", input.raceName);
 
-  const userPrompt = `Analyze this ultramarathon race and provide a comprehensive overview:
+  const userPrompt = `Analyze race:
 
-Race Name: ${input.raceName}
-Race Website: ${input.raceWebsite || "Not provided"}
-Race Date: ${input.raceDate}
+Race: ${input.raceName}
+Website: ${input.raceWebsite || "Not provided"}
+Date: ${input.raceDate}
 
-Return a JSON object with this exact structure:
+Return JSON:
 {
-  "description": "Comprehensive race description including history, course characteristics, and what makes this race unique",
-  "distance": <number in miles>,
-  "elevationGain": <number in feet>,
-  "elevationProfile": [
-    {
-      "mile": <number>,
-      "elevation": <number in feet>,
-      "landmark": "<optional landmark name>"
-    }
-  ],
-  "aidStations": [
-    {
-      "name": "<station name>",
-      "mile": <number>,
-      "cutoff": "<cutoff time in format like '10:30 AM' or 'None'>",
-      "crewAccess": <boolean>,
-      "dropBagAccess": <boolean>,
-      "services": ["<service1>", "<service2>"]
-    }
-  ],
-  "weatherPatterns": {
-    "month": "<race month>",
-    "avgHighTemp": <number in Fahrenheit>,
-    "avgLowTemp": <number in Fahrenheit>,
-    "precipitation": "<precipitation description>",
-    "sunriseTime": "<time>",
-    "sunsetTime": "<time>"
-  },
-  "toughSections": [
-    {
-      "name": "<section name>",
-      "miles": "<mile range like '45-52'>",
-      "difficulty": "<moderate|hard|brutal>",
-      "elevationChange": "<description like '+3000ft over 7 miles'>",
-      "notes": "<why this section is challenging and tactical advice>"
-    }
-  ],
-  "courseNotes": "Additional notes including any assumptions made, course markings info, common mistakes runners make, and other helpful tactical information"
+  "description": "max 100 words",
+  "distance": num,
+  "elevationGain": num,
+  "elevationProfile": [{"mile": num, "elevation": num, "landmark": "optional"}],
+  "aidStations": [{"name": "string", "mile": num, "cutoff": "time or None", "crewAccess": bool, "dropBagAccess": bool, "services": ["essential only"]}],
+  "weatherPatterns": {"month": "string", "avgHighTemp": num, "avgLowTemp": num, "precipitation": "string", "sunriseTime": "time", "sunsetTime": "time"},
+  "toughSections": [{"name": "string", "miles": "range", "difficulty": "moderate|hard|brutal", "elevationChange": "string", "notes": "max 30 words"}],
+  "courseNotes": "max 80 words"
 }
 
-Provide elevation profile points at key locations (start, major climbs/descents, aid stations, finish) - aim for 10-20 points total.
-Include all aid stations with accurate cutoff times if this is a well-known race.
-Identify 3-5 tough sections that require special attention.`;
+Max 12 elevation points. Include all aid stations. Identify 3-5 tough sections.`;
 
-  const response = await withRetry(
-    () =>
-      anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    "generateRaceOverview"
-  );
+  // Use concise retry to handle truncation
+  const response = await withConciseRetry({
+    anthropic,
+    model: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    systemPrompt: SYSTEM_PROMPT,
+    userPrompt,
+    stepName: "generateRaceOverview",
+    maxRetries: 2,
+  });
 
   const content =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const data = parseAndValidate(content, raceOverviewSchema, "generateRaceOverview");
+
+  // Use robust parser with truncation detection
+  const { data, truncationDetected, recoveryApplied } = robustParseAndValidate(
+    content,
+    raceOverviewSchema,
+    {
+      stepName: "generateRaceOverview",
+      maxTokens: MAX_TOKENS,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+    }
+  );
+
+  if (truncationDetected) {
+    console.warn(`⚠️ Step 1 - Race Overview: Truncation detected`);
+  }
+  if (recoveryApplied) {
+    console.log(`🔧 Step 1 - Race Overview: Recovery applied`);
+  }
 
   const generationTime = Date.now() - startTime;
   console.log(

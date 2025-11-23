@@ -1,5 +1,5 @@
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
-import { withRetry, parseAndValidate } from "./utils";
+import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
   contingencyProtocolsSchema,
   ContingencyProtocols,
@@ -7,34 +7,27 @@ import {
   AIStepResponse,
 } from "../schemas/guide-sections";
 
-const SYSTEM_PROMPT = `You are an expert ultramarathon medical advisor and race safety specialist. Your role is to create comprehensive contingency protocols that help runners make smart decisions when things go wrong during a 100-mile race.
+// Increased token limit for contingency protocols (detailed protocols with multiple scenarios)
+const MAX_TOKENS = 12288;
 
-Key contingency principles:
-1. EARLY INTERVENTION: Address problems early before they become race-ending
-2. CLEAR THRESHOLDS: Specific criteria for when to stop (not vague "if it gets bad")
-3. ACTIONABLE STEPS: Exact actions to take, in order
-4. KNOW WHEN TO DNF: A DNF today means you can race again - permanent injury doesn't
-5. PERSONALIZATION: Account for runner's specific vulnerabilities
+const SYSTEM_PROMPT = `You are an ultramarathon safety specialist. Create contingency protocols for race problems.
 
-Common race-day problems:
-- GI distress (nausea, vomiting, diarrhea) - #1 reason for DNF
-- Blisters and foot problems
-- Muscle cramps
-- Chafing
-- Hypothermia/hyperthermia
-- Hyponatremia
-- Falling behind on cutoffs
-- Equipment failure (headlamp, shoes, poles)
-- Mental breakdown / dark patches
-- Injury (rolled ankle, fall)
+Principles:
+- Early intervention before race-ending
+- Clear, measurable thresholds for action
+- Specific criteria for when to DNF
 
-For each protocol:
-- Warning signals: What to watch for
-- Immediate actions: First 1-3 things to do
-- Prevention: What to do beforehand to avoid this
-- When to stop: Clear, measurable criteria
+OUTPUT CONSTRAINTS (critical):
+- "protocols": Max 8 protocols total
+- "warningSignals": Max 3 per protocol, 10 words each
+- "immediateActions": Max 4 per protocol, 12 words each
+- "prevention": Max 3 per protocol, 10 words each
+- "whenToStop": Max 20 words
+- "emergencyContacts": Max 30 words
+- "dnfDecisionFramework": Max 50 words
+- "raceHotlineInfo": Max 30 words
 
-CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanation text, just the JSON object matching the exact schema provided.`;
+Return ONLY valid JSON. No markdown.`;
 
 export async function generateContingencyProtocols(
   input: ContingencyInput
@@ -42,87 +35,68 @@ export async function generateContingencyProtocols(
   const startTime = Date.now();
   console.log("🚀 Step 7 - Contingency Protocols");
 
-  const userPrompt = `Create comprehensive contingency protocols for this ultramarathon:
+  // Compact race info
+  const raceInfo = `${input.raceOverview.distance}mi, ${input.raceOverview.elevationGain}ft gain, ${input.pacingStrategy.totalEstimatedTime} total`;
 
-RACE OVERVIEW:
-${JSON.stringify({
-  distance: input.raceOverview.distance,
-  elevationGain: input.raceOverview.elevationGain,
-  toughSections: input.raceOverview.toughSections,
-  courseNotes: input.raceOverview.courseNotes,
-}, null, 2)}
+  // Compact weather
+  const weather = input.weatherPatterns;
+  const weatherInfo = `${weather.avgLowTemp}-${weather.avgHighTemp}°F, ${weather.precipitation}`;
 
-WEATHER PATTERNS:
-${JSON.stringify(input.weatherPatterns, null, 2)}
+  // Build priority list based on vulnerabilities
+  const priorities = [];
+  if (input.giIssuesHistory) priorities.push(`GI (HIGH: ${input.giIssuesHistory})`);
+  if (input.blisterProneAreas) priorities.push(`Blisters (HIGH: ${input.blisterProneAreas})`);
+  if (input.medicalConditions) priorities.push(`${input.medicalConditions} (HIGH)`);
 
-RUNNER VULNERABILITIES:
-- GI Issues History: ${input.giIssuesHistory || "None reported"}
-- Blister-Prone Areas: ${input.blisterProneAreas || "None reported"}
-- Medical Conditions: ${input.medicalConditions || "None reported"}
+  const userPrompt = `Create contingency protocols:
 
-PACING INFO:
-- Total Estimated Time: ${input.pacingStrategy.totalEstimatedTime}
-- Number of sections: ${input.pacingStrategy.sections.length}
+RACE: ${raceInfo}
+WEATHER: ${weatherInfo}
+VULNERABILITIES: GI=${input.giIssuesHistory || "none"}, Blisters=${input.blisterProneAreas || "none"}, Medical=${input.medicalConditions || "none"}
 
-Return a JSON object with this exact structure:
+Return JSON:
 {
-  "protocols": [
-    {
-      "scenario": "<specific problem like 'Nausea and Vomiting'>",
-      "severity": "<low|medium|high|critical>",
-      "warningSignals": [
-        "<early warning sign 1>",
-        "<early warning sign 2>",
-        "<etc>"
-      ],
-      "immediateActions": [
-        "<step 1>",
-        "<step 2>",
-        "<step 3>"
-      ],
-      "prevention": [
-        "<preventive measure 1>",
-        "<preventive measure 2>"
-      ],
-      "whenToStop": "<specific, measurable criteria for when to DNF>"
-    }
-  ],
-  "emergencyContacts": "<what numbers to have saved, who to call>",
-  "dnfDecisionFramework": "<clear framework for making DNF decisions rationally>",
-  "raceHotlineInfo": "<info about race medical support, sweep times, etc.>"
+  "protocols": [{"scenario": "string", "severity": "low|medium|high|critical", "warningSignals": ["max 3, 10 words each"], "immediateActions": ["max 4, 12 words each"], "prevention": ["max 3, 10 words each"], "whenToStop": "max 20 words"}],
+  "emergencyContacts": "max 30 words",
+  "dnfDecisionFramework": "max 50 words",
+  "raceHotlineInfo": "max 30 words"
 }
 
-Create protocols for these scenarios (minimum 8, prioritize based on runner's vulnerabilities):
-1. GI Distress (nausea/vomiting) - ${input.giIssuesHistory ? 'HIGH PRIORITY - runner has history' : 'standard'}
-2. Blisters/Foot Problems - ${input.blisterProneAreas ? 'HIGH PRIORITY - runner is prone in: ' + input.blisterProneAreas : 'standard'}
-3. Falling Behind Cutoffs
-4. Heat-related illness (if relevant to weather)
-5. Hypothermia/Cold exposure (if night sections or cold weather)
-6. Muscle Cramps
-7. Equipment Failure
-8. Mental Breakdown / Dark Patch
-${input.medicalConditions ? `9. ${input.medicalConditions}-related issues` : ''}
+Create 8 protocols: ${priorities.length > 0 ? priorities.join(", ") + ", plus " : ""}GI, Blisters, Cutoffs, Heat, Cold, Cramps, Equipment, Mental.
+Be specific: "vomiting 3+ times/hr" not "severe vomiting".`;
 
-For each protocol:
-- Be specific with numbers (e.g., "if vomiting more than 3 times in an hour")
-- Give actionable immediate steps in priority order
-- Include prevention that can be done before and during race
-- Make "when to stop" criteria objective and measurable`;
-
-  const response = await withRetry(
-    () =>
-      anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    "generateContingencyProtocols"
-  );
+  // Use concise retry to handle truncation
+  const response = await withConciseRetry({
+    anthropic,
+    model: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    systemPrompt: SYSTEM_PROMPT,
+    userPrompt,
+    stepName: "generateContingencyProtocols",
+    maxRetries: 2,
+  });
 
   const content =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const data = parseAndValidate(content, contingencyProtocolsSchema, "generateContingencyProtocols");
+
+  // Use robust parser with truncation detection
+  const { data, truncationDetected, recoveryApplied } = robustParseAndValidate(
+    content,
+    contingencyProtocolsSchema,
+    {
+      stepName: "generateContingencyProtocols",
+      maxTokens: MAX_TOKENS,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+    }
+  );
+
+  if (truncationDetected) {
+    console.warn(`⚠️ Step 7 - Contingency Protocols: Truncation detected`);
+  }
+  if (recoveryApplied) {
+    console.log(`🔧 Step 7 - Contingency Protocols: Recovery applied`);
+  }
 
   const generationTime = Date.now() - startTime;
   console.log(

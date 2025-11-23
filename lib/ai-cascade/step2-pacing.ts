@@ -1,5 +1,5 @@
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
-import { withRetry, parseAndValidate } from "./utils";
+import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
   pacingStrategySchema,
   PacingStrategy,
@@ -7,23 +7,25 @@ import {
   AIStepResponse,
 } from "../schemas/guide-sections";
 
-const SYSTEM_PROMPT = `You are an expert ultramarathon coach specializing in race pacing strategy. Your role is to create personalized, section-by-section pacing plans that account for terrain, elevation, fatigue, and individual runner capabilities.
+const MAX_TOKENS = 8192;
 
-Key pacing principles you must apply:
-1. ELEVATION ADJUSTMENT: Add 30-60 seconds per mile for every 1000ft of climbing, adjusted by climbing strength
-   - Strong climber: +30s/mi per 1000ft
-   - Average climber: +45s/mi per 1000ft
-   - Struggles on climbs: +60s/mi per 1000ft
-2. FATIGUE FACTOR: Slow pace by 10-15% after mile 60-70 for most runners
-3. TERRAIN: Technical trails add 20-30% to pace vs runnable trails
-4. EARLY RESTRAINT: Start conservative (slower than goal pace) for the first 20-30%
-5. NIGHT RUNNING: Add 10-20% for sections run in darkness
+const SYSTEM_PROMPT = `You are an expert ultramarathon pacing coach. Create section-by-section pacing plans accounting for terrain, elevation, and fatigue.
 
-If Strava data is provided, use it to calibrate paces. Otherwise, estimate based on goal finish time.
+Pacing rules:
+- ELEVATION: +30s/mi per 1000ft (strong climber), +45s (average), +60s (struggles)
+- FATIGUE: Slow 10-15% after mile 60-70
+- TERRAIN: Technical trails +20-30% vs runnable
+- EARLY: Start conservative (slower than goal) first 20-30%
+- NIGHT: Add 10-20% for darkness
 
-Be specific with section times. Runners need exact numbers for race planning.
+OUTPUT CONSTRAINTS (critical for token efficiency):
+- "notes" field: Max 30 words, tactical only
+- "paceStrategy": Max 100 words
+- "keyPacingNotes": 4-6 items, max 20 words each
+- Create 8-12 sections (not more)
+- No redundant information between sections
 
-CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanation text, just the JSON object matching the exact schema provided.`;
+Return ONLY valid JSON. No markdown, no explanation.`;
 
 export async function generatePacingStrategy(
   input: PacingInput
@@ -31,77 +33,78 @@ export async function generatePacingStrategy(
   const startTime = Date.now();
   console.log("🚀 Step 2 - Pacing Strategy:", input.goalFinishTime, "goal");
 
-  // Format Strava data if available
-  const stravaSection = input.stravaData
-    ? `
-Strava Data (90-day analysis):
-- Athlete ID: ${input.stravaData.athleteId}
-- Recent Avg Pace: ${input.stravaData.recentActivities?.avgPace || "N/A"}
-- Recent Avg Heart Rate: ${input.stravaData.recentActivities?.avgHeartRate || "N/A"}
-- Total Distance (90 days): ${input.stravaData.recentActivities?.totalDistance || "N/A"} miles
-- Elevation Gained (90 days): ${input.stravaData.recentActivities?.elevationGain || "N/A"} ft
-- Fitness Score: ${input.stravaData.fitnessScore || "N/A"}
-`
-    : "No Strava data available - estimate paces based on goal time and experience level.";
+  // Extract only needed fields from raceOverview (minimize input tokens)
+  const raceData = {
+    distance: input.raceOverview.distance,
+    elevationGain: input.raceOverview.elevationGain,
+    aidStations: input.raceOverview.aidStations.map(s => ({
+      name: s.name,
+      mile: s.mile,
+      cutoff: s.cutoff
+    })),
+    // Only include key elevation points (reduce from full profile)
+    keyElevation: input.raceOverview.elevationProfile
+      .filter((_, i, arr) => i === 0 || i === arr.length - 1 || i % Math.ceil(arr.length / 8) === 0)
+      .map(p => ({ mile: p.mile, elevation: p.elevation }))
+  };
 
-  const userPrompt = `Create a detailed pacing strategy for this ultramarathon:
+  // Compact Strava summary
+  const stravaInfo = input.stravaData
+    ? `Strava: pace ${input.stravaData.recentActivities?.avgPace || "N/A"}, ` +
+      `${input.stravaData.recentActivities?.totalDistance || 0}mi/90days, ` +
+      `fitness ${input.stravaData.fitnessScore || "N/A"}`
+    : "No Strava data";
 
-RACE DATA:
-${JSON.stringify(input.raceOverview, null, 2)}
+  const userPrompt = `Create pacing strategy:
 
-RUNNER PROFILE:
-- Goal Finish Time: ${input.goalFinishTime}
-- Climbing Strength: ${input.climbingStrength}
-- Ultras Completed: ${input.ultrasCompleted}
-${stravaSection}
+RACE: ${JSON.stringify(raceData)}
 
-Return a JSON object with this exact structure:
+RUNNER: Goal ${input.goalFinishTime}, ${input.climbingStrength} climber, ${input.ultrasCompleted} ultras. ${stravaInfo}
+
+Return JSON:
 {
-  "sections": [
-    {
-      "name": "<section name - use aid station names as endpoints>",
-      "startMile": <number>,
-      "endMile": <number>,
-      "distance": <number>,
-      "elevationGain": <number in feet>,
-      "elevationLoss": <number in feet>,
-      "terrainType": "<runnable|technical|mixed|road>",
-      "targetPace": "<pace in MM:SS/mi format>",
-      "sectionTime": "<time in H:MM format>",
-      "cumulativeTime": "<cumulative time in H:MM format>",
-      "cumulativeMile": <number>,
-      "notes": "<tactical notes for this section - be specific about terrain, when to push/hold back>"
-    }
-  ],
-  "totalEstimatedTime": "<total time in H:MM format>",
-  "averagePace": "<overall average pace in MM:SS/mi format>",
-  "cutoffBuffer": "<estimated buffer from last cutoff>",
-  "paceStrategy": "<paragraph explaining the overall strategy, key decision points, and contingency pacing>",
-  "keyPacingNotes": [
-    "<important pacing note 1>",
-    "<important pacing note 2>",
-    "<etc - include 4-6 key tactical notes>"
-  ]
+  "sections": [{"name": "string", "startMile": num, "endMile": num, "distance": num, "elevationGain": num, "elevationLoss": num, "terrainType": "runnable|technical|mixed|road", "targetPace": "MM:SS/mi", "sectionTime": "H:MM", "cumulativeTime": "H:MM", "cumulativeMile": num, "notes": "max 30 words"}],
+  "totalEstimatedTime": "H:MM",
+  "averagePace": "MM:SS/mi",
+  "cutoffBuffer": "string",
+  "paceStrategy": "max 100 words",
+  "keyPacingNotes": ["max 20 words each", "4-6 items"]
 }
 
-Break the course into 8-15 sections, typically using aid stations as endpoints.
-Ensure cumulative times add up correctly.
-Account for time spent at aid stations (2-5 min for small, 5-15 min for major crew stations).`;
+Rules: 8-12 sections using aid stations as endpoints. Include 2-5min aid station time (5-15min for crew stations).`;
 
-  const response = await withRetry(
-    () =>
-      anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    "generatePacingStrategy"
-  );
+  // Use concise retry to handle truncation
+  const response = await withConciseRetry({
+    anthropic,
+    model: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    systemPrompt: SYSTEM_PROMPT,
+    userPrompt,
+    stepName: "generatePacingStrategy",
+    maxRetries: 2,
+  });
 
   const content =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const data = parseAndValidate(content, pacingStrategySchema, "generatePacingStrategy");
+
+  // Use robust parser with truncation detection
+  const { data, truncationDetected, recoveryApplied } = robustParseAndValidate(
+    content,
+    pacingStrategySchema,
+    {
+      stepName: "generatePacingStrategy",
+      maxTokens: MAX_TOKENS,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+    }
+  );
+
+  if (truncationDetected) {
+    console.warn(`⚠️ Step 2 - Pacing Strategy: Truncation detected`);
+  }
+  if (recoveryApplied) {
+    console.log(`🔧 Step 2 - Pacing Strategy: Recovery applied`);
+  }
 
   const generationTime = Date.now() - startTime;
   console.log(

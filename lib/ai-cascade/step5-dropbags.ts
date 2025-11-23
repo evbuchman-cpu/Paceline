@@ -1,5 +1,5 @@
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
-import { withRetry, parseAndValidate } from "./utils";
+import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
   dropBagStrategySchema,
   DropBagStrategy,
@@ -7,23 +7,26 @@ import {
   AIStepResponse,
 } from "../schemas/guide-sections";
 
-const SYSTEM_PROMPT = `You are an expert ultramarathon gear specialist with years of experience helping runners prepare drop bags for 100-mile races. Your role is to create detailed, station-specific packing lists that account for time of day, weather conditions, and race progression.
+// Increased token limit for drop bag strategy (detailed packing lists)
+const MAX_TOKENS = 12288;
 
-Key drop bag principles:
-1. TIME OF DAY: Pack different items for morning (cold/fresh), afternoon (hot/tired), evening (cooling/dark), night (cold/fatigue)
-2. WEATHER ADAPTATION: Adjust for expected conditions - extra warmth gear if cold, sun protection if hot
-3. RACE PROGRESSION: Early stations need less, later stations need more (backup gear, comfort items)
-4. REDUNDANCY: Don't rely on a single drop bag for critical items
-5. LABELING: Clear system so runner can grab items quickly while fatigued
-6. SIMPLICITY: Don't over-pack - decision fatigue is real at mile 70+
+const SYSTEM_PROMPT = `You are an ultramarathon gear specialist. Create station-specific packing lists for drop bags.
 
-For each station, consider:
-- What time will runner arrive?
-- What weather conditions are expected?
-- What might have failed/run out by this point?
-- What's the next section like (technical, exposed, long gap to next aid)?
+Drop bag principles:
+- TIME: morning=cold, afternoon=hot, evening=cooling, night=cold/fatigue
+- PROGRESSION: Early stations=less, later=more backup gear
+- SIMPLICITY: Don't over-pack (decision fatigue at mile 70+)
 
-CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanation text, just the JSON object matching the exact schema provided.`;
+OUTPUT CONSTRAINTS (critical):
+- "packingList": Max 8 items per station
+- "reason" field: Max 10 words
+- "priorityItems": Max 3 per station
+- "notes": Max 20 words per station
+- "generalPackingTips": Max 5 tips, 15 words each
+- "labelingSystem": Max 30 words
+- "dropOffInstructions": Max 40 words
+
+Return ONLY valid JSON. No markdown.`;
 
 export async function generateDropBagStrategy(
   input: DropBagInput
@@ -62,88 +65,79 @@ export async function generateDropBagStrategy(
     };
   }
 
-  const userPrompt = `Create a detailed drop bag strategy for this ultramarathon:
+  // Extract drop bag timing by matching with pacing
+  const dropBagTiming = dropBagStations.map(station => {
+    const pacingSection = input.pacingStrategy.sections.find(
+      s => s.cumulativeMile >= station.mile
+    );
+    return {
+      name: station.name,
+      mile: station.mile,
+      arrival: pacingSection?.cumulativeTime || "TBD"
+    };
+  });
 
-RACE OVERVIEW:
-${JSON.stringify({
-  distance: input.raceOverview.distance,
-  elevationGain: input.raceOverview.elevationGain,
-  courseNotes: input.raceOverview.courseNotes,
-}, null, 2)}
+  // Compact weather summary
+  const weather = input.weatherPatterns;
+  const weatherSummary = `${weather.month}: ${weather.avgLowTemp}-${weather.avgHighTemp}°F, ${weather.precipitation}`;
 
-PACING STRATEGY:
-${JSON.stringify({
-  totalEstimatedTime: input.pacingStrategy.totalEstimatedTime,
-  sections: input.pacingStrategy.sections.map(s => ({
-    name: s.name,
-    cumulativeTime: s.cumulativeTime,
-    cumulativeMile: s.cumulativeMile,
-  }))
-}, null, 2)}
+  // Compact nutrition prefs
+  const prefs = input.nutritionPreferences || {};
+  const dietInfo = [
+    prefs.vegan && "vegan",
+    prefs.glutenFree && "GF",
+    prefs.caffeineSensitive && "caff-sensitive"
+  ].filter(Boolean).join(", ") || "none";
 
-DROP BAG STATIONS:
-${JSON.stringify(dropBagStations, null, 2)}
+  const userPrompt = `Create drop bag strategy:
 
-WEATHER PATTERNS:
-${JSON.stringify(input.weatherPatterns, null, 2)}
+STATIONS: ${JSON.stringify(dropBagTiming)}
+RACE: ${input.raceOverview.distance}mi, ${input.raceOverview.elevationGain}ft gain
+WEATHER: ${weatherSummary}
+DIET: ${dietInfo}
 
-NUTRITION PREFERENCES:
-${JSON.stringify(input.nutritionPreferences || { vegan: false, glutenFree: false, caffeineSensitive: false }, null, 2)}
-
-Return a JSON object with this exact structure:
+Return JSON:
 {
-  "stations": [
-    {
-      "name": "<station name>",
-      "mile": <number>,
-      "expectedArrival": "<time like '2:30 PM' or '10:15 PM'>",
-      "timeOfDay": "<morning|afternoon|evening|night>",
-      "weatherConditions": "<expected conditions at arrival time>",
-      "packingList": [
-        {
-          "item": "<specific item name>",
-          "quantity": "<amount like '2 pairs' or '1'>",
-          "reason": "<why this item at this station>"
-        }
-      ],
-      "priorityItems": [
-        "<most critical item to grab>",
-        "<second most critical>"
-      ],
-      "notes": "<station-specific advice>"
-    }
-  ],
-  "generalPackingTips": [
-    "<tip 1>",
-    "<tip 2>",
-    "<etc - 5-7 tips>"
-  ],
-  "labelingSystem": "<clear description of how to label bags for quick identification>",
-  "dropOffInstructions": "<when and where to drop off bags, any race-specific requirements>"
+  "stations": [{"name": "string", "mile": num, "expectedArrival": "time", "timeOfDay": "morning|afternoon|evening|night", "weatherConditions": "string", "packingList": [{"item": "specific name", "quantity": "amount", "reason": "max 10 words"}], "priorityItems": ["max 3 critical items"], "notes": "max 20 words"}],
+  "generalPackingTips": ["max 5 tips, 15 words each"],
+  "labelingSystem": "max 30 words",
+  "dropOffInstructions": "max 40 words"
 }
 
-For each station:
-- Be specific about items (e.g., "Injinji toe socks" not just "socks")
-- Include quantities (e.g., "2 gel flasks" not just "gels")
-- Explain WHY each item is needed at that specific station
-- Consider what might fail by that point (shoes worn out, headlamp battery dead)
-- Account for nutrition preferences in food items
-- Priority items should be things runner MUST grab even if rushed`;
+Max 8 items per station packingList. Be specific (e.g., "Injinji toe socks" not "socks").`;
 
-  const response = await withRetry(
-    () =>
-      anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    "generateDropBagStrategy"
-  );
+  // Use concise retry to handle truncation
+  const response = await withConciseRetry({
+    anthropic,
+    model: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    systemPrompt: SYSTEM_PROMPT,
+    userPrompt,
+    stepName: "generateDropBagStrategy",
+    maxRetries: 2,
+  });
 
   const content =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const data = parseAndValidate(content, dropBagStrategySchema, "generateDropBagStrategy");
+
+  // Use robust parser with truncation detection
+  const { data, truncationDetected, recoveryApplied } = robustParseAndValidate(
+    content,
+    dropBagStrategySchema,
+    {
+      stepName: "generateDropBagStrategy",
+      maxTokens: MAX_TOKENS,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+    }
+  );
+
+  if (truncationDetected) {
+    console.warn(`⚠️ Step 5 - Drop Bag Strategy: Truncation detected`);
+  }
+  if (recoveryApplied) {
+    console.log(`🔧 Step 5 - Drop Bag Strategy: Recovery applied`);
+  }
 
   const generationTime = Date.now() - startTime;
   console.log(

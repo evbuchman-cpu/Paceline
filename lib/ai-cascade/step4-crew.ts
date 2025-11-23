@@ -1,5 +1,5 @@
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
-import { withRetry, parseAndValidate } from "./utils";
+import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
   crewLogisticsSchema,
   CrewLogistics,
@@ -7,20 +7,28 @@ import {
   AIStepResponse,
 } from "../schemas/guide-sections";
 
-const SYSTEM_PROMPT = `You are an expert ultramarathon crew chief with years of experience supporting runners at 100-mile races. Your role is to create detailed, actionable crew instructions that help crews support their runner effectively.
+// Increased token limit for crew logistics (verbose output)
+const MAX_TOKENS = 12288;
 
-Key crew logistics principles:
-1. TIMING: Crews need to arrive 30-60 minutes before predicted runner arrival
-2. EFFICIENCY: Time at aid stations should be minimized - have everything ready
-3. COMMUNICATION: Clear priorities list so crew knows what to focus on
-4. OBSERVATION: Crews must watch for warning signs (confusion, stumbling, vomiting)
-5. PREPARATION: Crews need to prep for next station while waiting
+const SYSTEM_PROMPT = `You are an ultramarathon crew chief. Create actionable crew instructions for race day.
 
-Generate a printable markdown timing sheet that crews can use on race day.
+Crew principles:
+- Arrive 30-60 min before runner
+- Have everything ready, minimize station time
+- Clear priorities list
+- Watch for warning signs
 
-If crewSupport is 'no' or 'none', return hasCrewSupport: false with empty arrays.
+OUTPUT CONSTRAINTS (critical):
+- "priorities": Max 3 items, 8 words each
+- "crewTasks": Max 5 items, 10 words each
+- "mentalSupport": Max 20 words
+- "warningSignsToWatch": Max 3 items
+- "crewTimingSheet": Simple markdown table, one row per station
+- "crewPackingList": Max 15 essential items
+- "communicationPlan": Max 40 words
+- "emergencyProtocol": Max 40 words
 
-CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanation text, just the JSON object matching the exact schema provided.`;
+Return ONLY valid JSON. No markdown wrapping.`;
 
 export async function generateCrewLogistics(
   input: CrewInput
@@ -58,86 +66,72 @@ export async function generateCrewLogistics(
     };
   }
 
-  // Filter to crew-access stations only
+  // Filter to crew-access stations and extract only needed timing data
   const crewAccessStations = input.aidStations.filter((s) => s.crewAccess);
 
-  const userPrompt = `Create detailed crew logistics for this ultramarathon:
+  // Match stations with pacing arrival times
+  const crewStationTiming = crewAccessStations.map(station => {
+    const pacingSection = input.pacingStrategy.sections.find(
+      s => s.cumulativeMile >= station.mile
+    );
+    return {
+      name: station.name,
+      mile: station.mile,
+      arrival: pacingSection?.cumulativeTime || "TBD"
+    };
+  });
 
-PACING STRATEGY:
-${JSON.stringify(input.pacingStrategy, null, 2)}
+  const userPrompt = `Create crew logistics:
 
-CREW-ACCESS AID STATIONS:
-${JSON.stringify(crewAccessStations, null, 2)}
+CREW STATIONS: ${JSON.stringify(crewStationTiming)}
 
-RUNNER INFO:
-- First Name: ${input.firstName || "Runner"}
-- Crew Support Type: ${input.crewSupport}
+RUNNER: ${input.firstName || "Runner"}, ${input.crewSupport} crew support
+RACE: ${input.pacingStrategy.totalEstimatedTime} total time
 
-Return a JSON object with this exact structure:
+Return JSON:
 {
   "hasCrewSupport": true,
-  "crewStations": [
-    {
-      "name": "<station name>",
-      "mile": <number>,
-      "predictedArrival": "<time like '2:30 PM'>",
-      "arrivalWindow": "<time range like '2:15 PM - 2:45 PM'>",
-      "timeAtStation": "<recommended time like '8-10 minutes'>",
-      "priorities": [
-        "<highest priority task>",
-        "<second priority>",
-        "<third priority>"
-      ],
-      "crewTasks": [
-        "<specific task 1>",
-        "<specific task 2>",
-        "<etc>"
-      ],
-      "gearChanges": [
-        "<gear change if any, or empty array>"
-      ],
-      "nutritionNeeds": [
-        "<specific nutrition item and quantity>"
-      ],
-      "mentalSupport": "<specific mental support guidance for this point in race>",
-      "warningSignsToWatch": [
-        "<warning sign 1>",
-        "<warning sign 2>"
-      ]
-    }
-  ],
-  "crewTimingSheet": "<printable markdown table with columns: Station | Mile | Arrival Window | Priority Tasks | Gear Changes>",
-  "crewPackingList": [
-    "<item 1>",
-    "<item 2>",
-    "<etc - comprehensive packing list for crew>"
-  ],
-  "communicationPlan": "<how runner and crew will communicate - texting strategy, backup plans>",
-  "emergencyProtocol": "<what crew should do in emergency - who to call, when to intervene>"
+  "crewStations": [{"name": "string", "mile": num, "predictedArrival": "time", "arrivalWindow": "±15-30min range", "timeAtStation": "8-10 min", "priorities": ["max 3, 8 words each"], "crewTasks": ["max 5, 10 words each"], "gearChanges": ["or empty"], "nutritionNeeds": ["specific items"], "mentalSupport": "max 20 words", "warningSignsToWatch": ["max 3"]}],
+  "crewTimingSheet": "markdown table: Station|Mile|Arrival|Priority|Gear",
+  "crewPackingList": ["max 15 essential items"],
+  "communicationPlan": "max 40 words",
+  "emergencyProtocol": "max 40 words"
 }
 
-For each crew station:
-- Be specific about priorities (e.g., "Refill 2 soft flasks with Tailwind" not "refill bottles")
-- Include realistic arrival windows (±15-30 min based on race distance)
-- Tailor mental support to race stage (early = restraint, middle = grind, late = finish push)
-- List specific warning signs appropriate to each race stage
+Tailor mental support to race stage: early=restraint, middle=grind, late=push.`;
 
-The timing sheet should be a clean markdown table that can be printed.`;
-
-  const response = await withRetry(
-    () =>
-      anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    "generateCrewLogistics"
-  );
+  // Use concise retry to handle truncation
+  const response = await withConciseRetry({
+    anthropic,
+    model: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    systemPrompt: SYSTEM_PROMPT,
+    userPrompt,
+    stepName: "generateCrewLogistics",
+    maxRetries: 2,
+  });
 
   const content =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const data = parseAndValidate(content, crewLogisticsSchema, "generateCrewLogistics");
+
+  // Use robust parser with truncation detection
+  const { data, truncationDetected, recoveryApplied } = robustParseAndValidate(
+    content,
+    crewLogisticsSchema,
+    {
+      stepName: "generateCrewLogistics",
+      maxTokens: MAX_TOKENS,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+    }
+  );
+
+  if (truncationDetected) {
+    console.warn(`⚠️ Step 4 - Crew Logistics: Truncation detected`);
+  }
+  if (recoveryApplied) {
+    console.log(`🔧 Step 4 - Crew Logistics: Recovery applied`);
+  }
 
   const generationTime = Date.now() - startTime;
   console.log(

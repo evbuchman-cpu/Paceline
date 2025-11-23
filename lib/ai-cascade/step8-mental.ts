@@ -1,5 +1,5 @@
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
-import { withRetry, parseAndValidate } from "./utils";
+import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
   mentalStrategySchema,
   MentalStrategy,
@@ -7,25 +7,31 @@ import {
   AIStepResponse,
 } from "../schemas/guide-sections";
 
-const SYSTEM_PROMPT = `You are an expert sports psychologist specializing in ultramarathon mental performance. Your role is to create personalized mental strategies that help runners navigate the psychological challenges of 100-mile races.
+const MAX_TOKENS = 8192;
 
-Key mental strategy principles:
-1. SPECIFICITY: Vague mantras ("stay positive") don't work under extreme fatigue - need specific, actionable mental cues
-2. SEGMENTATION: Break the race into smaller mental chunks
-3. ANTICIPATION: Know exactly which sections will be hardest and have specific strategies ready
-4. PERSONALIZATION: Address the runner's specific fears and experience level
-5. PROCESS FOCUS: Focus on the next aid station, not the finish line
-6. CELEBRATION: Build in small wins to maintain motivation
+const SYSTEM_PROMPT = `You are an ultramarathon sports psychologist. Create personalized mental strategies.
 
-Mental challenges at different race stages:
-- Miles 0-30: Restraint (don't go out too fast, save mental energy)
-- Miles 30-60: The grind (fatigue sets in, still far from finish)
-- Miles 60-80: The low point (dark patches, questioning everything)
-- Miles 80-100: The push (finding reserves, smelling the barn)
+Principles:
+- Specific mantras (not vague "stay positive")
+- Anticipate hard sections with strategies
+- Process focus: next aid station, not finish
 
-Dark moment protocol is critical - everyone has them, preparation is key.
+Race stages:
+- 0-30mi: Restraint
+- 30-60mi: Grind
+- 60-80mi: Low point
+- 80-100mi: Push
 
-CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanation text, just the JSON object matching the exact schema provided.`;
+OUTPUT CONSTRAINTS (critical):
+- "raceDayMindset": Max 80 words
+- "mantras": Max 4 mantras, 5 words each, useCase/explanation 15 words each
+- "toughSections": Match input sections, strategies max 3 per section, 12 words each
+- "darkMomentProtocol": Max 60 words
+- "motivationalAnchors": Max 3, 12 words each
+- "celebrationMilestones": Max 5
+- "finishLineVisualization": Max 50 words
+
+Return ONLY valid JSON. No markdown.`;
 
 export async function generateMentalStrategy(
   input: MentalInput
@@ -33,93 +39,71 @@ export async function generateMentalStrategy(
   const startTime = Date.now();
   console.log("🚀 Step 8 - Mental Strategy");
 
-  const userPrompt = `Create a comprehensive mental strategy for this ultramarathon:
+  // Compact race info
+  const raceInfo = `${input.raceOverview.distance}mi, ${input.raceOverview.elevationGain}ft, ${input.pacingStrategy.totalEstimatedTime}`;
 
-RACE OVERVIEW:
-${JSON.stringify({
-  distance: input.raceOverview.distance,
-  elevationGain: input.raceOverview.elevationGain,
-  courseNotes: input.raceOverview.courseNotes,
-}, null, 2)}
+  // Compact tough sections
+  const toughSections = input.toughSections.map(s => ({
+    name: s.name,
+    miles: s.miles,
+    difficulty: s.difficulty
+  }));
 
-TOUGH SECTIONS:
-${JSON.stringify(input.toughSections, null, 2)}
+  // Experience level context
+  const expLevel = input.ultrasCompleted === "0" ? "first-timer" :
+                   input.ultrasCompleted === "1-3" ? "some experience" : "experienced";
 
-PACING INFO:
-- Total Estimated Time: ${input.pacingStrategy.totalEstimatedTime}
-- Average Pace: ${input.pacingStrategy.averagePace}
+  const userPrompt = `Create mental strategy:
 
-RUNNER INFO:
-- First Name: ${input.firstName || "Runner"}
-- Ultras Completed: ${input.ultrasCompleted}
-- Biggest Race Fears: ${input.biggestRaceFears || "Not specified"}
+RACE: ${raceInfo}
+TOUGH SECTIONS: ${JSON.stringify(toughSections)}
+RUNNER: ${input.firstName || "Runner"}, ${expLevel} (${input.ultrasCompleted} ultras), fears: ${input.biggestRaceFears || "none specified"}
 
-Return a JSON object with this exact structure:
+Return JSON:
 {
-  "raceDayMindset": "<1-2 paragraph description of the overall mental approach for this specific race>",
-  "mantras": [
-    {
-      "mantra": "<short, powerful phrase>",
-      "useCase": "<when to use this mantra>",
-      "explanation": "<why this works psychologically>"
-    }
-  ],
-  "toughSections": [
-    {
-      "sectionName": "<name from tough sections>",
-      "miles": "<mile range>",
-      "mentalChallenge": "<what makes this section mentally hard>",
-      "strategies": [
-        "<specific strategy 1>",
-        "<specific strategy 2>",
-        "<specific strategy 3>"
-      ],
-      "mantras": [
-        "<mantra for this section>"
-      ],
-      "focusPoints": [
-        "<what to focus on mentally during this section>"
-      ]
-    }
-  ],
-  "darkMomentProtocol": "<detailed protocol for when everything feels terrible - specific steps to follow>",
-  "motivationalAnchors": [
-    "<reason 1 for doing this race - to recall when struggling>",
-    "<reason 2>",
-    "<reason 3>"
-  ],
-  "celebrationMilestones": [
-    {
-      "mile": <number>,
-      "celebration": "<small mental or physical celebration>"
-    }
-  ],
-  "finishLineVisualization": "<detailed visualization of crossing the finish line>"
+  "raceDayMindset": "max 80 words",
+  "mantras": [{"mantra": "max 5 words", "useCase": "max 15 words", "explanation": "max 15 words"}],
+  "toughSections": [{"sectionName": "string", "miles": "range", "mentalChallenge": "string", "strategies": ["max 3, 12 words each"], "mantras": ["1-2"], "focusPoints": ["1-2"]}],
+  "darkMomentProtocol": "max 60 words, specific steps",
+  "motivationalAnchors": ["max 3, 12 words each"],
+  "celebrationMilestones": [{"mile": num, "celebration": "string"}],
+  "finishLineVisualization": "max 50 words"
 }
 
-Guidelines:
-- Create 4-6 mantras that are short (5 words max), specific, and actionable
-- Address each tough section with tailored strategies
-- Make the dark moment protocol extremely specific and step-by-step
-- Tailor to experience level: ${input.ultrasCompleted === "0" ? "first-timer needs more reassurance and basic mental skills" : input.ultrasCompleted === "1-3" ? "some experience but still building mental toolkit" : "experienced - focus on race-specific challenges"}
-- Address specific fears: ${input.biggestRaceFears || "general ultramarathon fears"}
-- Include 4-6 celebration milestones spread throughout the race
-- Make finish line visualization vivid and personal`;
+Max 4 mantras, max 5 celebration milestones. Tailor to ${expLevel} level.`;
 
-  const response = await withRetry(
-    () =>
-      anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    "generateMentalStrategy"
-  );
+  // Use concise retry to handle truncation
+  const response = await withConciseRetry({
+    anthropic,
+    model: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    systemPrompt: SYSTEM_PROMPT,
+    userPrompt,
+    stepName: "generateMentalStrategy",
+    maxRetries: 2,
+  });
 
   const content =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const data = parseAndValidate(content, mentalStrategySchema, "generateMentalStrategy");
+
+  // Use robust parser with truncation detection
+  const { data, truncationDetected, recoveryApplied } = robustParseAndValidate(
+    content,
+    mentalStrategySchema,
+    {
+      stepName: "generateMentalStrategy",
+      maxTokens: MAX_TOKENS,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+    }
+  );
+
+  if (truncationDetected) {
+    console.warn(`⚠️ Step 8 - Mental Strategy: Truncation detected`);
+  }
+  if (recoveryApplied) {
+    console.log(`🔧 Step 8 - Mental Strategy: Recovery applied`);
+  }
 
   const generationTime = Date.now() - startTime;
   console.log(

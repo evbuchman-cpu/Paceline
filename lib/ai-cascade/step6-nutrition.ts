@@ -1,5 +1,5 @@
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
-import { withRetry, parseAndValidate } from "./utils";
+import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
   nutritionTimelineSchema,
   NutritionTimeline,
@@ -7,25 +7,29 @@ import {
   AIStepResponse,
 } from "../schemas/guide-sections";
 
-const SYSTEM_PROMPT = `You are an expert ultramarathon sports nutritionist with years of experience helping runners fuel 100-mile races. Your role is to create personalized, practical nutrition timelines that prevent bonking, GI issues, and hyponatremia.
+// Increased token limit for nutrition timeline (many entries)
+const MAX_TOKENS = 10240;
 
-Key nutrition principles for ultramarathons:
-1. CALORIE TARGETS: 200-300 calories/hour (lower early, can decrease late)
-2. SODIUM: 300-600mg/hour depending on conditions and sweat rate
-3. FLUIDS: 16-24 oz/hour (more in heat, less at night)
-4. TIMING: Eat before you're hungry, drink before you're thirsty
-5. VARIETY: Flavor fatigue is real - alternate sweet/salty
-6. REAL FOOD: After ~8 hours, transition from gels to real food
-7. GI PREVENTION: Nothing new on race day, reduce fiber pre-race, slow down to eat
+const SYSTEM_PROMPT = `You are an ultramarathon nutritionist. Create practical fueling timelines.
 
-Common mistakes to prevent:
-- Too many gels (causes GI distress after hour 8)
-- Not enough sodium (leads to hyponatremia)
-- Drinking plain water only (dilutes electrolytes)
-- Eating too much solid food early when running hard
-- Not adjusting for heat/cold/altitude
+Nutrition rules:
+- Calories: 200-300/hr
+- Sodium: 300-600mg/hr
+- Fluids: 16-24oz/hr
+- After 8hrs: transition gels to real food
+- Alternate sweet/salty for variety
 
-CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanation text, just the JSON object matching the exact schema provided.`;
+OUTPUT CONSTRAINTS (critical):
+- "timeline": Max 15 entries (at aid stations + key points)
+- "foods" array: Max 3 items per entry
+- "notes" field: Max 15 words per entry
+- "preRaceNutrition": Max 50 words
+- "hydrationStrategy": Max 40 words
+- "caffeineStrategy": Max 40 words
+- "stomachIssuesPrevention": 4-5 tips, max 12 words each
+- "aidStationStrategy": Max 40 words
+
+Return ONLY valid JSON. No markdown.`;
 
 export async function generateNutritionTimeline(
   input: NutritionInput
@@ -33,93 +37,78 @@ export async function generateNutritionTimeline(
   const startTime = Date.now();
   console.log("🚀 Step 6 - Nutrition Timeline");
 
-  const userPrompt = `Create a detailed nutrition timeline for this ultramarathon:
-
-PACING STRATEGY:
-${JSON.stringify({
-  totalEstimatedTime: input.pacingStrategy.totalEstimatedTime,
-  sections: input.pacingStrategy.sections.map(s => ({
+  // Extract only needed timing from pacing
+  const pacingTiming = input.pacingStrategy.sections.map(s => ({
     name: s.name,
-    startMile: s.startMile,
-    endMile: s.endMile,
-    cumulativeTime: s.cumulativeTime,
-    terrainType: s.terrainType,
-  }))
-}, null, 2)}
+    mile: s.cumulativeMile,
+    time: s.cumulativeTime
+  }));
 
-AID STATIONS:
-${JSON.stringify(input.aidStations.map(s => ({
-  name: s.name,
-  mile: s.mile,
-  services: s.services,
-})), null, 2)}
+  // Compact station list
+  const stations = input.aidStations.map(s => ({
+    name: s.name,
+    mile: s.mile
+  }));
 
-RUNNER INFO:
-- Goal Finish Time: ${input.goalFinishTime}
-- Nutrition Preferences: ${JSON.stringify(input.nutritionPreferences || { vegan: false, glutenFree: false, caffeineSensitive: false })}
-- GI Issues History: ${input.giIssuesHistory || "None reported"}
-- Body Weight: ${input.bodyWeight ? `${input.bodyWeight} lbs` : "Not provided"}
+  // Compact preferences
+  const prefs = input.nutritionPreferences || {};
+  const dietInfo = [
+    prefs.vegan && "vegan",
+    prefs.glutenFree && "GF",
+    prefs.caffeineSensitive && "caff-sensitive"
+  ].filter(Boolean).join(", ") || "none";
 
-Return a JSON object with this exact structure:
+  const userPrompt = `Create nutrition timeline:
+
+TIMING: ${JSON.stringify(pacingTiming)}
+STATIONS: ${JSON.stringify(stations)}
+RUNNER: ${input.goalFinishTime} goal, diet: ${dietInfo}, GI: ${input.giIssuesHistory || "none"}${input.bodyWeight ? `, ${input.bodyWeight}lbs` : ""}
+
+Return JSON:
 {
-  "timeline": [
-    {
-      "mile": <number>,
-      "time": "<clock time like '7:30 AM'>",
-      "timeElapsed": "<elapsed time like '2:15'>",
-      "calories": <number>,
-      "sodium": <mg number>,
-      "fluids": <oz number>,
-      "foods": [
-        "<specific food item and amount>"
-      ],
-      "notes": "<timing or technique notes>"
-    }
-  ],
-  "summary": {
-    "totalCalories": <number>,
-    "caloriesPerHour": <number>,
-    "totalSodium": <mg number>,
-    "sodiumPerHour": <mg number>,
-    "totalFluids": <oz number>,
-    "fluidsPerHour": <oz number>
-  },
-  "preRaceNutrition": "<what to eat night before and morning of>",
-  "hydrationStrategy": "<overall hydration approach>",
-  "caffeineStrategy": "<when to use caffeine, how much, ${input.nutritionPreferences?.caffeineSensitive ? 'considering caffeine sensitivity' : 'typical approach'}>",
-  "stomachIssuesPrevention": [
-    "<tip 1>",
-    "<tip 2>",
-    "<etc - 4-6 tips>"
-  ],
-  "aidStationStrategy": "<how to efficiently get nutrition at aid stations>"
+  "timeline": [{"mile": num, "time": "clock", "timeElapsed": "H:MM", "calories": num, "sodium": mg, "fluids": oz, "foods": ["max 3 items"], "notes": "max 15 words"}],
+  "summary": {"totalCalories": num, "caloriesPerHour": num, "totalSodium": mg, "sodiumPerHour": mg, "totalFluids": oz, "fluidsPerHour": oz},
+  "preRaceNutrition": "max 50 words",
+  "hydrationStrategy": "max 40 words",
+  "caffeineStrategy": "max 40 words${prefs.caffeineSensitive ? ", note sensitivity" : ""}",
+  "stomachIssuesPrevention": ["4-5 tips, 12 words each"],
+  "aidStationStrategy": "max 40 words"
 }
 
-For the timeline:
-- Create entries at each aid station plus between-station fueling points
-- Be specific about foods (e.g., "1 Honey Stinger waffle (160 cal)" not just "waffle")
-- Account for nutrition preferences (vegan, gluten-free options)
-- Transition from gels to real food after hour 6-8
-- Include variety (alternate sweet/salty, different textures)
-- Higher sodium if hot conditions expected
-- Factor in GI issues history with gentler options if needed
+Max 15 timeline entries. Be specific: "1 Honey Stinger (160cal)" not "waffle". Transition gels→real food after hr 6-8.`;
 
-The timeline should give specific, actionable nutrition at each checkpoint.`;
-
-  const response = await withRetry(
-    () =>
-      anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    "generateNutritionTimeline"
-  );
+  // Use concise retry to handle truncation
+  const response = await withConciseRetry({
+    anthropic,
+    model: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    systemPrompt: SYSTEM_PROMPT,
+    userPrompt,
+    stepName: "generateNutritionTimeline",
+    maxRetries: 2,
+  });
 
   const content =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const data = parseAndValidate(content, nutritionTimelineSchema, "generateNutritionTimeline");
+
+  // Use robust parser with truncation detection
+  const { data, truncationDetected, recoveryApplied } = robustParseAndValidate(
+    content,
+    nutritionTimelineSchema,
+    {
+      stepName: "generateNutritionTimeline",
+      maxTokens: MAX_TOKENS,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+    }
+  );
+
+  if (truncationDetected) {
+    console.warn(`⚠️ Step 6 - Nutrition Timeline: Truncation detected`);
+  }
+  if (recoveryApplied) {
+    console.log(`🔧 Step 6 - Nutrition Timeline: Recovery applied`);
+  }
 
   const generationTime = Date.now() - startTime;
   console.log(

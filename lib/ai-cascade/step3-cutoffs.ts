@@ -1,5 +1,5 @@
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
-import { withRetry, parseAndValidate } from "./utils";
+import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
   cutoffManagementSchema,
   CutoffManagement,
@@ -7,23 +7,23 @@ import {
   AIStepResponse,
 } from "../schemas/guide-sections";
 
-const SYSTEM_PROMPT = `You are an expert ultramarathon race strategist specializing in cutoff management. Your role is to analyze pacing plans against race cutoffs and provide clear, actionable guidance on time buffers.
+const MAX_TOKENS = 8192;
 
-Cutoff buffer status rules (MUST FOLLOW EXACTLY):
-- 🟢 GREEN: 3+ hours buffer - comfortable, can afford to slow down
-- 🟡 YELLOW: 1-3 hours buffer - manageable but requires attention
-- 🔴 RED: Less than 1 hour buffer - critical, may need contingency pacing
+const SYSTEM_PROMPT = `You are an ultramarathon cutoff strategist. Analyze pacing vs cutoffs with clear buffer guidance.
 
-Key analysis principles:
-1. Calculate buffer = Cutoff Time - Predicted Arrival Time (in minutes)
-2. Identify critical checkpoints where buffer is tightest
-3. Note cascade effects - falling behind early compounds later
-4. Consider terrain difficulty after each checkpoint
-5. Account for typical slowdown patterns in ultras
+Buffer status rules:
+- 🟢 GREEN: 3+ hours - comfortable
+- 🟡 YELLOW: 1-3 hours - needs attention
+- 🔴 RED: <1 hour - critical
 
-Be direct about risk. If a plan is aggressive, say so. Runners need honest assessment.
+OUTPUT CONSTRAINTS:
+- "notes" field: Max 25 words per station
+- "bufferStrategy": Max 80 words
+- "contingencyNotes": Max 80 words
+- Only include stations with cutoffs in detail
+- Be direct about risk
 
-CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanation text, just the JSON object matching the exact schema provided.`;
+Return ONLY valid JSON. No markdown.`;
 
 export async function generateCutoffManagement(
   input: CutoffInput
@@ -31,59 +31,106 @@ export async function generateCutoffManagement(
   const startTime = Date.now();
   console.log("🚀 Step 3 - Cutoff Management:", input.aidStations.length, "stations");
 
-  const userPrompt = `Analyze cutoff times against the pacing strategy and provide detailed buffer analysis:
+  // Extract only timing data from pacing (minimize tokens)
+  const pacingTiming = input.pacingStrategy.sections.map(s => ({
+    name: s.name,
+    mile: s.cumulativeMile,
+    arrival: s.cumulativeTime
+  }));
 
-PACING STRATEGY:
-${JSON.stringify(input.pacingStrategy, null, 2)}
+  // Extract only cutoff-relevant station data
+  const stationData = input.aidStations.map(s => ({
+    name: s.name,
+    mile: s.mile,
+    cutoff: s.cutoff
+  }));
 
-AID STATIONS WITH CUTOFFS:
-${JSON.stringify(input.aidStations, null, 2)}
+  const userPrompt = `Analyze cutoffs vs pacing:
 
-Return a JSON object with this exact structure:
+PACING ARRIVALS: ${JSON.stringify(pacingTiming)}
+
+STATIONS: ${JSON.stringify(stationData)}
+
+Return JSON:
 {
-  "stations": [
-    {
-      "name": "<aid station name>",
-      "mile": <number>,
-      "cutoffTime": "<cutoff time or 'None' if no cutoff>",
-      "predictedArrival": "<predicted arrival time based on pacing>",
-      "bufferMinutes": <number - positive means ahead of cutoff, negative means behind>,
-      "bufferFormatted": "<buffer in H:MM format like '+2:30' or '-0:45'>",
-      "status": "<green|yellow|red>",
-      "statusEmoji": "<🟢|🟡|🔴>",
-      "riskLevel": "<Low|Moderate|High|Critical>",
-      "notes": "<specific tactical advice for this checkpoint - what to do if behind/ahead>"
-    }
-  ],
-  "overallRisk": "<Low|Medium|High>",
-  "criticalCheckpoints": [
-    "<checkpoint name where buffer is tightest>",
-    "<second tightest>",
-    "<etc>"
-  ],
-  "bufferStrategy": "<paragraph explaining buffer management strategy, when to bank time, when to spend it>",
-  "contingencyNotes": "<specific guidance if falling behind - where to make up time, when to abandon goal pace>"
+  "stations": [{"name": "string", "mile": num, "cutoffTime": "time or None", "predictedArrival": "time", "bufferMinutes": num, "bufferFormatted": "+H:MM", "status": "green|yellow|red", "statusEmoji": "🟢|🟡|🔴", "riskLevel": "Low|Moderate|High|Critical", "notes": "max 25 words"}],
+  "overallRisk": "Low|Medium|High",
+  "criticalCheckpoints": ["2-4 tightest checkpoints"],
+  "bufferStrategy": "max 80 words",
+  "contingencyNotes": "max 80 words"
 }
 
-Include ALL aid stations, even those without cutoffs (mark as "None").
-For stations without cutoffs, estimate a reasonable status based on overall pace.
-Identify the 2-4 most critical checkpoints.
-Be specific in contingency notes - tell runner exactly what to do if behind at each critical checkpoint.`;
+Include all stations. Mark stations without cutoffs as "None" but estimate status. Identify 2-4 critical checkpoints.`;
 
-  const response = await withRetry(
-    () =>
-      anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    "generateCutoffManagement"
-  );
+  // Use concise retry to handle truncation
+  const response = await withConciseRetry({
+    anthropic,
+    model: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    systemPrompt: SYSTEM_PROMPT,
+    userPrompt,
+    stepName: "generateCutoffManagement",
+    maxRetries: 2,
+  });
 
   const content =
     response.content[0].type === "text" ? response.content[0].text : "";
-  const data = parseAndValidate(content, cutoffManagementSchema, "generateCutoffManagement");
+
+  // Pre-process to fix missing statusEmoji fields before robust parsing
+  let preprocessedContent = content;
+  try {
+    // Remove markdown code blocks if present
+    let cleanContent = content.trim();
+    if (cleanContent.startsWith("```json")) {
+      cleanContent = cleanContent.slice(7);
+    } else if (cleanContent.startsWith("```")) {
+      cleanContent = cleanContent.slice(3);
+    }
+    if (cleanContent.endsWith("```")) {
+      cleanContent = cleanContent.slice(0, -3);
+    }
+
+    const parsedContent = JSON.parse(cleanContent.trim());
+
+    // Fix missing statusEmoji fields based on status
+    if (parsedContent.stations && Array.isArray(parsedContent.stations)) {
+      parsedContent.stations = parsedContent.stations.map((station: { status?: string; statusEmoji?: string }) => {
+        if (!station.statusEmoji && station.status) {
+          const statusMap: Record<string, string> = {
+            'green': '🟢',
+            'yellow': '🟡',
+            'red': '🔴'
+          };
+          station.statusEmoji = statusMap[station.status.toLowerCase()] || '🟡';
+        }
+        return station;
+      });
+    }
+
+    preprocessedContent = JSON.stringify(parsedContent);
+  } catch {
+    // If pre-processing fails, let robust parser handle it
+    preprocessedContent = content;
+  }
+
+  // Use robust parser with truncation detection
+  const { data, truncationDetected, recoveryApplied } = robustParseAndValidate(
+    preprocessedContent,
+    cutoffManagementSchema,
+    {
+      stepName: "generateCutoffManagement",
+      maxTokens: MAX_TOKENS,
+      usage: response.usage,
+      stopReason: response.stop_reason,
+    }
+  );
+
+  if (truncationDetected) {
+    console.warn(`⚠️ Step 3 - Cutoff Management: Truncation detected`);
+  }
+  if (recoveryApplied) {
+    console.log(`🔧 Step 3 - Cutoff Management: Recovery applied`);
+  }
 
   const generationTime = Date.now() - startTime;
   console.log(
