@@ -13,7 +13,7 @@ export const elevationPointSchema = z.object({
 export const aidStationSchema = z.object({
   name: z.string(),
   mile: z.number(),
-  cutoff: z.string(),
+  cutoff: z.string().nullable(), // Can be null for stations without cutoffs
   crewAccess: z.boolean(),
   dropBagAccess: z.boolean(),
   services: z.array(z.string()),
@@ -53,6 +53,7 @@ export interface RaceOverviewInput {
   raceName: string;
   raceWebsite?: string;
   raceDate: string;
+  websiteContent?: string; // Fetched and extracted content from race website
 }
 
 // ============================================================================
@@ -112,10 +113,10 @@ export interface PacingInput {
 export const cutoffStationSchema = z.object({
   name: z.string(),
   mile: z.number(),
-  cutoffTime: z.string(),
+  cutoffTime: z.string().nullable(), // Can be null for stations without cutoffs
   predictedArrival: z.string(),
-  bufferMinutes: z.number(),
-  bufferFormatted: z.string(),
+  bufferMinutes: z.number().nullable(), // Can be null for stations without cutoffs
+  bufferFormatted: z.string().nullable(), // Can be null for stations without cutoffs
   status: z.enum(["green", "yellow", "red"]),
   statusEmoji: z.enum(["🟢", "🟡", "🔴"]),
   riskLevel: z.string(),
@@ -137,7 +138,7 @@ export interface CutoffInput {
   aidStations: Array<{
     name: string;
     mile: number;
-    cutoff: string;
+    cutoff: string | null;
     crewAccess: boolean;
     dropBagAccess: boolean;
     services: string[];
@@ -178,7 +179,7 @@ export interface CrewInput {
   aidStations: Array<{
     name: string;
     mile: number;
-    cutoff: string;
+    cutoff: string | null;
     crewAccess: boolean;
     dropBagAccess: boolean;
     services: string[];
@@ -223,7 +224,7 @@ export interface DropBagInput {
   aidStations: Array<{
     name: string;
     mile: number;
-    cutoff: string;
+    cutoff: string | null;
     crewAccess: boolean;
     dropBagAccess: boolean;
     services: string[];
@@ -284,7 +285,7 @@ export interface NutritionInput {
   aidStations: Array<{
     name: string;
     mile: number;
-    cutoff: string;
+    cutoff: string | null;
     crewAccess: boolean;
     dropBagAccess: boolean;
     services: string[];
@@ -380,8 +381,8 @@ export interface MentalInput {
     name: string;
     miles: string;
     difficulty: string;
-    elevationChange: string;
-    notes: string;
+    elevationChange?: string;  // Optional - not needed for mental strategy
+    notes?: string;            // Optional - not needed for mental strategy
   }>;
   firstName?: string;
 }

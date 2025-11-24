@@ -11,17 +11,24 @@ const MAX_TOKENS = 8192;
 
 const SYSTEM_PROMPT = `You are an ultramarathon race analyst. Provide accurate race overviews for race day planning.
 
-Include:
-- Aid stations with mile markers, cutoffs, crew/drop bag access
-- Elevation profile at key points
-- Tough sections with tactical advice
-- Historical weather for race month
+ACCURACY RULES (critical):
+1. Aid stations, miles, cutoffs, distances, elevation: Extract ONLY from provided website content. Do not guess or use prior knowledge.
+2. If website shows different data than you expect, TRUST THE WEBSITE.
+3. Include ALL aid stations mentioned on the website - do not skip any.
+4. Use exact names, exact miles, exact cutoff times from website.
+5. For weather/general advice: Use location and race month to provide reasonable estimates.
+
+TOUGH SECTIONS: Identify the hardest climbs/descents from elevation data. Look for:
+- Biggest elevation gains in shortest distances
+- Technical descents
+- Exposed sections
+- Sections mentioned as difficult on website
 
 OUTPUT CONSTRAINTS (critical for downstream steps):
 - "description": Max 100 words
 - "elevationProfile": Max 12 points (start, finish, major climbs/descents, aid stations)
-- "aidStations": Include only essential services (water, medical, food types)
-- "toughSections": 3-5 sections, notes max 30 words each
+- "aidStations": Include ALL stations from website with exact names/miles
+- "toughSections": 3-5 hardest sections, notes max 30 words each
 - "courseNotes": Max 80 words
 
 Return ONLY valid JSON. No markdown.`;
@@ -32,11 +39,23 @@ export async function generateRaceOverview(
   const startTime = Date.now();
   console.log("🚀 Step 1 - Race Overview:", input.raceName);
 
+  // Build prompt with website content if available
+  const websiteSection = input.websiteContent
+    ? `
+
+WEBSITE CONTENT (use this as primary source):
+---
+${input.websiteContent}
+---
+
+Extract aid stations, cutoffs, distances, elevation, crew/drop bag access from the above content.`
+    : "";
+
   const userPrompt = `Analyze race:
 
 Race: ${input.raceName}
 Website: ${input.raceWebsite || "Not provided"}
-Date: ${input.raceDate}
+Date: ${input.raceDate}${websiteSection}
 
 Return JSON:
 {
