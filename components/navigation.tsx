@@ -32,14 +32,14 @@ export function Navigation() {
             <a href="#how-it-works" className="font-sans text-[#4A5859] hover:text-[#2C5F4D] transition-colors">
               How It Works
             </a>
-            <a href="#pricing" className="font-sans text-[#4A5859] hover:text-[#2C5F4D] transition-colors">
+            <a href="/pricing" className="font-sans text-[#4A5859] hover:text-[#2C5F4D] transition-colors">
               Pricing
             </a>
             <a href="#faq" className="font-sans text-[#4A5859] hover:text-[#2C5F4D] transition-colors">
               FAQ
             </a>
             <Button className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-              <a href="#pricing">Get Started</a>
+              <a href="/pricing">Get Started</a>
             </Button>
           </div>
 
@@ -69,7 +69,7 @@ export function Navigation() {
               How It Works
             </a>
             <a
-              href="#pricing"
+              href="/pricing"
               className="block font-sans text-[#4A5859] hover:text-[#2C5F4D]"
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -83,7 +83,7 @@ export function Navigation() {
               FAQ
             </a>
             <Button className="w-full bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-              <a href="#pricing">Get Started</a>
+              <a href="/pricing">Get Started</a>
             </Button>
           </div>
         </div>

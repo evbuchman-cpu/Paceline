@@ -66,7 +66,7 @@ export function ProblemSolution() {
         </div>
         <div className="text-center">
           <Button size="lg" className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-            <a href="#pricing">Ready to stop winging it? Get your personalized guide →</a>
+            <a href="/pricing">Ready to stop winging it? Get your personalized guide →</a>
           </Button>
         </div>
       </div>

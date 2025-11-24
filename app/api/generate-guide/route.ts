@@ -26,6 +26,9 @@ import { uploadToR2, generateGuidePdfFileName } from "@/lib/r2-storage";
 // Web fetching import
 import { fetchRaceWebsite } from "@/lib/web-fetcher";
 
+// Validation import
+import { validateAndCorrectGuideData, formatValidationResult } from "@/lib/guide-validator";
+
 // Request validation schema
 const generateGuideRequestSchema = z.object({
   questionnaireId: z.string().uuid(),
@@ -247,7 +250,7 @@ export async function POST(req: NextRequest) {
     console.log(`✅ AI cascade complete. Total cost: $${totalCost.toFixed(4)}`);
 
     // Step 8: Prepare guide data
-    const guideData: GuideData = {
+    const rawGuideData: GuideData = {
       raceOverview: raceOverviewResult.data,
       pacingStrategy: pacingResult.data,
       cutoffManagement: cutoffResult.data,
@@ -258,7 +261,43 @@ export async function POST(req: NextRequest) {
       mentalStrategy: mentalResult.data,
     };
 
-    // Step 9: Generate PDF
+    // Step 9: Validate and auto-correct guide data
+    console.log("🔍 Validating and correcting guide data...");
+    const { result: validationResult, correctedData: guideData } = validateAndCorrectGuideData(rawGuideData);
+
+    // Log validation results
+    console.log(formatValidationResult(validationResult));
+
+    // Check for unfixable errors
+    if (!validationResult.isValid) {
+      console.error("❌ Guide validation failed with unfixable errors");
+
+      // Update guide status to failed
+      await db
+        .update(guide)
+        .set({
+          status: "failed",
+          error: `Validation failed: ${validationResult.errors.map(e => e.message).join("; ")}`,
+          sections: rawGuideData, // Store raw data for debugging
+          updatedAt: new Date(),
+        })
+        .where(eq(guide.id, guideId));
+
+      return NextResponse.json(
+        {
+          error: "Guide validation failed",
+          details: validationResult.errors,
+          warnings: validationResult.warnings,
+        },
+        { status: 422 }
+      );
+    }
+
+    if (validationResult.wasAutoCorrected) {
+      console.log(`📝 Auto-corrected ${validationResult.corrections.length} issues`);
+    }
+
+    // Step 10: Generate PDF with corrected data
     console.log("📄 Generating PDF...");
     const questionnaireData: QuestionnaireData = {
       raceName: q.raceName,
@@ -272,13 +311,13 @@ export async function POST(req: NextRequest) {
     const pdfBuffer = await generateGuidePDF(guideData, questionnaireData);
     console.log(`✅ PDF generated: ${pdfBuffer.length} bytes`);
 
-    // Step 10: Upload to R2
+    // Step 11: Upload to R2
     console.log("☁️ Uploading to R2...");
     const fileName = generateGuidePdfFileName(questionnaireId);
     const pdfUrl = await uploadToR2(pdfBuffer, fileName);
     console.log(`✅ PDF uploaded: ${pdfUrl}`);
 
-    // Step 11: Update guide record with completed status
+    // Step 12: Update guide record with completed status
     const generationTime = Date.now() - startTime;
     const aiCostCents = Math.round(totalCost * 100);
 

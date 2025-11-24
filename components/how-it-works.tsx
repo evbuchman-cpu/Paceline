@@ -89,7 +89,7 @@ export function HowItWorks() {
 
         <div className="text-center mt-16">
           <Button size="lg" className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold mb-4" asChild>
-            <a href="#pricing">Get Your Race Plan → $99</a>
+            <a href="/pricing">Get Your Race Plan → $99</a>
           </Button>
           <p className="font-serif text-[#4A5859]">30-day money-back guarantee. Instant delivery.</p>
         </div>

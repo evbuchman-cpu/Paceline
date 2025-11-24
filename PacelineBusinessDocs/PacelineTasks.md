@@ -32,7 +32,7 @@
 
 ## Current Status
 
-### ✅ Already Completed (~65% of MVP)
+### ✅ Already Completed (~75% of MVP)
 
 | Component | Status | Location | Notes |
 |-----------|--------|----------|-------|
@@ -58,7 +58,7 @@
 | **Dashboard Layout** | ✅ Done | `app/dashboard/layout.tsx` | Auth-protected with navigation |
 | **Guides List Page** | ✅ Done | `app/dashboard/guides/page.tsx` | List & download UI |
 
-### ⏳ TODO: Core Features (~35% remaining)
+### ⏳ TODO: Core Features (~25% remaining)
 
 **Priority Levels:**
 - **P0** = Blocker (must complete to launch)
@@ -74,8 +74,9 @@
 | **AI Cascade (Steps 1-4)** | P0 | ✅ Done | Week 2 | AI Integration Specialist |
 | **AI Cascade (Steps 5-8)** | P0 | ✅ Done | Week 3 | AI Integration Specialist |
 | **PDF Generation** | P0 | ✅ Done | Week 3 | Fullstack MVP Builder |
-| **Cloudflare R2** | P0 | ⏳ Not Started | Week 3 | Fullstack MVP Builder |
-| **Generate Guide API** | P0 | ⏳ Not Started | Week 3 | Fullstack MVP Builder |
+| **Cloudflare R2** | P0 | ✅ Done | Week 3 | Fullstack MVP Builder |
+| **Generate Guide API** | P0 | ✅ Done | Week 3 | Fullstack MVP Builder |
+| **Guide Validator** | P0 | ⏳ Not Started | Week 3 | AI Integration Specialist |
 | **User Dashboard** | P0 | ⏳ Partial | Week 4 | Fullstack MVP Builder |
 | **Email Automation** | P0 | ⏳ Not Started | Week 4 | Fullstack MVP Builder |
 | **Polar Webhooks** | P0 | ✅ Done | Week 4 | Fullstack MVP Builder |
@@ -633,7 +634,7 @@
 
 ---
 
-### Task 3.2.5: Guide Validation & Consistency Checker (P0)
+### Task 3.2.5: Guide Validation & Consistency Checker (P0) ✅ DONE
 **Agent:** @AI-Integration-Specialist
 **Time:** 4-6 hours
 **Priority:** BLOCKER
@@ -642,7 +643,7 @@
 AI-generated content can have mathematical errors and inconsistencies. Before generating the PDF, we MUST validate the data to ensure accuracy. This protects users and our reputation.
 
 **What to build:**
-- [ ] Create `lib/guide-validator.ts`
+- [x] Create `lib/guide-validator.ts`
   ```typescript
   export interface ValidationResult {
     isValid: boolean;
@@ -671,37 +672,37 @@ AI-generated content can have mathematical errors and inconsistencies. Before ge
 **Validations to implement:**
 
 1. **Cutoff Buffer Calculations**
-   - [ ] For each station: `bufferMinutes = cutoffTime - predictedArrival`
-   - [ ] Status matches buffer: red (<60 min), yellow (60-180 min), green (>180 min)
-   - [ ] Flag if any arrival > cutoff (impossible)
+   - [x] For each station: `bufferMinutes = cutoffTime - predictedArrival`
+   - [x] Status matches buffer: red (<60 min), yellow (60-180 min), green (>180 min)
+   - [x] Flag if any arrival > cutoff (impossible)
 
 2. **Nutrition Totals**
-   - [ ] Sum of timeline calories = summary.totalCalories
-   - [ ] Calories/hour within bounds (150-300 cal/hr)
-   - [ ] Fluids/hour within bounds (12-24 oz/hr)
-   - [ ] Sodium/hour within bounds (100-400 mg/hr)
+   - [x] Sum of timeline calories = summary.totalCalories
+   - [x] Calories/hour within bounds (150-300 cal/hr)
+   - [x] Fluids/hour within bounds (12-24 oz/hr)
+   - [x] Sodium/hour within bounds (100-400 mg/hr)
 
 3. **Time Consistency**
-   - [ ] All cumulative times are sequential (each > previous)
-   - [ ] Race time matches sum of section times
-   - [ ] AM/PM indicators are correct based on race start + elapsed time
+   - [x] All cumulative times are sequential (each > previous)
+   - [x] Race time matches sum of section times
+   - [x] AM/PM indicators are correct based on race start + elapsed time
 
 4. **Cross-Section Consistency**
-   - [ ] Aid station names match across: raceOverview, cutoffManagement, crewLogistics, dropBagStrategy
-   - [ ] Aid station mileages match across all sections
-   - [ ] Tough sections in raceOverview match toughSections in mentalStrategy
-   - [ ] Crew stations reference only crew-accessible aid stations
+   - [x] Aid station names match across: raceOverview, cutoffManagement, crewLogistics, dropBagStrategy
+   - [x] Aid station mileages match across all sections
+   - [x] Tough sections in raceOverview match toughSections in mentalStrategy
+   - [x] Crew stations reference only crew-accessible aid stations
 
 5. **Pacing Consistency**
-   - [ ] Section distances sum to total distance
-   - [ ] Elevation gains/losses are reasonable for terrain
-   - [ ] Target paces are realistic for elevation
+   - [x] Section distances sum to total distance
+   - [x] Elevation gains/losses are reasonable for terrain
+   - [x] Target paces are realistic for elevation
 
 **Integration:**
-- [ ] Call `validateGuideData()` after AI cascade completes
-- [ ] If `isValid === false`: Log errors, notify admin, DO NOT generate PDF
-- [ ] If warnings exist: Log warnings, proceed with PDF but flag for review
-- [ ] Store validation results in `guide.validationResults` (JSONB)
+- [x] Call `validateGuideData()` after AI cascade completes
+- [x] If `isValid === false`: Log errors, notify admin, DO NOT generate PDF
+- [x] If warnings exist: Log warnings, proceed with PDF but flag for review
+- [x] Store validation results in `guide.validationResults` (JSONB)
 
 **Files to create:**
 - `lib/guide-validator.ts`
@@ -719,7 +720,7 @@ AI-generated content can have mathematical errors and inconsistencies. Before ge
 
 ---
 
-### Task 3.3: Cloudflare R2 Storage (P0)
+### Task 3.3: Cloudflare R2 Storage (P0) ✅ DONE
 **Agent:** @Fullstack-MVP-Builder
 **Time:** 2-3 hours
 **Priority:** BLOCKER
@@ -1365,13 +1366,13 @@ AI-generated content can have mathematical errors and inconsistencies. Before ge
 ## Quick Start: Next 3 Actions
 
 **Today:**
-1. **@Fullstack-MVP-Builder**: Set up Cloudflare R2 Storage (`lib/r2-storage.ts`)
+1. **@AI-Integration-Specialist**: Build Guide Validator (`lib/guide-validator.ts`) - validates AI output before PDF generation
 
 **This Week:**
-2. **@Fullstack-MVP-Builder**: Create Generate Guide API (`app/api/generate-guide/route.ts`) - ties AI cascade → PDF → R2 together
+2. **@Fullstack-MVP-Builder**: Email Automation with Resend (`lib/email-sender.ts`) - welcome, payment, guide delivery emails
 
 **Next:**
-3. **@Fullstack-MVP-Builder**: Complete User Dashboard (`app/dashboard/guides/page.tsx`) - guide listing and download
+3. **@Fullstack-MVP-Builder**: Complete User Dashboard (`app/dashboard/guides/page.tsx`) - finish guide listing and download
 
 ---
 

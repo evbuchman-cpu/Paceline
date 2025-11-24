@@ -23,6 +23,8 @@ export function QuestionnaireClient({
 
   const handleSubmit = async (data: EssentialQuestionnaire | CustomQuestionnaire) => {
     try {
+      let currentQuestionnaireId = questionnaireId;
+
       if (questionnaireId) {
         // Update existing questionnaire
         const response = await fetch(`/api/questionnaire/${questionnaireId}`, {
@@ -38,9 +40,6 @@ export function QuestionnaireClient({
           const error = await response.json();
           throw new Error(error.error || "Failed to update questionnaire");
         }
-
-        toast.success("Questionnaire submitted successfully!");
-        router.push("/dashboard/guides");
       } else {
         // Create new questionnaire
         const response = await fetch("/api/questionnaire", {
@@ -57,10 +56,32 @@ export function QuestionnaireClient({
           throw new Error(error.error || "Failed to create questionnaire");
         }
 
-        await response.json();
-        toast.success("Questionnaire submitted successfully!");
-        router.push("/dashboard/guides");
+        const result = await response.json();
+        currentQuestionnaireId = result.id;
       }
+
+      // Trigger guide generation
+      toast.success("Questionnaire submitted! Generating your race guide...");
+
+      const generateResponse = await fetch("/api/generate-guide", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questionnaireId: currentQuestionnaireId,
+        }),
+      });
+
+      if (!generateResponse.ok) {
+        const error = await generateResponse.json();
+        // Don't throw - guide generation can be retried from dashboard
+        console.error("Guide generation failed:", error);
+        toast.error("Guide generation started but may take a few minutes. Check your dashboard.");
+      } else {
+        const guideResult = await generateResponse.json();
+        toast.success(`Race guide generated in ${(guideResult.generationTime / 1000).toFixed(1)} seconds!`);
+      }
+
+      router.push("/dashboard/guides");
     } catch (error) {
       console.error("Error submitting questionnaire:", error);
       throw error; // Re-throw so form can handle it
