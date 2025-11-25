@@ -44,7 +44,7 @@ async function syncPurchases() {
         const tier = mapProductIdToTier(sub.productId);
 
         if (tier) {
-          const guidesRemaining = tier === "ultra_bundle" ? 3 : 1;
+          const guidesRemaining = tier === "ultra_bundle" ? 5 : 1;
 
           await db.insert(purchase).values({
             id: randomUUID(),

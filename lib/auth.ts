@@ -235,7 +235,7 @@ export const auth = betterAuth({
 
                       if (existingPurchase.length === 0) {
                         // Create new purchase record
-                        const guidesRemaining = tier === "ultra_bundle" ? 3 : 1;
+                        const guidesRemaining = tier === "ultra_bundle" ? 5 : 1;
 
                         await db.insert(purchase).values({
                           id: randomUUID(),

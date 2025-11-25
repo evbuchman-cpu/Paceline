@@ -1,9 +1,12 @@
 import { db } from "@/db/drizzle";
-import { purchase, subscription } from "@/db/schema";
+import { purchase, subscription, user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { headers } from "next/headers";
 import crypto from "crypto";
+
+// Email import
+import { sendPaymentConfirmationEmail } from "@/lib/email-sender";
 
 // Utility function to safely parse dates
 function safeParseDate(value: string | Date | null | undefined): Date | null {
@@ -133,10 +136,11 @@ export async function POST(req: Request) {
             .limit(1);
 
           if (existingPurchase.length === 0) {
-            const guidesRemaining = tier === "ultra_bundle" ? 3 : 1;
+            const guidesRemaining = tier === "ultra_bundle" ? 5 : 1;
+            const purchaseId = randomUUID();
 
             await db.insert(purchase).values({
-              id: randomUUID(),
+              id: purchaseId,
               userId: userId,
               tier: tier,
               amount: subscriptionData.amount || 0,
@@ -149,6 +153,34 @@ export async function POST(req: Request) {
             });
 
             console.log("✅ Created purchase record for subscription:", subscriptionData.id);
+
+            // Fetch user data for email
+            const userData = await db
+              .select()
+              .from(user)
+              .where(eq(user.id, userId))
+              .limit(1);
+
+            if (userData.length > 0) {
+              const questionnaireUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/questionnaire?purchaseId=${purchaseId}`;
+
+              await sendPaymentConfirmationEmail({
+                user: {
+                  name: userData[0].name,
+                  email: userData[0].email,
+                },
+                purchase: {
+                  tier: tier,
+                  amount: subscriptionData.amount,
+                  createdAt: new Date(),
+                },
+                questionnaireUrl,
+              });
+
+              console.log('✅ Payment confirmation email sent');
+            } else {
+              console.warn('⚠️  User not found, skipping payment confirmation email');
+            }
           } else {
             await db
               .update(purchase)

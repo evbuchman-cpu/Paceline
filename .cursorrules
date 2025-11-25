@@ -28,7 +28,7 @@ RaceWise is an AI-powered platform that transforms 30 hours of scattered ultrama
 ### Pricing Tiers
 - **Essential:** $29 (first-timers, basic planning)
 - **Custom:** $99 ★ Most Popular (Strava integration, full personalization)
-- **Ultra Bundle:** $299 (3 races, $100/race)
+- **Ultra Bundle:** $497 (5 races, $99/race)
 
 ### Success Metrics (6 Months)
 - 500 guides sold = $50,000 revenue
@@ -55,7 +55,7 @@ RaceWise is an AI-powered platform that transforms 30 hours of scattered ultrama
 
 ### Payment & Subscriptions
 - **Payment Provider:** Polar.sh
-- **Products:** Essential ($29), Custom ($99), Ultra Bundle ($299)
+- **Products:** Essential ($29), Custom ($99), Ultra Bundle ($497)
 - **Webhooks:** subscription.created, subscription.active, subscription.canceled
 
 ### AI & Generation
@@ -353,7 +353,7 @@ POLAR_ACCESS_TOKEN="polar-api-token"
 POLAR_WEBHOOK_SECRET="polar-webhook-secret"
 POLAR_ESSENTIAL_PRODUCT_ID="product-id-for-$29-tier"
 POLAR_CUSTOM_PRODUCT_ID="product-id-for-$99-tier"
-POLAR_ULTRA_PRODUCT_ID="product-id-for-$299-tier"
+POLAR_ULTRA_PRODUCT_ID="product-id-for-$497-tier"
 
 # AI
 OPENAI_API_KEY="openai-api-key"

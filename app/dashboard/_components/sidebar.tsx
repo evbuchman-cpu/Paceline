@@ -3,12 +3,8 @@
 import UserProfile from "@/components/user-profile";
 import clsx from "clsx";
 import {
-  Banknote,
-  HomeIcon,
   LucideIcon,
-  MessageCircleIcon,
   Settings,
-  Upload,
   ClipboardList,
   FileText,
 } from "lucide-react";
@@ -24,11 +20,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: "Overview",
-    href: "/dashboard",
-    icon: HomeIcon,
-  },
-  {
     label: "Questionnaire",
     href: "/dashboard/questionnaire",
     icon: ClipboardList,
@@ -37,21 +28,6 @@ const navItems: NavItem[] = [
     label: "My Guides",
     href: "/dashboard/guides",
     icon: FileText,
-  },
-  {
-    label: "Chat",
-    href: "/dashboard/chat",
-    icon: MessageCircleIcon,
-  },
-  {
-    label: "Upload",
-    href: "/dashboard/upload",
-    icon: Upload,
-  },
-  {
-    label: "Payment Gated",
-    href: "/dashboard/payment",
-    icon: Banknote,
   },
 ];
 

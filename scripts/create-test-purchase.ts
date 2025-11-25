@@ -69,7 +69,7 @@ async function createPurchase(userId: string) {
   });
 
   readline.question(
-    "\nWhich tier? (1=Essential $29, 2=Custom $99, 3=Ultra Bundle $299): ",
+    "\nWhich tier? (1=Essential $29, 2=Custom $99, 3=Ultra Bundle $497): ",
     async (answer: string) => {
       let tier: "essential" | "custom" | "ultra_bundle";
       let amount: number;
@@ -88,8 +88,8 @@ async function createPurchase(userId: string) {
           break;
         case "3":
           tier = "ultra_bundle";
-          amount = 29900;
-          guidesRemaining = 3;
+          amount = 49700;
+          guidesRemaining = 5;
           break;
         default:
           console.error("Invalid choice");

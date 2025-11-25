@@ -6,9 +6,9 @@
 
 ## 🎯 Core Product
 
-**What:** AI-powered ultramarathon race planning (30 hrs → 10 min)  
-**Who:** Alex Chen (38, engineer, anxious about cutoffs, time-crunched)  
-**Price:** Essential $29 | Custom $99 ★ | Ultra $299  
+**What:** AI-powered ultramarathon race planning (30 hrs → 10 min)
+**Who:** Alex Chen (38, engineer, anxious about cutoffs, time-crunched)
+**Price:** Essential $29 | Custom $99 ★ | Ultra $497
 **Goal:** 500 guides, $50K revenue, 15% finish rate ↑ (6 months)
 
 ---
@@ -132,7 +132,7 @@ GET    /api/guides
 
 1. [ ] Neon database setup + Drizzle migrations
 2. [ ] Better Auth config (Google OAuth)
-3. [ ] Polar.sh products (3 tiers: $29, $99, $299)
+3. [ ] Polar.sh products (3 tiers: $29, $99, $497)
 4. [ ] Landing page (Next.js + Tailwind)
 5. [ ] Questionnaire forms (12 Essential, 19 Custom)
 6. [ ] Manual fulfillment SOP (Claude prompts)

@@ -51,7 +51,7 @@ RaceWise is an AI-powered ultramarathon race planning platform that transforms 3
 
 - **Essential:** $29 (first-timers, basic planning)
 - **Custom:** $99 ★ Most Popular (Strava integration, full personalization)
-- **Ultra Bundle:** $299 (3 races, $100/race)
+- **Ultra Bundle:** $497 (5 races, $99/race)
 
 **ARPU:** $99 | **Gross Margin:** 94% | **LTV:CAC:** 10:1
 
@@ -131,8 +131,8 @@ RaceWise is an AI-powered ultramarathon race planning platform that transforms 3
 - Drop bag strategy by station (weather-adjusted)
 - Weather strategy + contingency protocols
 
-### Ultra Bundle - $299
-- 3 Custom guides ($100/race, save $198)
+### Ultra Bundle - $497
+- 5 Custom guides ($99/race, save $648)
 - Plan version updates (1 per race)
 - Priority support (24hr response)
 - Post-race debrief reports
@@ -687,7 +687,7 @@ export async function uploadToR2(buffer, fileName) {
 |------|-------|--------|--------|
 | Essential | $29 | First-timers, price-sensitive | 20% |
 | Custom ★ | $99 | Alex Chen (analytical, anxious) | 60% |
-| Ultra Bundle | $299 | Multi-race planners (3/year) | 20% |
+| Ultra Bundle | $497 | Multi-race planners (5/year) | 20% |
 
 **ARPU:** $99 weighted average  
 **Gross Margin:** 94% ($99 - $6 COGS)  

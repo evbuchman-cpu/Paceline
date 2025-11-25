@@ -29,6 +29,9 @@ import { fetchRaceWebsite } from "@/lib/web-fetcher";
 // Validation import
 import { validateAndCorrectGuideData, formatValidationResult } from "@/lib/guide-validator";
 
+// Email imports
+import { sendGuideDeliveryEmail, sendGuideFailedEmail } from "@/lib/email-sender";
+
 // Request validation schema
 const generateGuideRequestSchema = z.object({
   questionnaireId: z.string().uuid(),
@@ -333,6 +336,28 @@ export async function POST(req: NextRequest) {
       })
       .where(eq(guide.id, guideId));
 
+    // Send guide delivery email
+    await sendGuideDeliveryEmail({
+      user: {
+        name: session.user.name,
+        email: session.user.email,
+      },
+      questionnaire: {
+        raceName: q.raceName,
+        raceDate: q.raceDate,
+        firstName: q.firstName || session.user.name,
+      },
+      guide: {
+        pdfUrl: pdfUrl,
+        generationTime: generationTime || 0,
+      },
+      purchase: {
+        tier: p.tier,
+      },
+    });
+
+    console.log('✅ Guide delivery email sent');
+
     console.log(`🎉 Guide generation complete!`);
     console.log(`   - Guide ID: ${guideId}`);
     console.log(`   - Generation time: ${(generationTime / 1000).toFixed(2)}s`);
@@ -361,6 +386,27 @@ export async function POST(req: NextRequest) {
             updatedAt: new Date(),
           })
           .where(eq(guide.id, guideId));
+
+        // Send guide failed email
+        await sendGuideFailedEmail({
+          user: {
+            name: session.user.name,
+            email: session.user.email,
+          },
+          questionnaire: {
+            raceName: q.raceName,
+            raceDate: q.raceDate,
+            firstName: q.firstName || session.user.name,
+          },
+          guide: {
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+          purchase: {
+            tier: p.tier,
+          },
+        });
+
+        console.log('✅ Guide failed email sent');
       } catch (updateError) {
         console.error("Failed to update guide status:", updateError);
       }

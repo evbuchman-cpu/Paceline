@@ -120,11 +120,11 @@ RaceWise transforms **30 hours of scattered ultramarathon race planning into a 1
 
 **Questionnaire:** 19 fields (Essential + Strava OAuth, race results, GI issues, blister-prone areas, nutrition preferences, biggest fears)
 
-#### Ultra Bundle - $299 (20% of customers)
-**Target:** Multi-race planners (3 races/year)
+#### Ultra Bundle - $497 (20% of customers)
+**Target:** Multi-race planners (5 races/year)
 
 **Features:**
-- 3 Custom guides ($100/race, save $198)
+- 5 Custom guides ($99/race, save $648)
 - Plan version updates (1 per race)
 - Priority support (24hr response)
 - Post-race debrief reports
@@ -1029,7 +1029,7 @@ import { Input } from '@/components/ui/input';
 
 **Revenue Metrics:**
 - Total revenue (MTD, QTD, YTD)
-- Revenue by tier (Essential $29, Custom $99, Ultra $299)
+- Revenue by tier (Essential $29, Custom $99, Ultra $497)
 - ARPU (Average Revenue Per User) - Target: $99
 - Gross margin - Target: 94%
 
