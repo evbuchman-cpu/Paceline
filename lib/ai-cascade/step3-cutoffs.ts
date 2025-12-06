@@ -6,6 +6,7 @@ import {
   CutoffInput,
   AIStepResponse,
 } from "../schemas/guide-sections";
+import { logger } from "@/lib/logger";
 
 const MAX_TOKENS = 8192;
 
@@ -29,7 +30,7 @@ export async function generateCutoffManagement(
   input: CutoffInput
 ): Promise<AIStepResponse<CutoffManagement>> {
   const startTime = Date.now();
-  console.log("🚀 Step 3 - Cutoff Management:", input.aidStations.length, "stations");
+  logger.debug("AI Step 3: Cutoff Management started", { stationCount: input.aidStations.length });
 
   // Extract only timing data from pacing (minimize tokens)
   const pacingTiming = input.pacingStrategy.sections.map(s => ({
@@ -126,16 +127,18 @@ Include all stations. Mark stations without cutoffs as "None" but estimate statu
   );
 
   if (truncationDetected) {
-    console.warn(`⚠️ Step 3 - Cutoff Management: Truncation detected`);
+    logger.warn("AI Step 3: Truncation detected", { step: "Cutoff Management" });
   }
   if (recoveryApplied) {
-    console.log(`🔧 Step 3 - Cutoff Management: Recovery applied`);
+    logger.debug("AI Step 3: Recovery applied", { step: "Cutoff Management" });
   }
 
   const generationTime = Date.now() - startTime;
-  console.log(
-    `✅ Step 3 - Cutoff Management complete: ${generationTime}ms | ${response.usage.input_tokens} in / ${response.usage.output_tokens} out`
-  );
+  logger.debug("AI Step 3: Cutoff Management complete", {
+    generationTimeMs: generationTime,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  });
 
   return {
     success: true,

@@ -6,7 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   SheetContent,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import UserProfile from "@/components/user-profile";
@@ -18,7 +17,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
-import Image from "next/image";
 
 export default function DashboardTopNav({ children }: { children: ReactNode }) {
   return (

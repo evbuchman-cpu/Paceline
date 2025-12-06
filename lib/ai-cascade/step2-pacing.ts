@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { anthropic, calculateCost, CLAUDE_MODEL } from "../anthropic-client";
 import { withConciseRetry, robustParseAndValidate } from "./utils";
 import {
@@ -31,7 +32,7 @@ export async function generatePacingStrategy(
   input: PacingInput
 ): Promise<AIStepResponse<PacingStrategy>> {
   const startTime = Date.now();
-  console.log("🚀 Step 2 - Pacing Strategy:", input.goalFinishTime, "goal");
+  logger.debug("AI Step 2: Pacing Strategy started", { goalFinishTime: input.goalFinishTime });
 
   // Extract only needed fields from raceOverview (minimize input tokens)
   const raceData = {
@@ -100,16 +101,18 @@ Rules: 8-12 sections using aid stations as endpoints. Include 2-5min aid station
   );
 
   if (truncationDetected) {
-    console.warn(`⚠️ Step 2 - Pacing Strategy: Truncation detected`);
+    logger.warn("AI Step 2: Truncation detected", { step: "Pacing Strategy" });
   }
   if (recoveryApplied) {
-    console.log(`🔧 Step 2 - Pacing Strategy: Recovery applied`);
+    logger.debug("AI Step 2: Recovery applied", { step: "Pacing Strategy" });
   }
 
   const generationTime = Date.now() - startTime;
-  console.log(
-    `✅ Step 2 - Pacing Strategy complete: ${generationTime}ms | ${response.usage.input_tokens} in / ${response.usage.output_tokens} out`
-  );
+  logger.debug("AI Step 2: Pacing Strategy complete", {
+    generationTimeMs: generationTime,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  });
 
   return {
     success: true,

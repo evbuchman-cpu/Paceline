@@ -159,7 +159,7 @@ Every guide includes these 8 sections:
 | **ORM** | Drizzle ORM | 0.43.1 | Type-safe, performant queries |
 | **Auth** | Better Auth | 1.2.8 | Modern auth with Polar.sh integration |
 | **Payments** | Polar.sh | 0.32.16 | Developer-first subscriptions |
-| **AI** | OpenAI GPT-4 | Turbo | Structured outputs, function calling |
+| **AI** | Anthropic Claude | Sonnet 4.5 | Structured outputs, function calling |
 | **PDF** | Puppeteer | Latest | HTML → PDF conversion |
 | **Storage** | Cloudflare R2 | Latest | S3-compatible, zero egress fees |
 | **Email** | Resend | Latest | React templates, modern API |
@@ -517,31 +517,26 @@ Better Auth is configured with:
 
 **Implementation Example (Step 1):**
 ```typescript
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { anthropic, CLAUDE_MODEL } from "@/lib/anthropic-client";
 
 async function generateRaceOverview(raceName: string, raceWebsite?: string) {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4-turbo-preview",
+  const response = await anthropic.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 4096,
     messages: [{
-      role: "system",
-      content: "You are an expert ultramarathon race analyst. Generate comprehensive race overviews based on race names and websites."
-    }, {
       role: "user",
-      content: `Analyze this race and provide a detailed overview:
+      content: `You are an expert ultramarathon race analyst. Analyze this race and provide a detailed overview:
         Race: ${raceName}
         Website: ${raceWebsite || "Not provided"}
-        
-        Include: course description, elevation profile, aid stations with cutoffs, historical weather patterns.`
+
+        Include: course description, elevation profile, aid stations with cutoffs, historical weather patterns.
+
+        Return your response as valid JSON.`
     }],
-    response_format: { type: "json_object" },
     temperature: 0.5,
   });
-  
-  return JSON.parse(response.choices[0].message.content);
+
+  return JSON.parse(response.content[0].text);
 }
 ```
 
@@ -640,7 +635,7 @@ export async function uploadToR2(buffer: Buffer, fileName: string): Promise<stri
 **Week 2 - Strava & AI Start:**
 - Strava OAuth integration
 - AI Cascade Steps 1-4 (Race Overview, Pacing, Cutoffs, Crew)
-- OpenAI client setup
+- Anthropic Claude API client setup
 
 **Week 3 - AI Complete + PDF:**
 - AI Cascade Steps 5-8 (Drop Bags, Nutrition, Contingencies, Mental)
@@ -747,7 +742,7 @@ Claude should:
 **Validation:**
 - Use Zod schemas for all API inputs
 - Validate questionnaire completeness before generation
-- Check OpenAI API responses before saving
+- Check Claude API responses before saving
 - Verify PDF generation success before storing URL
 
 ---
@@ -776,11 +771,11 @@ Claude should:
 
 ### AI/ML Expert
 
-**GPT-4 Integration:**
+**Claude API Integration:**
 - Prompt engineering for 8-step cascade
-- Structured outputs (JSON mode)
-- Function calling for complex workflows
-- Cost optimization (token management)
+- Structured outputs (JSON extraction)
+- Multi-turn conversations for complex workflows
+- Cost optimization (token management - $3/M input, $15/M output for Sonnet 4.5)
 - Error handling and retries
 
 **Implementation Guidance:**
@@ -1110,10 +1105,10 @@ import { Input } from '@/components/ui/input';
 - [API Documentation](https://docs.polar.sh/)
 - [Webhooks Guide](https://docs.polar.sh/api-reference/webhooks)
 
-**OpenAI:**
-- [API Reference](https://platform.openai.com/docs/api-reference)
-- [Chat Completions](https://platform.openai.com/docs/guides/text-generation)
-- [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)
+**Anthropic (Claude API):**
+- [API Reference](https://docs.anthropic.com/en/api/messages)
+- [Messages API](https://docs.anthropic.com/en/docs/build-with-claude/messages-api)
+- [Prompt Engineering](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering)
 
 **Puppeteer:**
 - [Documentation](https://pptr.dev/)

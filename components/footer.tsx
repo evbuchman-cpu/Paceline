@@ -95,17 +95,17 @@ export function Footer() {
             </div>
             <ul className="space-y-2 font-serif text-sm">
               <li>
-                <a href="#privacy" className="text-white/80 hover:text-white transition-colors">
+                <a href="/privacy-policy" className="text-white/80 hover:text-white transition-colors">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#terms" className="text-white/80 hover:text-white transition-colors">
+                <a href="/terms-of-service" className="text-white/80 hover:text-white transition-colors">
                   Terms of Service
                 </a>
               </li>
               <li>
-                <a href="#refund" className="text-white/80 hover:text-white transition-colors">
+                <a href="/refund-policy" className="text-white/80 hover:text-white transition-colors">
                   Refund Policy
                 </a>
               </li>

@@ -1,7 +1,6 @@
 "use client";
 import { Check, X, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { TopographicPattern } from "@/components/patterns"
 import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -41,8 +40,7 @@ export function Pricing() {
   }
 
   return (
-    <section id="pricing" className="relative py-20 bg-white overflow-hidden">
-      <TopographicPattern />
+    <section id="pricing" className="relative py-20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h2 className="font-sans font-semibold text-3xl sm:text-4xl lg:text-5xl text-[#2C5F4D] mb-4 text-balance">

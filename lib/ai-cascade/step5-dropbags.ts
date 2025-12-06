@@ -6,6 +6,7 @@ import {
   DropBagInput,
   AIStepResponse,
 } from "../schemas/guide-sections";
+import { logger } from "@/lib/logger";
 
 // Increased token limit for drop bag strategy (detailed packing lists)
 const MAX_TOKENS = 12288;
@@ -32,7 +33,7 @@ export async function generateDropBagStrategy(
   input: DropBagInput
 ): Promise<AIStepResponse<DropBagStrategy>> {
   const startTime = Date.now();
-  console.log("🚀 Step 5 - Drop Bag Strategy");
+  logger.debug("AI Step 5: Drop Bag Strategy");
 
   // Filter to drop-bag-access stations only
   const dropBagStations = input.aidStations.filter((s) => s.dropBagAccess);
@@ -133,10 +134,10 @@ Max 8 items per station packingList. Be specific (e.g., "Injinji toe socks" not 
   );
 
   if (truncationDetected) {
-    console.warn(`⚠️ Step 5 - Drop Bag Strategy: Truncation detected`);
+    logger.warn("AI Step 5: Truncation detected", { step: "Drop Bag Strategy" });
   }
   if (recoveryApplied) {
-    console.log(`🔧 Step 5 - Drop Bag Strategy: Recovery applied`);
+    logger.debug("AI Step 5: Recovery applied", { step: "Drop Bag Strategy" });
   }
 
   const generationTime = Date.now() - startTime;

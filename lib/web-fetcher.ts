@@ -1,4 +1,5 @@
 import puppeteer, { Page } from "puppeteer";
+import { logger } from "@/lib/logger";
 
 export interface FetchedRaceData {
   url: string;
@@ -75,7 +76,7 @@ async function extractPageContent(page: Page): Promise<string> {
 async function findRelevantLinks(page: Page, baseUrl: string): Promise<string[]> {
   const parsedBase = new URL(baseUrl);
 
-  const links = await page.evaluate((keywords: string[], baseHost: string) => {
+  const links = await page.evaluate((keywords: string[]) => {
     const anchors = Array.from(document.querySelectorAll("a[href]"));
     const foundLinks: string[] = [];
 
@@ -98,7 +99,7 @@ async function findRelevantLinks(page: Page, baseUrl: string): Promise<string[]>
     }
 
     return foundLinks;
-  }, RELEVANT_PAGE_KEYWORDS, parsedBase.host);
+  }, RELEVANT_PAGE_KEYWORDS);
 
   // Convert relative URLs to absolute and filter to same domain
   const absoluteLinks: string[] = [];
@@ -133,7 +134,7 @@ async function findRelevantLinks(page: Page, baseUrl: string): Promise<string[]>
  */
 export async function fetchRaceWebsite(url: string): Promise<FetchedRaceData> {
   const startTime = Date.now();
-  console.log(`🌐 Fetching race website: ${url}`);
+  logger.debug("Fetching race website", { url });
 
   let browser;
   try {
@@ -169,11 +170,11 @@ export async function fetchRaceWebsite(url: string): Promise<FetchedRaceData> {
 
     // Extract content from main page
     const mainPageContent = await extractPageContent(page);
-    console.log(`  📄 Main page: ${mainPageContent.length} chars`);
+    logger.debug("Main page content extracted", { contentLength: mainPageContent.length });
 
     // Find relevant subpage links
     const relevantLinks = await findRelevantLinks(page, url);
-    console.log(`  🔗 Found ${relevantLinks.length} relevant subpages`);
+    logger.debug("Found relevant subpages", { subpageCount: relevantLinks.length });
 
     // Limit to top 5 subpages to avoid timeout
     const linksToFetch = relevantLinks.slice(0, 5);
@@ -193,10 +194,13 @@ export async function fetchRaceWebsite(url: string): Promise<FetchedRaceData> {
         if (subpageContent.length > 100) { // Only include if substantial content
           allContent.push(`\n=== SUBPAGE: ${subpageUrl} ===\n${subpageContent}`);
           pagesFetched++;
-          console.log(`  📄 Subpage ${pagesFetched}: ${subpageContent.length} chars`);
+          logger.debug("Subpage content extracted", {
+            pageNumber: pagesFetched,
+            contentLength: subpageContent.length
+          });
         }
-      } catch (subpageError) {
-        console.warn(`  ⚠️ Failed to fetch subpage: ${subpageUrl}`);
+      } catch {
+        logger.warn("Failed to fetch subpage", { subpageUrl });
         // Continue with other pages
       }
     }
@@ -213,7 +217,12 @@ export async function fetchRaceWebsite(url: string): Promise<FetchedRaceData> {
     }
 
     const fetchTime = Date.now() - startTime;
-    console.log(`✅ Website fetched: ${combinedContent.length} chars from ${pagesFetched} pages in ${fetchTime}ms`);
+    logger.info("Website fetched successfully", {
+      url,
+      contentLength: combinedContent.length,
+      pagesFetched,
+      fetchTimeMs: fetchTime,
+    });
 
     return {
       url,
@@ -229,7 +238,7 @@ export async function fetchRaceWebsite(url: string): Promise<FetchedRaceData> {
     }
 
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`❌ Failed to fetch website: ${errorMessage}`);
+    logger.error("Failed to fetch website", error, { url });
 
     return {
       url,

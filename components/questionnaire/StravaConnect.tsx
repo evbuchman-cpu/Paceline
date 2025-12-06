@@ -9,10 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 
-interface StravaAnalysis {
+export interface StravaAnalysis {
   totalActivities: number;
   totalDistance: number;
   totalElevationGain: number;
@@ -58,15 +58,9 @@ export function StravaConnect({
     } else if (stravaError === "connection_failed") {
       toast.error("Failed to connect to Strava. Please try again.");
     }
-  }, [searchParams]);
+  }, [searchParams, handleAnalyze]);
 
-  const handleConnect = () => {
-    // Redirect to Strava OAuth
-    const authorizeUrl = `/api/strava/authorize?questionnaireId=${questionnaireId}`;
-    window.location.href = authorizeUrl;
-  };
-
-  const handleAnalyze = async () => {
+  const handleAnalyze = useCallback(async () => {
     if (!connected && !searchParams.get("strava_success")) {
       toast.error("Please connect Strava first");
       return;
@@ -103,6 +97,12 @@ export function StravaConnect({
     } finally {
       setAnalyzing(false);
     }
+  }, [connected, searchParams, questionnaireId, onAnalysisComplete]);
+
+  const handleConnect = () => {
+    // Redirect to Strava OAuth
+    const authorizeUrl = `/api/strava/authorize?questionnaireId=${questionnaireId}`;
+    window.location.href = authorizeUrl;
   };
 
   if (!connected) {
@@ -147,7 +147,7 @@ export function StravaConnect({
             Connect with Strava
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
-            We'll analyze your running activities from the last 90 days
+            We&apos;ll analyze your running activities from the last 90 days
           </p>
         </CardContent>
       </Card>

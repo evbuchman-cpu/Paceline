@@ -3,9 +3,10 @@ import { db } from "@/db/drizzle";
 import { questionnaire, purchase, guide } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 // AI Cascade imports
 import {
@@ -27,7 +28,7 @@ import { uploadToR2, generateGuidePdfFileName } from "@/lib/r2-storage";
 import { fetchRaceWebsite } from "@/lib/web-fetcher";
 
 // Validation import
-import { validateAndCorrectGuideData, formatValidationResult } from "@/lib/guide-validator";
+import { validateAndCorrectGuideData } from "@/lib/guide-validator";
 
 // Email imports
 import { sendGuideDeliveryEmail, sendGuideFailedEmail } from "@/lib/email-sender";
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { questionnaireId } = generateGuideRequestSchema.parse(body);
 
-    console.log(`📋 Starting guide generation for questionnaire: ${questionnaireId}`);
+    logger.info("Starting guide generation", { questionnaireId, userId: session.user.id });
 
     // Step 3: Fetch questionnaire with purchase (for tier info and ownership check)
     const questionnaireResult = await db
@@ -130,7 +131,7 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date(),
     });
 
-    console.log(`🚀 Created guide record: ${guideId}`);
+    logger.info("Guide record created", { guideId, questionnaireId, tier: p.tier });
 
     // Step 7: Run 8-step AI cascade
     let totalCost = 0;
@@ -138,18 +139,23 @@ export async function POST(req: NextRequest) {
     // Pre-step: Fetch race website content
     let websiteContent: string | undefined;
     if (q.raceWebsite) {
-      console.log("🌐 Fetching race website content...");
+      logger.debug("Fetching race website content", { raceWebsite: q.raceWebsite });
       const fetchResult = await fetchRaceWebsite(q.raceWebsite);
       if (fetchResult.success && fetchResult.content) {
         websiteContent = fetchResult.content;
-        console.log(`✅ Website content fetched: ${fetchResult.content.length} chars`);
+        logger.debug("Website content fetched successfully", {
+          contentLength: fetchResult.content.length
+        });
       } else {
-        console.warn(`⚠️ Failed to fetch website: ${fetchResult.error || "Unknown error"}`);
+        logger.warn("Failed to fetch race website", {
+          raceWebsite: q.raceWebsite,
+          error: fetchResult.error
+        });
       }
     }
 
     // Step 1: Race Overview
-    console.log("🔄 Step 1/8: Generating race overview...");
+    logger.debug("AI Cascade Step 1/8: Generating race overview");
     const raceOverviewResult = await generateRaceOverview({
       raceName: q.raceName,
       raceWebsite: q.raceWebsite || undefined,
@@ -159,7 +165,7 @@ export async function POST(req: NextRequest) {
     totalCost += raceOverviewResult.usage.estimatedCost;
 
     // Step 2: Pacing Strategy
-    console.log("🔄 Step 2/8: Generating pacing strategy...");
+    logger.debug("AI Cascade Step 2/8: Generating pacing strategy");
     const pacingResult = await generatePacingStrategy({
       raceOverview: raceOverviewResult.data,
       goalFinishTime: q.goalFinishTime,
@@ -180,7 +186,7 @@ export async function POST(req: NextRequest) {
     totalCost += pacingResult.usage.estimatedCost;
 
     // Step 3: Cutoff Management
-    console.log("🔄 Step 3/8: Generating cutoff management...");
+    logger.debug("AI Cascade Step 3/8: Generating cutoff management");
     const cutoffResult = await generateCutoffManagement({
       pacingStrategy: pacingResult.data,
       aidStations: raceOverviewResult.data.aidStations,
@@ -188,7 +194,7 @@ export async function POST(req: NextRequest) {
     totalCost += cutoffResult.usage.estimatedCost;
 
     // Step 4: Crew Logistics
-    console.log("🔄 Step 4/8: Generating crew logistics...");
+    logger.debug("AI Cascade Step 4/8: Generating crew logistics");
     const crewResult = await generateCrewLogistics({
       pacingStrategy: pacingResult.data,
       aidStations: raceOverviewResult.data.aidStations,
@@ -201,7 +207,7 @@ export async function POST(req: NextRequest) {
     const nutritionPrefs = q.nutritionPreferences as NutritionPreferences | null;
 
     // Step 5: Drop Bag Strategy
-    console.log("🔄 Step 5/8: Generating drop bag strategy...");
+    logger.debug("AI Cascade Step 5/8: Generating drop bag strategy");
     const dropBagResult = await generateDropBagStrategy({
       raceOverview: raceOverviewResult.data,
       pacingStrategy: pacingResult.data,
@@ -212,7 +218,7 @@ export async function POST(req: NextRequest) {
     totalCost += dropBagResult.usage.estimatedCost;
 
     // Step 6: Nutrition Timeline
-    console.log("🔄 Step 6/8: Generating nutrition timeline...");
+    logger.debug("AI Cascade Step 6/8: Generating nutrition timeline");
     const nutritionResult = await generateNutritionTimeline({
       pacingStrategy: pacingResult.data,
       aidStations: raceOverviewResult.data.aidStations,
@@ -223,7 +229,7 @@ export async function POST(req: NextRequest) {
     totalCost += nutritionResult.usage.estimatedCost;
 
     // Step 7: Contingency Protocols
-    console.log("🔄 Step 7/8: Generating contingency protocols...");
+    logger.debug("AI Cascade Step 7/8: Generating contingency protocols");
     const contingencyResult = await generateContingencyProtocols({
       raceOverview: raceOverviewResult.data,
       pacingStrategy: pacingResult.data,
@@ -234,7 +240,7 @@ export async function POST(req: NextRequest) {
     totalCost += contingencyResult.usage.estimatedCost;
 
     // Step 8: Mental Strategy
-    console.log("🔄 Step 8/8: Generating mental strategy...");
+    logger.debug("AI Cascade Step 8/8: Generating mental strategy");
     const mentalResult = await generateMentalStrategy({
       raceOverview: raceOverviewResult.data,
       pacingStrategy: pacingResult.data,
@@ -250,7 +256,11 @@ export async function POST(req: NextRequest) {
     });
     totalCost += mentalResult.usage.estimatedCost;
 
-    console.log(`✅ AI cascade complete. Total cost: $${totalCost.toFixed(4)}`);
+    logger.info("AI cascade complete", {
+      guideId,
+      totalCost: `$${totalCost.toFixed(4)}`,
+      steps: 8,
+    });
 
     // Step 8: Prepare guide data
     const rawGuideData: GuideData = {
@@ -265,15 +275,24 @@ export async function POST(req: NextRequest) {
     };
 
     // Step 9: Validate and auto-correct guide data
-    console.log("🔍 Validating and correcting guide data...");
+    logger.debug("Validating and correcting guide data");
     const { result: validationResult, correctedData: guideData } = validateAndCorrectGuideData(rawGuideData);
 
     // Log validation results
-    console.log(formatValidationResult(validationResult));
+    logger.debug("Validation results", {
+      isValid: validationResult.isValid,
+      wasAutoCorrected: validationResult.wasAutoCorrected,
+      errorCount: validationResult.errors.length,
+      warningCount: validationResult.warnings.length,
+      correctionCount: validationResult.corrections.length,
+    });
 
     // Check for unfixable errors
     if (!validationResult.isValid) {
-      console.error("❌ Guide validation failed with unfixable errors");
+      logger.error("Guide validation failed with unfixable errors", undefined, {
+        guideId,
+        errors: validationResult.errors.map(e => e.message),
+      });
 
       // Update guide status to failed
       await db
@@ -297,11 +316,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (validationResult.wasAutoCorrected) {
-      console.log(`📝 Auto-corrected ${validationResult.corrections.length} issues`);
+      logger.info("Guide data auto-corrected", {
+        guideId,
+        correctionCount: validationResult.corrections.length,
+      });
     }
 
     // Step 10: Generate PDF with corrected data
-    console.log("📄 Generating PDF...");
+    logger.debug("Generating PDF");
     const questionnaireData: QuestionnaireData = {
       raceName: q.raceName,
       raceDate: q.raceDate,
@@ -312,13 +334,20 @@ export async function POST(req: NextRequest) {
     };
 
     const pdfBuffer = await generateGuidePDF(guideData, questionnaireData);
-    console.log(`✅ PDF generated: ${pdfBuffer.length} bytes`);
+    logger.debug("PDF generated successfully", {
+      guideId,
+      pdfSize: `${(pdfBuffer.length / 1024).toFixed(2)} KB`,
+    });
 
     // Step 11: Upload to R2
-    console.log("☁️ Uploading to R2...");
+    logger.debug("Uploading PDF to R2");
     const fileName = generateGuidePdfFileName(questionnaireId);
     const pdfUrl = await uploadToR2(pdfBuffer, fileName);
-    console.log(`✅ PDF uploaded: ${pdfUrl}`);
+    logger.info("PDF uploaded to R2", {
+      guideId,
+      fileName,
+      pdfSize: `${(pdfBuffer.length / 1024).toFixed(2)} KB`,
+    });
 
     // Step 12: Update guide record with completed status
     const generationTime = Date.now() - startTime;
@@ -356,12 +385,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log('✅ Guide delivery email sent');
+    logger.info("Guide delivery email sent", {
+      guideId,
+      userId: session.user.id,
+    });
 
-    console.log(`🎉 Guide generation complete!`);
-    console.log(`   - Guide ID: ${guideId}`);
-    console.log(`   - Generation time: ${(generationTime / 1000).toFixed(2)}s`);
-    console.log(`   - AI cost: $${totalCost.toFixed(4)}`);
+    logger.info("Guide generation complete", {
+      guideId,
+      questionnaireId,
+      generationTimeSeconds: (generationTime / 1000).toFixed(2),
+      aiCost: `$${totalCost.toFixed(4)}`,
+      pdfUrl,
+    });
 
     return NextResponse.json(
       {
@@ -373,7 +408,10 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("❌ Error generating guide:", error);
+    logger.error("Error generating guide", error, {
+      guideId,
+      questionnaireId: guideId ? undefined : "not created",
+    });
 
     // Update guide status to failed if we created one
     if (guideId) {
@@ -406,9 +444,11 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        console.log('✅ Guide failed email sent');
+        logger.info("Guide failed email sent", { guideId });
       } catch (updateError) {
-        console.error("Failed to update guide status:", updateError);
+        logger.error("Failed to update guide status after error", updateError, {
+          guideId,
+        });
       }
     }
 
@@ -502,7 +542,7 @@ export async function GET(req: NextRequest) {
       updatedAt: g.updatedAt,
     });
   } catch (error) {
-    console.error("Error fetching guide status:", error);
+    logger.error("Error fetching guide status", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

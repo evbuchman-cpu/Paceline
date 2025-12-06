@@ -3,7 +3,7 @@ import { purchase, subscription, user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { headers } from "next/headers";
-import crypto from "crypto";
+import { logger } from "@/lib/logger";
 
 // Email import
 import { sendPaymentConfirmationEmail } from "@/lib/email-sender";
@@ -25,46 +25,47 @@ function mapProductIdToTier(productId: string): "essential" | "custom" | "ultra_
   return tierMap[productId] || null;
 }
 
-// Verify Polar webhook signature
-function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-  const hmac = crypto.createHmac("sha256", secret);
-  hmac.update(payload);
-  const expectedSignature = hmac.digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
-}
+// TODO: Re-enable webhook signature verification for production security
+// function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+//   const hmac = crypto.createHmac("sha256", secret);
+//   hmac.update(payload);
+//   const expectedSignature = hmac.digest("hex");
+//   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+// }
 
 export async function POST(req: Request) {
-  console.log("🎯 Webhook received from Polar.sh");
+  logger.debug("Webhook request received from Polar.sh");
 
   try {
     const headersList = await headers();
     const signature = headersList.get("x-polar-signature");
     const rawBody = await req.text();
 
-    console.log("📦 Raw webhook body:", rawBody.substring(0, 200));
-    console.log("🔑 Signature:", signature);
+    logger.debug("Webhook signature and body received", {
+      hasSignature: !!signature,
+      bodyPreview: rawBody.substring(0, 100), // Reduced from 200 for security
+    });
 
     // Verify webhook signature
     if (!signature) {
-      console.error("❌ No signature provided");
+      logger.error("Webhook signature validation failed: No signature provided");
       return Response.json({ error: "No signature provided" }, { status: 401 });
     }
 
     const webhookSecret = process.env.POLAR_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      console.error("❌ POLAR_WEBHOOK_SECRET not set");
+      logger.error("Configuration error: POLAR_WEBHOOK_SECRET not set");
       return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
 
     // Note: Polar uses different signature formats, may need adjustment
     // For now, let's log and process anyway for debugging
-    console.log("⚠️  Signature verification temporarily disabled for debugging");
+    logger.warn("Signature verification temporarily disabled for debugging");
 
     const data = JSON.parse(rawBody);
     const eventType = data.type;
 
-    console.log("📨 Event type:", eventType);
-    console.log("📦 Event data:", JSON.stringify(data, null, 2));
+    logger.debug("Webhook event parsed", { eventType });
 
     // Handle subscription events
     if (
@@ -75,14 +76,17 @@ export async function POST(req: Request) {
       eventType === "subscription.uncanceled" ||
       eventType === "subscription.updated"
     ) {
-      console.log("🎯 Processing subscription webhook:", eventType);
-
       const subscriptionData = data.data;
       const userId = subscriptionData.customer?.external_id || subscriptionData.customer?.externalId;
 
-      console.log("👤 User ID:", userId);
-      console.log("📦 Subscription ID:", subscriptionData.id);
-      console.log("💰 Product ID:", subscriptionData.product_id || subscriptionData.productId);
+      // Audit log for subscription webhook (always logged for compliance)
+      logger.audit("subscription_webhook_processing", {
+        eventType,
+        subscriptionId: subscriptionData.id,
+        userId,
+        productId: subscriptionData.product_id || subscriptionData.productId,
+        status: subscriptionData.status,
+      });
 
       // Upsert subscription
       await db
@@ -121,7 +125,10 @@ export async function POST(req: Request) {
           },
         });
 
-      console.log("✅ Upserted subscription:", subscriptionData.id);
+      logger.info("Subscription upserted successfully", {
+        subscriptionId: subscriptionData.id,
+        status: subscriptionData.status,
+      });
 
       // Create or update purchase record
       if (userId && (subscriptionData.product_id || subscriptionData.productId)) {
@@ -152,7 +159,12 @@ export async function POST(req: Request) {
               updatedAt: new Date(),
             });
 
-            console.log("✅ Created purchase record for subscription:", subscriptionData.id);
+            logger.info("Purchase record created for subscription", {
+              subscriptionId: subscriptionData.id,
+              purchaseId,
+              tier,
+              guidesRemaining,
+            });
 
             // Fetch user data for email
             const userData = await db
@@ -177,9 +189,16 @@ export async function POST(req: Request) {
                 questionnaireUrl,
               });
 
-              console.log('✅ Payment confirmation email sent');
+              logger.info("Payment confirmation email sent", {
+                userId,
+                purchaseId,
+                tier,
+              });
             } else {
-              console.warn('⚠️  User not found, skipping payment confirmation email');
+              logger.warn("User not found, skipping payment confirmation email", {
+                userId,
+                subscriptionId: subscriptionData.id,
+              });
             }
           } else {
             await db
@@ -190,10 +209,16 @@ export async function POST(req: Request) {
               })
               .where(eq(purchase.polarSubscriptionId, subscriptionData.id));
 
-            console.log("✅ Updated purchase record for subscription:", subscriptionData.id);
+            logger.info("Purchase record updated for subscription", {
+              subscriptionId: subscriptionData.id,
+              newStatus: subscriptionData.status === "active" ? "completed" : "pending",
+            });
           }
         } else {
-          console.warn("⚠️  Unknown product ID, skipping purchase creation:", productId);
+          logger.warn("Unknown product ID, skipping purchase creation", {
+            productId,
+            subscriptionId: subscriptionData.id,
+          });
         }
       }
 
@@ -201,11 +226,13 @@ export async function POST(req: Request) {
     }
 
     // Unknown event type
-    console.log("ℹ️  Unhandled event type:", eventType);
+    logger.info("Unhandled webhook event type received", { eventType });
     return Response.json({ received: true, eventType });
 
   } catch (error) {
-    console.error("💥 Error processing webhook:", error);
+    logger.error("Error processing webhook", error, {
+      hasRawBody: true,
+    });
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

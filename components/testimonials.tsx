@@ -1,5 +1,5 @@
 import { Star } from "lucide-react"
-import { TopographicPattern } from "@/components/patterns"
+import Image from "next/image"
 
 const testimonials = [
   {
@@ -30,8 +30,7 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="relative py-20 bg-[#F5F1EA] overflow-hidden">
-      <TopographicPattern />
+    <section className="relative py-20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h2 className="font-sans font-semibold text-3xl sm:text-4xl lg:text-5xl text-[#2C5F4D] mb-4 text-balance">
@@ -50,11 +49,14 @@ export function Testimonials() {
               </div>
               <blockquote className="font-serif text-[#4A5859] leading-relaxed mb-6">&quot;{testimonial.quote}&quot;</blockquote>
               <div className="flex items-center gap-4">
-                <img
-                  src={testimonial.image || "/placeholder.svg"}
-                  alt={testimonial.author}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
+                <div className="relative w-16 h-16 rounded-full overflow-hidden">
+                  <Image
+                    src={testimonial.image || "/placeholder.svg"}
+                    alt={testimonial.author}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
                 <div>
                   <p className="font-sans font-semibold text-[#2C5F4D]">{testimonial.author}</p>
                   <p className="font-serif text-sm text-[#4A5859]">{testimonial.race}</p>

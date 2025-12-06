@@ -2,6 +2,7 @@ import { resend } from './resend-client';
 import GuideDeliveryEmail from '@/emails/guide-delivery';
 import GuideFailedEmail from '@/emails/guide-failed';
 import PaymentConfirmationEmail from '@/emails/payment-confirmation';
+import { logger } from '@/lib/logger';
 
 // Type definitions
 interface GuideDeliveryData {
@@ -26,18 +27,18 @@ interface PaymentConfirmationData {
 
 // Helper: Retry with exponential backoff
 async function sendWithRetry(
-  emailFn: () => Promise<any>,
+  emailFn: () => Promise<{ data: { id: string } | null; error: Error | null }>,
   context: string,
   maxRetries = 3
 ): Promise<{ success: boolean; error?: string; emailId?: string }> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📧 Sending ${context} (attempt ${attempt}/${maxRetries})`);
+      logger.debug("Sending email", { context, attempt, maxRetries });
 
       const { data, error } = await emailFn();
 
       if (error) {
-        console.error(`❌ Email send failed (attempt ${attempt}):`, error);
+        logger.error("Email send failed", error, { context, attempt });
 
         if (attempt < maxRetries) {
           const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
@@ -48,11 +49,11 @@ async function sendWithRetry(
         return { success: false, error: error.message };
       }
 
-      console.log(`✅ ${context} sent successfully:`, data?.id);
+      logger.info("Email sent successfully", { context, emailId: data?.id });
       return { success: true, emailId: data?.id };
 
-    } catch (error: any) {
-      console.error(`❌ Email send exception (attempt ${attempt}):`, error);
+    } catch (error) {
+      logger.error("Email send exception", error, { context, attempt });
 
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt - 1) * 1000;
@@ -71,12 +72,17 @@ async function sendWithRetry(
 export async function sendGuideDeliveryEmail(data: GuideDeliveryData) {
   // Validate required fields
   if (!data.user.email) {
-    console.error('❌ Cannot send guide delivery email: missing user email');
+    logger.error("Cannot send guide delivery email: missing user email", undefined, {
+      raceName: data.questionnaire.raceName,
+    });
     return { success: false, error: 'Missing user email' };
   }
 
   if (!data.guide.pdfUrl) {
-    console.error('❌ Cannot send guide delivery email: missing PDF URL');
+    logger.error("Cannot send guide delivery email: missing PDF URL", undefined, {
+      userEmail: data.user.email,
+      raceName: data.questionnaire.raceName,
+    });
     return { success: false, error: 'Missing PDF URL' };
   }
 
@@ -94,7 +100,9 @@ export async function sendGuideDeliveryEmail(data: GuideDeliveryData) {
 // 2. Guide Failed Email
 export async function sendGuideFailedEmail(data: GuideFailedData) {
   if (!data.user.email) {
-    console.error('❌ Cannot send guide failed email: missing user email');
+    logger.error("Cannot send guide failed email: missing user email", undefined, {
+      raceName: data.questionnaire.raceName,
+    });
     return { success: false, error: 'Missing user email' };
   }
 
@@ -112,7 +120,9 @@ export async function sendGuideFailedEmail(data: GuideFailedData) {
 // 3. Payment Confirmation Email
 export async function sendPaymentConfirmationEmail(data: PaymentConfirmationData) {
   if (!data.user.email) {
-    console.error('❌ Cannot send payment confirmation email: missing user email');
+    logger.error("Cannot send payment confirmation email: missing user email", undefined, {
+      tier: data.purchase.tier,
+    });
     return { success: false, error: 'Missing user email' };
   }
 

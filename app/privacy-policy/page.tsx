@@ -29,11 +29,11 @@ export default function PrivacyPolicy() {
                   1. Introduction
                 </h2>
                 <p className="leading-relaxed">
-                  Welcome to Nextjs Starter Kit (&aposwe,&apos &aposour,&apos or
-                  &aposus&apos). We are committed to protecting your personal
+                  Welcome to Paceline (&quot;we,&quot; &quot;our,&quot; or
+                  &quot;us&quot;). We are committed to protecting your personal
                   information and your right to privacy. This Privacy Policy
                   explains how we collect, use, disclose, and safeguard your
-                  information when you use our service.
+                  information when you use our AI-powered race planning service.
                 </p>
               </section>
 
@@ -55,23 +55,54 @@ export default function PrivacyPolicy() {
                       <li>
                         Google account information (when using Google Sign-In)
                       </li>
-                      <li>Organization details</li>
+                      <li>Payment information (processed by Polar.sh)</li>
                     </ul>
                   </div>
 
                   <div>
                     <h3 className="text-lg font-medium mb-2">
-                      Pass Information
+                      Questionnaire Data
                     </h3>
                     <p className="leading-relaxed">
-                      When you create Apple Passes, we store:
+                      To generate your personalized race guide, we collect:
                     </p>
                     <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
-                      <li>Pass content and metadata</li>
-                      <li>Pass templates and designs</li>
-                      <li>Pass usage analytics</li>
-                      <li>Pass installation data</li>
+                      <li>Race information (name, date, distance, location)</li>
+                      <li>
+                        Fitness metrics (weekly mileage, recent race times,
+                        climbing strength)
+                      </li>
+                      <li>Goal finish time and race history</li>
+                      <li>
+                        Health information (GI issues, blister-prone areas)
+                      </li>
+                      <li>
+                        Nutrition preferences (vegan, gluten-free, caffeine
+                        sensitivity)
+                      </li>
+                      <li>Crew support availability</li>
+                      <li>Race-specific concerns and fears</li>
                     </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">
+                      Strava Fitness Data (Custom Tier Only)
+                    </h3>
+                    <p className="leading-relaxed">
+                      If you connect your Strava account (Custom tier), we
+                      collect:
+                    </p>
+                    <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
+                      <li>90 days of activity data (runs, distance, elevation)</li>
+                      <li>Training volume and intensity metrics</li>
+                      <li>Heart rate data (if available)</li>
+                      <li>Pace and performance trends</li>
+                    </ul>
+                    <p className="mt-2 text-sm">
+                      We only access data necessary for generating your race
+                      guide. You can revoke Strava access at any time.
+                    </p>
                   </div>
 
                   <div>
@@ -86,7 +117,8 @@ export default function PrivacyPolicy() {
                       <li>IP address</li>
                       <li>Browser type and version</li>
                       <li>Device information</li>
-                      <li>Usage data and analytics</li>
+                      <li>Usage data and analytics (via PostHog)</li>
+                      <li>Guide generation metrics (time, success rate)</li>
                     </ul>
                   </div>
                 </div>
@@ -102,11 +134,19 @@ export default function PrivacyPolicy() {
                 <ul className="list-disc list-inside space-y-1 ml-4">
                   <li>Provide and maintain our service</li>
                   <li>Create and manage your account</li>
-                  <li>Generate and distribute Apple Passes</li>
+                  <li>
+                    Generate personalized AI-powered race-day execution guides
+                  </li>
+                  <li>
+                    Analyze Strava fitness data to create elevation-adjusted
+                    pacing strategies
+                  </li>
+                  <li>Send race guides via email delivery</li>
                   <li>Send you important updates and notifications</li>
+                  <li>Process payments and manage purchases</li>
                   <li>Respond to your inquiries and support requests</li>
-                  <li>Monitor and analyze usage patterns</li>
-                  <li>Improve our service and develop new features</li>
+                  <li>Monitor and analyze usage patterns and guide quality</li>
+                  <li>Improve our AI models and develop new features</li>
                   <li>Comply with legal obligations</li>
                 </ul>
               </section>
@@ -147,25 +187,45 @@ export default function PrivacyPolicy() {
                   5. Third-Party Services
                 </h2>
                 <p className="leading-relaxed">
-                  We use the following third-party services that may collect
-                  information:
+                  We use the following third-party services that may collect or
+                  process information:
                 </p>
-                <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
+                <ul className="list-disc list-inside mt-2 space-y-2 ml-4">
                   <li>
                     <strong>Google Sign-In:</strong> For authentication services
                   </li>
                   <li>
-                    <strong>Payment processors:</strong> For handling
-                    subscription payments
+                    <strong>Polar.sh:</strong> For payment processing and
+                    subscription management
                   </li>
                   <li>
-                    <strong>Analytics services:</strong> To understand service
-                    usage
+                    <strong>Strava API:</strong> For accessing your fitness data
+                    (Custom tier only, with your explicit authorization)
+                  </li>
+                  <li>
+                    <strong>Anthropic (Claude API):</strong> For AI-powered guide generation
+                    (your questionnaire data is processed to create guides)
+                  </li>
+                  <li>
+                    <strong>PostHog:</strong> For product analytics and session
+                    replay
+                  </li>
+                  <li>
+                    <strong>Cloudflare R2:</strong> For secure PDF storage and
+                    delivery
+                  </li>
+                  <li>
+                    <strong>Resend:</strong> For transactional email delivery
+                  </li>
+                  <li>
+                    <strong>Neon PostgreSQL:</strong> For secure database
+                    hosting
                   </li>
                 </ul>
                 <p className="mt-3 leading-relaxed">
                   These services have their own privacy policies governing the
-                  use of your information.
+                  use of your information. We carefully select service providers
+                  that maintain strong data protection standards.
                 </p>
               </section>
 
@@ -270,8 +330,8 @@ export default function PrivacyPolicy() {
                   data practices, please contact us at:
                 </p>
                 <div className="mt-3 space-y-1">
-                  <p>Email: privacy@applepass.com</p>
-                  <p>Address: [Your Company Address]</p>
+                  <p>Email: privacy@paceline.run</p>
+                  <p>Support: support@paceline.run</p>
                 </div>
               </section>
             </div>

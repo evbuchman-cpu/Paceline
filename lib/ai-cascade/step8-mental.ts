@@ -6,6 +6,7 @@ import {
   MentalInput,
   AIStepResponse,
 } from "../schemas/guide-sections";
+import { logger } from "@/lib/logger";
 
 const MAX_TOKENS = 8192;
 
@@ -37,7 +38,7 @@ export async function generateMentalStrategy(
   input: MentalInput
 ): Promise<AIStepResponse<MentalStrategy>> {
   const startTime = Date.now();
-  console.log("🚀 Step 8 - Mental Strategy");
+  logger.debug("AI Step 8: Mental Strategy");
 
   // Compact race info
   const raceInfo = `${input.raceOverview.distance}mi, ${input.raceOverview.elevationGain}ft, ${input.pacingStrategy.totalEstimatedTime}`;
@@ -99,10 +100,10 @@ Max 4 mantras, max 5 celebration milestones. Tailor to ${expLevel} level.`;
   );
 
   if (truncationDetected) {
-    console.warn(`⚠️ Step 8 - Mental Strategy: Truncation detected`);
+    logger.warn("AI Step 8: Truncation detected", { step: "Mental Strategy" });
   }
   if (recoveryApplied) {
-    console.log(`🔧 Step 8 - Mental Strategy: Recovery applied`);
+    logger.debug("AI Step 8: Recovery applied", { step: "Mental Strategy" });
   }
 
   const generationTime = Date.now() - startTime;

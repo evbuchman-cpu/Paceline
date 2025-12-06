@@ -6,6 +6,7 @@ import {
   CrewInput,
   AIStepResponse,
 } from "../schemas/guide-sections";
+import { logger } from "@/lib/logger";
 
 // Increased token limit for crew logistics (verbose output)
 const MAX_TOKENS = 12288;
@@ -34,7 +35,7 @@ export async function generateCrewLogistics(
   input: CrewInput
 ): Promise<AIStepResponse<CrewLogistics>> {
   const startTime = Date.now();
-  console.log("🚀 Step 4 - Crew Logistics:", input.crewSupport);
+  logger.debug("AI Step 4: Crew Logistics:", input.crewSupport);
 
   // Handle no crew support case
   const hasCrewSupport = input.crewSupport.toLowerCase() !== "no" &&
@@ -127,10 +128,10 @@ Tailor mental support to race stage: early=restraint, middle=grind, late=push.`;
   );
 
   if (truncationDetected) {
-    console.warn(`⚠️ Step 4 - Crew Logistics: Truncation detected`);
+    logger.warn("AI Step 4: Truncation detected", { step: "Crew Logistics" });
   }
   if (recoveryApplied) {
-    console.log(`🔧 Step 4 - Crew Logistics: Recovery applied`);
+    logger.debug("AI Step 4: Recovery applied", { step: "Crew Logistics" });
   }
 
   const generationTime = Date.now() - startTime;

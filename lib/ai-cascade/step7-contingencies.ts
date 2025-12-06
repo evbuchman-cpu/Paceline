@@ -6,6 +6,7 @@ import {
   ContingencyInput,
   AIStepResponse,
 } from "../schemas/guide-sections";
+import { logger } from "@/lib/logger";
 
 // Increased token limit for contingency protocols (detailed protocols with multiple scenarios)
 const MAX_TOKENS = 12288;
@@ -33,7 +34,7 @@ export async function generateContingencyProtocols(
   input: ContingencyInput
 ): Promise<AIStepResponse<ContingencyProtocols>> {
   const startTime = Date.now();
-  console.log("🚀 Step 7 - Contingency Protocols");
+  logger.debug("AI Step 7: Contingency Protocols");
 
   // Compact race info
   const raceInfo = `${input.raceOverview.distance}mi, ${input.raceOverview.elevationGain}ft gain, ${input.pacingStrategy.totalEstimatedTime} total`;
@@ -92,10 +93,10 @@ Be specific: "vomiting 3+ times/hr" not "severe vomiting".`;
   );
 
   if (truncationDetected) {
-    console.warn(`⚠️ Step 7 - Contingency Protocols: Truncation detected`);
+    logger.warn("AI Step 7: Truncation detected", { step: "Contingency Protocols" });
   }
   if (recoveryApplied) {
-    console.log(`🔧 Step 7 - Contingency Protocols: Recovery applied`);
+    logger.debug("AI Step 7: Recovery applied", { step: "Contingency Protocols" });
   }
 
   const generationTime = Date.now() - startTime;

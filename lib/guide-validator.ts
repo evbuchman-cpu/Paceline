@@ -6,18 +6,9 @@
  */
 
 import type { GuideData } from "@/lib/pdf-generator";
-import {
-  validateAndCorrectCutoffs,
-  type CutoffValidationResult,
-} from "@/lib/validation/cutoff-validator";
-import {
-  validateAndCorrectNutrition,
-  type NutritionValidationResult,
-} from "@/lib/validation/nutrition-validator";
-import {
-  validateAndCorrectTimes,
-  type TimeValidationResult,
-} from "@/lib/validation/time-validator";
+import { validateAndCorrectCutoffs } from "@/lib/validation/cutoff-validator";
+import { validateAndCorrectNutrition } from "@/lib/validation/nutrition-validator";
+import { validateAndCorrectTimes } from "@/lib/validation/time-validator";
 import { validateAndCorrectConsistency } from "@/lib/validation/consistency-validator";
 
 export interface ValidationResult {
@@ -65,7 +56,7 @@ export function validateAndCorrectGuideData(guideData: GuideData): {
   };
 
   // Create a mutable copy of the guide data
-  let correctedData: GuideData = {
+  const correctedData: GuideData = {
     raceOverview: guideData.raceOverview,
     pacingStrategy: { ...guideData.pacingStrategy },
     cutoffManagement: { ...guideData.cutoffManagement },

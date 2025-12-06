@@ -8,8 +8,8 @@ export function FinalCTA() {
   const [selectedTier, setSelectedTier] = useState("custom")
 
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative py-20 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left: Emotional Hook */}
           <div className="space-y-6">

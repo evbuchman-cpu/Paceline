@@ -110,13 +110,20 @@ function SignInContent() {
           className="underline hover:text-gray-700 dark:hover:text-gray-300"
         >
           Terms of Service
-        </Link>{" "}
-        and{" "}
+        </Link>
+        ,{" "}
         <Link
           href="/privacy-policy"
           className="underline hover:text-gray-700 dark:hover:text-gray-300"
         >
           Privacy Policy
+        </Link>
+        , and{" "}
+        <Link
+          href="/refund-policy"
+          className="underline hover:text-gray-700 dark:hover:text-gray-300"
+        >
+          Refund Policy
         </Link>
       </p>
     </div>

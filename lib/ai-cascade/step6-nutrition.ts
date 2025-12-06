@@ -6,6 +6,7 @@ import {
   NutritionInput,
   AIStepResponse,
 } from "../schemas/guide-sections";
+import { logger } from "@/lib/logger";
 
 // Increased token limit for nutrition timeline (many entries)
 const MAX_TOKENS = 10240;
@@ -35,7 +36,7 @@ export async function generateNutritionTimeline(
   input: NutritionInput
 ): Promise<AIStepResponse<NutritionTimeline>> {
   const startTime = Date.now();
-  console.log("🚀 Step 6 - Nutrition Timeline");
+  logger.debug("AI Step 6: Nutrition Timeline");
 
   // Extract only needed timing from pacing
   const pacingTiming = input.pacingStrategy.sections.map(s => ({
@@ -104,10 +105,10 @@ Max 15 timeline entries. Be specific: "1 Honey Stinger (160cal)" not "waffle". T
   );
 
   if (truncationDetected) {
-    console.warn(`⚠️ Step 6 - Nutrition Timeline: Truncation detected`);
+    logger.warn("AI Step 6: Truncation detected", { step: "Nutrition Timeline" });
   }
   if (recoveryApplied) {
-    console.log(`🔧 Step 6 - Nutrition Timeline: Recovery applied`);
+    logger.debug("AI Step 6: Recovery applied", { step: "Nutrition Timeline" });
   }
 
   const generationTime = Date.now() - startTime;

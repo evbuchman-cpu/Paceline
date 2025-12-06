@@ -31,7 +31,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { StravaConnect } from "./StravaConnect";
+import { StravaConnect, type StravaAnalysis } from "./StravaConnect";
 
 interface CustomFormProps {
   purchaseId: string;
@@ -117,7 +117,7 @@ export function CustomForm({
   ];
 
   // Define what counts as "empty" vs user-filled
-  const isFieldFilled = (field: string, value: any) => {
+  const isFieldFilled = (field: string, value: unknown) => {
     if (!value || value === "") return false;
 
     // Don't count auto-generated default date as "filled" unless user changed it
@@ -157,7 +157,7 @@ export function CustomForm({
     }
   };
 
-  const handleStravaAnalysisComplete = (data: any) => {
+  const handleStravaAnalysisComplete = (data: StravaAnalysis) => {
     // Update form with Strava data
     form.setValue("stravaAthleteId", data.totalActivities ? "connected" : "");
     form.setValue("stravaData", data);
@@ -397,7 +397,7 @@ export function CustomForm({
               <StravaConnect
                 questionnaireId={questionnaireId}
                 isConnected={!!initialData?.stravaAthleteId}
-                stravaData={initialData?.stravaData as any}
+                stravaData={(initialData?.stravaData as StravaAnalysis) || null}
                 onAnalysisComplete={handleStravaAnalysisComplete}
               />
             )}

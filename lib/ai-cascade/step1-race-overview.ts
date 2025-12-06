@@ -6,6 +6,7 @@ import {
   RaceOverviewInput,
   AIStepResponse,
 } from "../schemas/guide-sections";
+import { logger } from "@/lib/logger";
 
 const MAX_TOKENS = 8192;
 
@@ -37,7 +38,7 @@ export async function generateRaceOverview(
   input: RaceOverviewInput
 ): Promise<AIStepResponse<RaceOverview>> {
   const startTime = Date.now();
-  console.log("🚀 Step 1 - Race Overview:", input.raceName);
+  logger.debug("AI Step 1: Race Overview started", { raceName: input.raceName });
 
   // Build prompt with website content if available
   const websiteSection = input.websiteContent
@@ -98,16 +99,18 @@ Max 12 elevation points. Include all aid stations. Identify 3-5 tough sections.`
   );
 
   if (truncationDetected) {
-    console.warn(`⚠️ Step 1 - Race Overview: Truncation detected`);
+    logger.warn("AI Step 1: Truncation detected", { step: "Race Overview" });
   }
   if (recoveryApplied) {
-    console.log(`🔧 Step 1 - Race Overview: Recovery applied`);
+    logger.debug("AI Step 1: Recovery applied", { step: "Race Overview" });
   }
 
   const generationTime = Date.now() - startTime;
-  console.log(
-    `✅ Step 1 - Race Overview complete: ${generationTime}ms | ${response.usage.input_tokens} in / ${response.usage.output_tokens} out`
-  );
+  logger.debug("AI Step 1: Race Overview complete", {
+    generationTimeMs: generationTime,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  });
 
   return {
     success: true,

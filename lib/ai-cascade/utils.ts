@@ -1,5 +1,6 @@
 import { z } from "zod";
 import Anthropic from "@anthropic-ai/sdk";
+import { logger } from "@/lib/logger";
 
 // === TYPES ===
 
@@ -50,7 +51,7 @@ export async function withConciseRetry(
   let lastResponse: Anthropic.Messages.Message | null = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    console.log(`📤 ${stepName}: Attempt ${attempt}/${maxRetries}`);
+    logger.debug("AI step attempt", { stepName, attempt, maxRetries });
 
     const response = await withRetry(
       () => anthropic.messages.create({
@@ -69,20 +70,29 @@ export async function withConciseRetry(
     const isTruncated = response.stop_reason === "max_tokens" || tokenUtilization >= 0.99;
 
     if (!isTruncated) {
-      console.log(`✅ ${stepName}: Complete response received on attempt ${attempt}`);
+      logger.debug("AI step complete", {
+        stepName,
+        attempt,
+        outputTokens: response.usage.output_tokens,
+      });
       return response;
     }
 
     // Log truncation status
-    console.log(
-      `⚠️ ${stepName}: Truncated (${response.usage.output_tokens}/${maxTokens} tokens, ${(tokenUtilization * 100).toFixed(1)}%)`
-    );
+    logger.warn("AI step response truncated", {
+      stepName,
+      outputTokens: response.usage.output_tokens,
+      maxTokens,
+      utilizationPercent: (tokenUtilization * 100).toFixed(1),
+    });
 
     // If this is the last attempt, return what we have
     if (attempt === maxRetries) {
-      console.warn(
-        `⚠️ ${stepName}: Max retries (${maxRetries}) reached, proceeding with truncated output`
-      );
+      logger.warn("AI step max retries reached, proceeding with truncated output", {
+        stepName,
+        maxRetries,
+        outputTokens: response.usage.output_tokens,
+      });
       return response;
     }
 
@@ -118,11 +128,12 @@ export async function withRetry<T>(
     } catch (error) {
       const isLastAttempt = attempt === maxRetries;
       const delay = 1000 * Math.pow(2, attempt - 1);
-      console.log(
-        `⚠️ ${operationName}: Attempt ${attempt}/${maxRetries} failed${
-          isLastAttempt ? "" : `, retrying in ${delay}ms...`
-        }`
-      );
+      logger.warn("Operation attempt failed", {
+        operationName,
+        attempt,
+        maxRetries,
+        retryDelayMs: isLastAttempt ? undefined : delay,
+      });
       if (isLastAttempt) throw error;
       await new Promise((r) => setTimeout(r, delay));
     }
@@ -238,7 +249,13 @@ export function robustParseAndValidate<T>(
       `"${jsonString.slice(-300)}"`,
     ].filter(Boolean).join("\n");
 
-    console.error(errorDetails);
+    logger.error("JSON parse failed", undefined, {
+      stepName,
+      parseError,
+      truncationDetected,
+      tokenUtilization: `${(tokenUtilization * 100).toFixed(1)}%`,
+      issues: issues.join("; "),
+    });
     throw new Error(errorDetails);
   }
 
@@ -255,7 +272,7 @@ export function robustParseAndValidate<T>(
 
       if (retryResult.success) {
         recoveryApplied = true;
-        console.log(`${stepName}: Applied defaults for missing fields`);
+        logger.debug("Applied defaults for missing fields", { stepName });
         return {
           data: retryResult.data,
           truncationDetected,

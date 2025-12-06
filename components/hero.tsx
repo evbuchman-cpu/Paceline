@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Star, ArrowRight } from "lucide-react"
-import { TopographicPattern } from "@/components/patterns"
+import Image from "next/image"
 
 const scrollToSection = (id: string) => {
   const element = document.getElementById(id)
@@ -15,22 +15,35 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative pt-16 pb-8 md:pt-20 md:pb-12 px-4 sm:px-6 lg:px-8 min-h-screen overflow-hidden"
+      className="relative pt-8 pb-8 md:pt-12 md:pb-12 px-4 sm:px-6 lg:px-8 min-h-screen overflow-hidden"
     >
-      <TopographicPattern />
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div className="space-y-6">
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-4xl lg:text-5xl xl:text-5xl font-semibold text-foreground leading-tight">
-                Stop piecing together advice.
-                <br />
-                <span className="text-[#2C5F4D]">Start executing with confidence.</span>
+            <div className="space-y-5">
+              {/*
+                LOCKED: Hero headline sizing - DO NOT MODIFY
+                These exact sizes prevent text overlap with image while keeping each sentence on ONE line
+                - text-[22px] sm:text-[28px] lg:text-[36px] xl:text-[42px] - Carefully calibrated
+                - whitespace-nowrap - Required to keep sentences on single lines
+                - font-bold - Brand requirement (700 weight)
+                If changes needed, test thoroughly on all breakpoints to ensure no image overlap
+              */}
+              <h1 className="font-sans text-[22px] sm:text-[28px] lg:text-[36px] xl:text-[42px] font-bold text-foreground leading-[1.2]">
+                <span className="block whitespace-nowrap">Stop piecing together advice.</span>
+                <span className="block whitespace-nowrap text-[#2C5F4D]">Start executing with confidence.</span>
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground font-serif leading-relaxed">
-                Personalized ultramarathon race guides with nutrition timing, pacing splits, and
-                terrain-specific strategies—so you can focus on the miles, not the spreadsheets.
-              </p>
+              <div className="font-serif text-sm sm:text-base lg:text-base text-[#4A5859] leading-[1.6] space-y-2">
+                <p className="whitespace-nowrap">
+                  Personalized ultramarathon race guides built for <span className="font-semibold text-[#C87350]">Your fitness</span>, <span className="font-semibold text-[#C87350]">Your crew</span>, <span className="font-semibold text-[#C87350]">Your race</span>.
+                </p>
+                <p className="whitespace-nowrap">
+                  Strava-powered pacing. Nutrition timelines. Crew logistics. Delivered in 24 hours.
+                </p>
+                <p className="whitespace-nowrap">
+                  You spend 10 minutes answering questions. We handle the rest.
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -41,20 +54,10 @@ export function Hero() {
                 data-testid="button-hero-primary-cta"
               >
                 Build Your Race Plan
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => scrollToSection("email-capture")}
-                className="text-base font-medium"
-                data-testid="button-hero-secondary-cta"
-              >
-                Get Free Guide
               </Button>
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
                   <div
@@ -78,11 +81,14 @@ export function Hero() {
             </div>
           </div>
 
-          <div className="relative h-[350px] lg:h-[500px] rounded-lg overflow-hidden shadow-2xl">
-            <img
-              src="/gritty-ultrarunner-mid-race-struggle-determination.jpg"
-              alt="Ultrarunner executing race strategy during ultramarathon"
-              className="w-full h-full object-cover"
+          <div className="relative w-full max-w-md mx-auto lg:max-w-lg rounded-lg overflow-hidden shadow-2xl">
+            <Image
+              src="/paceline-hero-finish-line.png"
+              alt="Ultrarunner crossing finish line with arms raised in victory"
+              width={1200}
+              height={800}
+              className="w-full h-auto"
+              priority
             />
           </div>
         </div>

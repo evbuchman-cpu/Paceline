@@ -29,7 +29,7 @@ export default function TermsOfService() {
                   1. Acceptance of Terms
                 </h2>
                 <p className="leading-relaxed">
-                  By accessing and using Apple Pass (&apos;Service&apos;), you
+                  By accessing and using Paceline (&quot;Service&quot;), you
                   accept and agree to be bound by the terms and provisions of
                   this agreement. If you do not agree to abide by the above,
                   please do not use this Service.
@@ -41,11 +41,13 @@ export default function TermsOfService() {
                   2. Description of Service
                 </h2>
                 <p className="leading-relaxed">
-                  Apple Pass provides a platform for creating, managing, and
-                  distributing digital passes for Apple Wallet. Our Service
-                  includes tools for designing passes, managing pass data,
-                  tracking pass usage, and sending push notifications to pass
-                  holders.
+                  Paceline provides AI-powered race-day execution guides for
+                  ultramarathon runners. Our Service includes personalized
+                  pacing strategies, crew logistics, nutrition timelines, drop
+                  bag strategies, cutoff management, and contingency protocols
+                  delivered as comprehensive PDF guides. Guides are generated
+                  using artificial intelligence based on your questionnaire
+                  responses and, for premium tiers, Strava fitness data.
                 </p>
               </section>
 
@@ -80,33 +82,35 @@ export default function TermsOfService() {
 
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  4. Subscription and Payment
+                  4. Purchases and Payment
                 </h2>
                 <div className="space-y-3">
                   <p className="leading-relaxed">
-                    Some aspects of our Service are provided on a subscription
-                    basis. By subscribing, you agree to:
+                    Our Service is offered through one-time purchases for
+                    individual race guides or multi-guide bundles. By making a
+                    purchase, you agree to:
                   </p>
                   <ul className="list-disc list-inside space-y-1 ml-4">
                     <li>
-                      Pay all applicable fees as described in our pricing plans
+                      Pay all applicable fees as described in our pricing tiers
+                      (Essential, Custom, or Ultra Bundle)
                     </li>
                     <li>
                       Provide current, complete, and accurate billing
                       information
                     </li>
                     <li>
-                      Authorize us to charge your payment method on a recurring
-                      basis
+                      Complete the required questionnaire within 90 days of
+                      purchase to receive your guide
                     </li>
                     <li>
                       Be responsible for all charges incurred under your account
                     </li>
                   </ul>
                   <p className="leading-relaxed mt-3">
-                    Subscription fees are non-refundable except as required by
-                    law. We reserve the right to change our subscription plans
-                    or adjust pricing with 30 days&apos; notice.
+                    Purchases are subject to our Refund Policy. We reserve the
+                    right to modify pricing for future purchases with notice
+                    posted on our website.
                   </p>
                 </div>
               </section>
@@ -126,27 +130,39 @@ export default function TermsOfService() {
                       laws or regulations
                     </li>
                     <li>
-                      Create passes that contain false, misleading, or
-                      fraudulent information
+                      Provide false, misleading, or fraudulent information in
+                      your questionnaire
                     </li>
                     <li>
                       Impersonate any person or entity or misrepresent your
                       affiliation
                     </li>
                     <li>
-                      Upload or transmit viruses or any other type of malicious
-                      code
-                    </li>
-                    <li>
                       Attempt to gain unauthorized access to any portion of the
                       Service
                     </li>
-                    <li>Interfere with or disrupt the Service or servers</li>
                     <li>
-                      Use the Service to send spam or unsolicited communications
+                      Interfere with or disrupt the Service, servers, or AI
+                      generation systems
                     </li>
-                    <li>Violate the privacy rights of others</li>
+                    <li>
+                      Redistribute, resell, or share generated guides with
+                      others for commercial purposes
+                    </li>
+                    <li>
+                      Reverse engineer or attempt to extract our AI prompts or
+                      algorithms
+                    </li>
+                    <li>
+                      Use the Service to generate guides for others without
+                      purchasing appropriate licenses
+                    </li>
                   </ul>
+                  <p className="leading-relaxed mt-3">
+                    You acknowledge that race guides are for personal use only
+                    and that you are solely responsible for your safety and
+                    race-day decisions.
+                  </p>
                 </div>
               </section>
 
@@ -159,21 +175,33 @@ export default function TermsOfService() {
                     Our Intellectual Property
                   </h3>
                   <p className="leading-relaxed">
-                    The Service and its original content, features, and
-                    functionality are owned by Apple Pass and are protected by
-                    international copyright, trademark, patent, trade secret,
-                    and other intellectual property laws.
+                    The Service and its original content, features, AI models,
+                    prompts, algorithms, and functionality are owned by Paceline
+                    and are protected by international copyright, trademark,
+                    trade secret, and other intellectual property laws.
                   </p>
 
                   <h3 className="text-lg font-medium mb-2 mt-4">
-                    Your Content
+                    AI-Generated Content
                   </h3>
                   <p className="leading-relaxed">
-                    You retain ownership of any content you create using our
-                    Service. By using our Service, you grant us a worldwide,
-                    non-exclusive, royalty-free license to use, reproduce, and
-                    display your content solely for the purpose of providing the
-                    Service to you.
+                    Race guides generated by our Service are created using
+                    artificial intelligence based on your inputs. You receive a
+                    personal, non-transferable license to use the generated
+                    guide for your own race preparation. You may not
+                    redistribute, resell, or share guides commercially without
+                    our written permission.
+                  </p>
+
+                  <h3 className="text-lg font-medium mb-2 mt-4">
+                    Your Questionnaire Data
+                  </h3>
+                  <p className="leading-relaxed">
+                    You retain ownership of the information you provide in
+                    questionnaires. By using our Service, you grant us a
+                    worldwide, non-exclusive, royalty-free license to use your
+                    data solely for generating your personalized guide and
+                    improving our Service.
                   </p>
                 </div>
               </section>
@@ -195,8 +223,8 @@ export default function TermsOfService() {
                 </h2>
                 <div className="space-y-3">
                   <p className="leading-relaxed uppercase font-medium">
-                    The Service is provided on an &aposAS IS&apos and &aposAS
-                    AVAILABLE&apos basis without warranties of any kind, either
+                    The Service is provided on an &quot;AS IS&quot; and &quot;AS
+                    AVAILABLE&quot; basis without warranties of any kind, either
                     express or implied, including but not limited to:
                   </p>
                   <ul className="list-disc list-inside space-y-1 ml-4">
@@ -210,7 +238,33 @@ export default function TermsOfService() {
                     <li>
                       That the Service is free of viruses or harmful components
                     </li>
+                    <li>
+                      That AI-generated content will be accurate, complete, or
+                      suitable for your specific race
+                    </li>
                   </ul>
+                  <p className="leading-relaxed mt-4 font-medium">
+                    IMPORTANT: Race guides are AI-generated recommendations based
+                    on limited data. We do not guarantee:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>That you will finish your race</li>
+                    <li>That you will meet cutoff times</li>
+                    <li>
+                      That strategies will work for your specific physiology
+                    </li>
+                    <li>The accuracy of pace predictions or nutrition plans</li>
+                    <li>
+                      That weather forecasts or course conditions will match our
+                      data
+                    </li>
+                  </ul>
+                  <p className="leading-relaxed mt-3">
+                    You are solely responsible for your race preparation, safety,
+                    and decision-making. Always consult with medical
+                    professionals, coaches, and race organizers before following
+                    any training or race-day recommendations.
+                  </p>
                 </div>
               </section>
 
@@ -219,12 +273,11 @@ export default function TermsOfService() {
                   9. Limitation of Liability
                 </h2>
                 <p className="leading-relaxed uppercase font-medium">
-                  To the maximum extent permitted by law, Apple Pass shall not
-                  be liable for any indirect, incidental, special,
-                  consequential, or punitive damages, or any loss of profits or
-                  revenues, whether incurred directly or indirectly, or any loss
-                  of data, use, goodwill, or other intangible losses resulting
-                  from:
+                  To the maximum extent permitted by law, Paceline shall not be
+                  liable for any indirect, incidental, special, consequential, or
+                  punitive damages, or any loss of profits or revenues, whether
+                  incurred directly or indirectly, or any loss of data, use,
+                  goodwill, or other intangible losses resulting from:
                 </p>
                 <ul className="list-disc list-inside space-y-1 ml-4 mt-3">
                   <li>Your use or inability to use the Service</li>
@@ -237,8 +290,24 @@ export default function TermsOfService() {
                     Any bugs, viruses, or similar harmful code transmitted
                     through the Service
                   </li>
-                  <li>Any errors or omissions in any content</li>
+                  <li>Any errors or omissions in AI-generated content</li>
+                  <li>
+                    Injuries, accidents, or health issues arising from following
+                    race guide recommendations
+                  </li>
+                  <li>
+                    Failure to finish races or meet cutoff times based on our
+                    pacing strategies
+                  </li>
+                  <li>
+                    Adverse reactions to nutrition or hydration recommendations
+                  </li>
+                  <li>Third-party AI service downtime or errors (Anthropic Claude API, etc.)</li>
                 </ul>
+                <p className="leading-relaxed mt-3">
+                  IN NO EVENT SHALL OUR TOTAL LIABILITY TO YOU EXCEED THE AMOUNT
+                  YOU PAID FOR THE SERVICE IN THE PRECEDING 12 MONTHS.
+                </p>
               </section>
 
               <section>
@@ -246,13 +315,18 @@ export default function TermsOfService() {
                   10. Indemnification
                 </h2>
                 <p className="leading-relaxed">
-                  You agree to defend, indemnify, and hold harmless Apple Pass
-                  and its affiliates, officers, directors, employees, and agents
-                  from and against any claims, liabilities, damages, judgments,
+                  You agree to defend, indemnify, and hold harmless Paceline and
+                  its affiliates, officers, directors, employees, and agents from
+                  and against any claims, liabilities, damages, judgments,
                   awards, losses, costs, expenses, or fees arising out of or
-                  relating to your violation of these Terms or your use of the
-                  Service.
+                  relating to:
                 </p>
+                <ul className="list-disc list-inside space-y-1 ml-4 mt-2">
+                  <li>Your violation of these Terms</li>
+                  <li>Your use of the Service or generated guides</li>
+                  <li>Any injuries or damages sustained during race events</li>
+                  <li>Your breach of any third-party rights</li>
+                </ul>
               </section>
 
               <section>
@@ -274,42 +348,56 @@ export default function TermsOfService() {
                 </h2>
                 <p className="leading-relaxed">
                   These Terms shall be governed and construed in accordance with
-                  the laws of [Your Jurisdiction], without regard to its
-                  conflict of law provisions. Our failure to enforce any right
-                  or provision of these Terms will not be considered a waiver of
-                  those rights.
+                  the laws of the State of Delaware, United States, without
+                  regard to its conflict of law provisions. Our failure to
+                  enforce any right or provision of these Terms will not be
+                  considered a waiver of those rights.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  13. Changes to Terms
+                  13. Force Majeure
+                </h2>
+                <p className="leading-relaxed">
+                  We shall not be liable for any failure or delay in performance
+                  of the Service due to circumstances beyond our reasonable
+                  control, including but not limited to: third-party AI service
+                  outages (Anthropic Claude API), natural disasters, acts of government,
+                  internet service disruptions, or other force majeure events.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                  14. Changes to Terms
                 </h2>
                 <p className="leading-relaxed">
                   We reserve the right, at our sole discretion, to modify or
                   replace these Terms at any time. If a revision is material, we
                   will provide at least 30 days notice prior to any new terms
-                  taking effect.
+                  taking effect. What constitutes a material change will be
+                  determined at our sole discretion.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  14. Contact Information
+                  15. Contact Information
                 </h2>
                 <p className="leading-relaxed">
                   If you have any questions about these Terms, please contact us
                   at:
                 </p>
                 <div className="mt-3 space-y-1">
-                  <p>Email: legal@applepass.com</p>
-                  <p>Address: [Your Company Address]</p>
+                  <p>Email: legal@paceline.run</p>
+                  <p>Support: support@paceline.run</p>
                 </div>
               </section>
 
               <section className="pt-8 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  By using Apple Pass, you acknowledge that you have read,
+                  By using Paceline, you acknowledge that you have read,
                   understood, and agree to be bound by these Terms of Service.
                 </p>
               </section>

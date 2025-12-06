@@ -1,4 +1,4 @@
-import { brandColors, fonts } from '../styles';
+import { brandColors } from '../styles';
 import type { PacingStrategy } from '../../schemas/guide-sections';
 
 export function generatePacingSection(data: PacingStrategy): string {

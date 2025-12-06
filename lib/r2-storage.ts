@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { logger } from "@/lib/logger";
 
 // Configure S3 client for Cloudflare R2
 const r2Client = new S3Client({
@@ -57,7 +58,11 @@ export async function uploadToR2(
     const publicUrl = `https://${publicDomain}/${fileName}`;
     return publicUrl;
   } catch (error) {
-    console.error("Error uploading to R2:", error);
+    logger.error("Error uploading to R2", error, {
+      fileName,
+      contentType,
+      bufferSize: buffer.length,
+    });
 
     if (error instanceof Error) {
       throw new Error(`Failed to upload to R2: ${error.message}`);
@@ -86,7 +91,7 @@ export async function deleteFromR2(fileName: string): Promise<void> {
       })
     );
   } catch (error) {
-    console.error("Error deleting from R2:", error);
+    logger.error("Error deleting from R2", error, { fileName });
 
     if (error instanceof Error) {
       throw new Error(`Failed to delete from R2: ${error.message}`);

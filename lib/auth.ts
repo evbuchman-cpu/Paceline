@@ -13,6 +13,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { logger } from "@/lib/logger";
 
 // Utility function to safely parse dates
 function safeParseDate(value: string | Date | null | undefined): Date | null {
@@ -137,8 +138,13 @@ export const auth = betterAuth({
               type === "subscription.uncanceled" ||
               type === "subscription.updated"
             ) {
-              console.log("🎯 Processing subscription webhook:", type);
-              console.log("📦 Payload data:", JSON.stringify(data, null, 2));
+              // Audit log for webhook processing (always logged for compliance)
+              logger.audit("subscription_webhook_received", {
+                webhookType: type,
+                subscriptionId: data.id,
+                customerId: data.customerId,
+                status: data.status,
+              });
 
               try {
                 // STEP 1: Extract user ID from customer data
@@ -178,7 +184,7 @@ export const auth = betterAuth({
                   userId: userId as string | null,
                 };
 
-                console.log("💾 Final subscription data:", {
+                logger.debug("Prepared subscription data for upsert", {
                   id: subscriptionData.id,
                   status: subscriptionData.status,
                   userId: subscriptionData.userId,
@@ -218,7 +224,10 @@ export const auth = betterAuth({
                     },
                   });
 
-                console.log("✅ Upserted subscription:", data.id);
+                logger.info("Subscription upserted successfully", {
+                  subscriptionId: data.id,
+                  status: subscriptionData.status,
+                });
 
                 // STEP 4: Create or update purchase record
                 if (userId && data.productId) {
@@ -250,7 +259,11 @@ export const auth = betterAuth({
                           updatedAt: new Date(),
                         });
 
-                        console.log("✅ Created purchase record for subscription:", data.id);
+                        logger.info("Purchase record created for subscription", {
+                          subscriptionId: data.id,
+                          tier,
+                          guidesRemaining,
+                        });
                       } else {
                         // Update existing purchase
                         await db
@@ -261,20 +274,29 @@ export const auth = betterAuth({
                           })
                           .where(eq(purchase.polarSubscriptionId, data.id));
 
-                        console.log("✅ Updated purchase record for subscription:", data.id);
+                        logger.info("Purchase record updated for subscription", {
+                          subscriptionId: data.id,
+                          newStatus: data.status === "active" ? "completed" : "pending",
+                        });
                       }
                     } catch (purchaseError) {
-                      console.error("💥 Error creating/updating purchase:", purchaseError);
+                      logger.error("Error creating/updating purchase record", purchaseError, {
+                        subscriptionId: data.id,
+                        tier,
+                      });
                     }
                   } else {
-                    console.warn("⚠️ Unknown product ID, skipping purchase creation:", data.productId);
+                    logger.warn("Unknown product ID, skipping purchase creation", {
+                      productId: data.productId,
+                      subscriptionId: data.id,
+                    });
                   }
                 }
               } catch (error) {
-                console.error(
-                  "💥 Error processing subscription webhook:",
-                  error,
-                );
+                logger.error("Error processing subscription webhook", error, {
+                  webhookType: type,
+                  subscriptionId: data.id,
+                });
                 // Don't throw - let webhook succeed to avoid retries
               }
             }

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { toast } from "sonner";
@@ -24,10 +25,10 @@ function SignInContent() {
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle className="text-lg md:text-xl">
-            Welcome to Nextjs Starter Kit
+            Welcome to Paceline
           </CardTitle>
           <CardDescription className="text-xs md:text-sm">
-            Use your google account to login to your account
+            Use your Google account to sign up
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -96,12 +97,35 @@ function SignInContent() {
                     d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0C79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
                   ></path>
                 </svg>
-                Login with Google
+                Sign up with Google
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
+      <p className="mt-6 text-xs text-center text-gray-500 dark:text-gray-400 max-w-md">
+        By signing up, you agree to our{" "}
+        <Link
+          href="/terms-of-service"
+          className="underline hover:text-gray-700 dark:hover:text-gray-300"
+        >
+          Terms of Service
+        </Link>
+        ,{" "}
+        <Link
+          href="/privacy-policy"
+          className="underline hover:text-gray-700 dark:hover:text-gray-300"
+        >
+          Privacy Policy
+        </Link>
+        , and{" "}
+        <Link
+          href="/refund-policy"
+          className="underline hover:text-gray-700 dark:hover:text-gray-300"
+        >
+          Refund Policy
+        </Link>
+      </p>
     </div>
   );
 }

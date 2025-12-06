@@ -236,8 +236,6 @@ export function validateAndCorrectConsistency(
   );
 
   // Check for station count mismatches (potential errors)
-  const referenceCount = referenceStations.length;
-
   // For cutoffs, we expect all stations with cutoffs
   const stationsWithCutoffs = raceOverview.aidStations.filter(s => s.cutoff).length;
   if (cutoffManagement.stations.length !== stationsWithCutoffs && stationsWithCutoffs > 0) {
