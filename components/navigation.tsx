@@ -9,17 +9,27 @@ export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="sticky top-0 z-50 bg-[#FFFCF7]/80 backdrop-blur-sm shadow-sm px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-end gap-1.5">
+            {/* Mountain Icon */}
             <Image
-              src="/PaceLine Logo.png"
-              alt="Paceline Logo"
-              width={150}
-              height={40}
-              className="h-8 w-auto"
+              src="/paceline-icon.svg"
+              alt="Paceline Icon"
+              width={80}
+              height={80}
+              className="h-11 w-auto"
+              priority
+            />
+            {/* PACELINE Text */}
+            <Image
+              src="/paceline-text.svg"
+              alt="Paceline"
+              width={200}
+              height={50}
+              className="h-9 w-auto"
               priority
             />
           </div>
@@ -39,7 +49,7 @@ export function Navigation() {
               FAQ
             </a>
             <Button className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-              <a href="/pricing">Get Started</a>
+              <a href="#email-capture">Get Free Race Scheduler</a>
             </Button>
           </div>
 
@@ -83,7 +93,7 @@ export function Navigation() {
               FAQ
             </a>
             <Button className="w-full bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-              <a href="/pricing">Get Started</a>
+              <a href="#email-capture">Get Free Race Scheduler</a>
             </Button>
           </div>
         </div>
