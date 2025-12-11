@@ -1098,7 +1098,65 @@ AI-generated content can have mathematical errors and inconsistencies. Before ge
 
 ## Phase 3: Scale & Optimize (Months 3-6)
 
-**Goal:** Scale to 500 guides, $50K revenue
+**Goal:** Scale to 500 guides, $50K revenue, prepare for MRR launch
+
+### Month 3: MCP Readiness Monitoring Setup (P2)
+**Agent:** @Fullstack-MVP-Builder
+**Time:** 2-3 hours
+**Priority:** Important for future planning
+
+**Why this matters:**
+Automates the decision of WHEN to implement MCP (Model Context Protocol). The code will alert you when your metrics justify the investment, so you don't have to remember or guess.
+
+**What to build:**
+- [ ] Create `lib/mcp-readiness-monitor.ts`
+  - Tracks: total guides, token costs, active subscribers, update requests
+  - Calculates readiness score (0-100)
+  - Determines if MCP implementation is justified
+  - See `/docs/LIVING_PLANS_MRR_STRATEGY.md` for full code
+
+- [ ] Create cron job `app/api/cron/mcp-readiness-check/route.ts`
+  - Runs every Monday at 9am
+  - Emails you if readiness score > 60 (high priority)
+  - Includes ROI calculation and payback period
+
+- [ ] Add cron to `vercel.json`:
+  ```json
+  {
+    "crons": [{
+      "path": "/api/cron/mcp-readiness-check",
+      "schedule": "0 9 * * 1"
+    }]
+  }
+  ```
+
+- [ ] Add MCP metrics table to `db/schema.ts`
+  ```typescript
+  export const mcpMetrics = pgTable("mcp_metrics", {
+    id: text("id").primaryKey(),
+    date: timestamp("date").notNull().defaultNow(),
+    totalGuidesGenerated: integer("totalGuidesGenerated").notNull(),
+    avgTokensPerGuide: integer("avgTokensPerGuide").notNull(),
+    monthlyTokenCost: integer("monthlyTokenCost").notNull(),
+    activeSubscribers: integer("activeSubscribers").notNull(),
+    readinessScore: integer("readinessScore").notNull(),
+    mcpRecommended: boolean("mcpRecommended").default(false),
+  });
+  ```
+
+**Success criteria:**
+- Weekly email reports arrive every Monday
+- Metrics tracked accurately
+- Alert triggers when thresholds met
+- ROI calculations are clear
+
+**What this enables:**
+- You'll know EXACTLY when to implement MCP (likely Month 6-8)
+- No guessing, no premature optimization
+- Automatic alerts with ROI justification
+- Focus on growth now, optimize later when it matters
+
+---
 
 ### Month 3-4: Feature Expansion (P2-P3)
 
@@ -1151,6 +1209,159 @@ AI-generated content can have mathematical errors and inconsistencies. Before ge
   `}
   ```
 - Agent: @AI-Integration-Specialist
+
+---
+
+### Month 6: Launch Living Plans™ Premium Subscription (P1-P2)
+**Agent:** @Fullstack-MVP-Builder + @Growth-Conversion-Specialist
+**Time:** 15-20 hours
+**Priority:** CRITICAL for MRR growth
+
+**Goal:** Launch premium subscription tier to generate Monthly Recurring Revenue (MRR)
+
+**Why this matters:**
+- Creates predictable MRR ($1,900+/month at 100 subscribers)
+- Increases customer lifetime value (1 purchase → 12 months avg)
+- Enables "Living Plans" feature (auto-updating guides)
+- Competitive moat (no competitor has dynamic plans)
+- Revenue stability during off-season
+
+**See full strategy:** `/docs/LIVING_PLANS_MRR_STRATEGY.md`
+
+**Prerequisites:**
+- ✅ 500+ one-time guides sold (validates demand)
+- ✅ 8+/10 customer satisfaction (validates quality)
+- ✅ <5% refund rate (validates product-market fit)
+- ⏳ MCP readiness monitor shows score > 60 (justifies dynamic features)
+
+**Phase 1: Setup Subscription Tier (Week 1-2)**
+- [ ] Create Living Plans product in Polar.sh
+  - Price: $19/month per active race
+  - Annual option: $180/year (save $48)
+  - Beta pricing: 3 months for $39 (first 50 subscribers)
+
+- [ ] Update `db/schema.ts` with new tables:
+  ```typescript
+  export const livingPlanSubscription = pgTable("living_plan_subscription", {
+    id: text("id").primaryKey(),
+    userId: text("userId").notNull().references(() => user.id),
+    polarSubscriptionId: text("polarSubscriptionId").notNull(),
+    status: text("status").notNull(), // "active" | "paused" | "canceled"
+    activeRaces: jsonb("activeRaces"), // Array of guides
+    lastWeatherCheck: timestamp("lastWeatherCheck"),
+    lastStravaCheck: timestamp("lastStravaCheck"),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+  });
+
+  export const guideUpdate = pgTable("guide_update", {
+    id: text("id").primaryKey(),
+    guideId: text("guideId").notNull().references(() => guide.id),
+    updateType: text("updateType").notNull(), // "weather" | "strava" | "manual"
+    sectionsUpdated: jsonb("sectionsUpdated"),
+    changeReason: text("changeReason"),
+    notificationSent: boolean("notificationSent").default(false),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+  });
+  ```
+
+- [ ] Update pricing page (`app/pricing/page.tsx`)
+  - Add new tier card for Living Plans™
+  - Highlight "Auto-Updating Plans" feature
+  - Add comparison table (static vs dynamic)
+
+- [ ] Build subscription management in dashboard
+  - `app/dashboard/subscription/page.tsx`
+  - Show active/paused status
+  - Show active races being monitored
+  - Show recent updates to guides
+  - Pause/cancel subscription controls
+
+**Phase 2: Marketing Launch (Week 2-3)**
+- [ ] Create email templates for Living Plans launch
+  - `emails/living-plans-launch.tsx` (announcement to all customers)
+  - `emails/living-plans-update-notification.tsx` (when guide updates)
+  - `emails/subscription-paused.tsx` (when no active races)
+
+- [ ] Send launch email to existing customers
+  - Target: Custom tier buyers (60% of customers)
+  - Offer: Beta pricing (3 months for $39)
+  - CTA: Upgrade to Living Plans
+
+- [ ] Update landing page with testimonial section
+  - "My plan updated when the forecast changed to 90°F. Saved my race!" - Alex Chen
+  - "I got injured 3 weeks out. Paceline adjusted my pacing automatically." - Sarah M.
+
+- [ ] Create FAQ page for subscriptions
+  - How does billing work? (only charged when active race)
+  - Can I cancel anytime? (yes)
+  - What happens if I don't have upcoming races? (subscription pauses)
+
+**Phase 3: Implement MCP for Dynamic Features (Week 4-8)**
+**Prerequisites:** MCP readiness monitor alerts you (score > 60)
+
+- [ ] Follow `/docs/MCP_IMPLEMENTATION_PLAN.md` Phase 2: Cost Optimization
+  - Install MCP SDK: `npm install @modelcontextprotocol/sdk`
+  - Create 5 core MCP tools:
+    - `get_athlete_fitness_summary` (Strava data → 50 tokens vs 5,000)
+    - `get_race_elevation_summary` (Course profile → 200 tokens vs 1,000)
+    - `get_weather_summary` (Forecast → 50 tokens vs 500)
+    - `get_nutrition_preferences` (User prefs → 30 tokens vs 300)
+    - `calculate_cutoff_buffers` (Aid station math)
+  - Refactor AI cascade to use MCP tools
+  - Test token reduction (target: 85% savings)
+
+- [ ] Follow `/docs/MCP_IMPLEMENTATION_PLAN.md` Phase 3: Dynamic Monitoring
+  - Create MCP tools for monitoring:
+    - `get_upcoming_races` (races in next 7 days)
+    - `get_current_strava_fitness` (recent training vs plan)
+    - `update_guide_section` (modify guide dynamically)
+    - `send_update_notification` (email user about changes)
+
+  - Build daily monitoring agent:
+    ```typescript
+    // app/api/cron/daily-guide-monitor/route.ts
+    // Runs daily at 6am, checks all Living Plans subscribers
+    // - Checks weather forecast for races in 7 days
+    // - Checks Strava fitness for recent activity changes
+    // - Updates guides if conditions changed materially
+    // - Emails users with update notifications
+    ```
+
+  - Add cron to `vercel.json`:
+    ```json
+    {
+      "crons": [
+        {
+          "path": "/api/cron/daily-guide-monitor",
+          "schedule": "0 6 * * *"
+        }
+      ]
+    }
+    ```
+
+**Success Criteria:**
+- ✅ 50 subscribers by Month 9 ($950 MRR)
+- ✅ 150 subscribers by Month 12 ($2,850 MRR)
+- ✅ <10% monthly churn rate
+- ✅ 2-3 guide updates per subscriber per race
+- ✅ 9+/10 satisfaction with dynamic updates
+- ✅ 85% token cost reduction from MCP
+- ✅ Zero spam complaints (updates are helpful, not annoying)
+
+**Revenue Impact:**
+- Month 6: $0 MRR (just launched)
+- Month 9: $950 MRR ($11,400 ARR)
+- Month 12: $2,850 MRR ($34,200 ARR)
+- Year 2: $9,500 MRR ($114,000 ARR)
+
+**Files to create:**
+- `app/pricing/page.tsx` (update with new tier)
+- `app/dashboard/subscription/page.tsx` (subscription management)
+- `db/schema.ts` (add livingPlanSubscription, guideUpdate tables)
+- `emails/living-plans-launch.tsx`
+- `emails/living-plans-update-notification.tsx`
+- `lib/mcp/` (MCP server and tools - when ready)
+- `app/api/cron/daily-guide-monitor/route.ts`
 
 ---
 

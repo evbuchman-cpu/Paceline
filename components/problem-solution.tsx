@@ -1,73 +1,230 @@
-import { X, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
+"use client"
 
-export function ProblemSolution() {
+import { Button } from "@/components/ui/button"
+import { TimeComparisonBadge } from "@/components/ui/time-comparison-badge"
+import { ComparisonCard } from "@/components/ui/comparison-card"
+import {
+  Clock,
+  FileText,
+  Activity,
+  User,
+  ClipboardList,
+  HelpCircle,
+  Zap,
+  TrendingUp,
+  Target,
+  CheckCircle2,
+  Users,
+  Check,
+  ArrowDown,
+} from "lucide-react"
+
+interface ProblemSolutionSectionProps {
+  variant?: "two-column" | "timeline"
+  className?: string
+}
+
+// Problem items data
+const problemItems = [
+  {
+    icon: <Clock className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />,
+    text: "30 hours lost to research when you could be training or resting",
+  },
+  {
+    icon: <Activity className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />,
+    text: "Hit mile 38 too fast, bonk at mile 62, miss cutoff by 8 minutes",
+  },
+  {
+    icon: <ClipboardList className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />,
+    text: '"Honey, what do you need at mile 45?" - crew panics, you improvise',
+  },
+  {
+    icon: <HelpCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />,
+    text: "Forgot spare headlamp. It's mile 80. The sun is setting.",
+  },
+  {
+    icon: <FileText className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />,
+    text: '"At mile 62, slow down" - but by how much? Blogs don\'t say.',
+  },
+  {
+    icon: <User className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />,
+    text: "Generic plan for someone 20 lbs lighter running 70 mpw. You run 50.",
+  },
+]
+
+// Solution items data
+const solutionItems = [
+  {
+    icon: <Zap className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />,
+    text: "Order in 10 min. Guide ready in 5. Race-ready today.",
+  },
+  {
+    icon: <Target className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />,
+    text: '"Mile 38-45: 12:30 pace, +2800ft climb" - exact targets, no guessing',
+  },
+  {
+    icon: <Users className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />,
+    text: '"4:30pm: Meet Sarah at Winfield. Hand you trekking poles + headlamp."',
+  },
+  {
+    icon: <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />,
+    text: "🟢 Mile 62: Arrive 3:15 before cutoff - confidence, not panic",
+  },
+  {
+    icon: <TrendingUp className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />,
+    text: "90 days of runs analyzed. Pacing adjusted for YOUR Fitness.",
+  },
+  {
+    icon: <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />,
+    text: "8 comprehensive sections—nothing left to chance",
+  },
+]
+
+export function ProblemSolution({
+  variant = "two-column",
+  className,
+}: ProblemSolutionSectionProps) {
+  if (variant === "two-column") {
+    return (
+      <section className="relative py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Headline */}
+          <div className="text-center mb-8">
+            <h2 className="font-sans font-semibold text-3xl sm:text-4xl lg:text-5xl text-[#2C5F4D] mb-4 text-balance">
+              Your fitness. Your plan. Your race.
+            </h2>
+            <p className="font-serif text-lg text-[#4A5859] max-w-3xl mx-auto mb-8">
+              AI-powered race plan personalized to YOUR fitness.
+              <br />
+              Built in 10 minutes, not 30 hours.
+            </p>
+          </div>
+
+          {/* Time Comparison Badge */}
+          <TimeComparisonBadge
+            before="30 hours"
+            after="10 minutes"
+            savings="90%"
+          />
+
+          {/* Two-Column Grid */}
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <ComparisonCard
+              type="problem"
+              title="How Most Ultrarunners Plan"
+              items={problemItems}
+              anxietyLevel={8}
+            />
+            <ComparisonCard
+              type="solution"
+              title="How Paceline Users Plan"
+              badge="✨ The Paceline Way"
+              items={solutionItems}
+              anxietyLevel={2}
+            />
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <Button
+              size="lg"
+              className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold"
+              asChild
+            >
+              <a href="/pricing">
+                Stop Second-Guessing. Start Executing with Confidence
+              </a>
+            </Button>
+            <p className="text-sm text-[#4A5859] mt-3">
+              Essential $29 | Custom $99 | Ultra Bundle $497
+            </p>
+            <div className="flex items-center justify-center gap-4 mt-3 text-xs text-[#4A5859]">
+              <span>🔒 Secure Checkout</span>
+              <span>💳 Money-Back Guarantee</span>
+              <span>⭐ 4.8/5 Stars</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Variation B: Timeline
+  return <TimelineVariation />
+}
+
+// Helper component for timeline variation
+function TimelineVariation() {
   return (
     <section className="relative py-20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Headline (same as two-column) */}
+        <div className="text-center mb-8">
           <h2 className="font-sans font-semibold text-3xl sm:text-4xl lg:text-5xl text-[#2C5F4D] mb-4 text-balance">
-            Stop Piecing Together Advice From Scattered Sources
+            Your fitness. Your plan. Your race.
           </h2>
+          <p className="font-serif text-lg text-[#4A5859] max-w-3xl mx-auto mb-8">
+            AI-powered race plan personalized to YOUR fitness.
+            <br />
+            Built in 10 minutes, not 30 hours.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {/* Current State */}
-          <div className="p-8 bg-red-50 rounded-lg border-2 border-red-200">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                <X className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-sans font-medium text-2xl text-[#2C5F4D]">How Most Ultrarunners Plan</h3>
-            </div>
-            <ul className="space-y-3">
-              {[
-                "12+ hours googling pacing strategies",
-                "23 browser tabs with conflicting advice",
-                "Excel spreadsheet with broken formulas",
-                "Reddit threads from 2019",
-                "Generic crew instructions",
-                "Anxiety level: 8/10 pre-race",
-                "Result: Barely make cutoffs or DNF",
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-2 font-serif text-[#4A5859]">
-                  <X className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Time Comparison Badge */}
+        <TimeComparisonBadge
+          before="30 hours"
+          after="10 minutes"
+          savings="90%"
+        />
 
-          {/* Paceline Solution */}
-          <div className="p-8 bg-green-50 rounded-lg border-2 border-green-200">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                <Check className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="font-sans font-medium text-2xl text-[#2C5F4D]">How Paceline Users Plan</h3>
-            </div>
-            <ul className="space-y-3">
-              {[
-                "10 minutes to purchase + fill questionnaire",
-                "AI-powered race plan in 24-48 hours",
-                "Section-by-section pacing (elevation-adjusted)",
-                "Crew cheat sheet with arrival times",
-                "Nutrition timeline + contingency plans",
-                "Anxiety level: 2/10 pre-race",
-                "Result: 3+ hour cutoff buffers, organized crew",
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-2 font-serif text-[#4A5859]">
-                  <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+        {/* Problem Card - Full Width */}
+        <ComparisonCard
+          type="problem"
+          title="How Most Ultrarunners Plan"
+          items={problemItems}
+          anxietyLevel={8}
+          className="mb-6"
+        />
+
+        {/* Arrow Separator */}
+        <div className="flex items-center justify-center my-8">
+          <div className="flex flex-col items-center">
+            <ArrowDown className="w-12 h-12 text-[#C87350] mb-2 animate-bounce" />
+            <p className="text-sm font-semibold text-[#C87350]">
+              Transform Your Planning
+            </p>
           </div>
         </div>
+
+        {/* Solution Card - Full Width */}
+        <ComparisonCard
+          type="solution"
+          title="How Paceline Users Plan"
+          badge="✨ The Paceline Way"
+          items={solutionItems}
+          anxietyLevel={2}
+          className="mb-12"
+        />
+
+        {/* CTA (same as two-column) */}
         <div className="text-center">
-          <Button size="lg" className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-            <a href="/pricing">Ready to stop winging it? Get your personalized guide →</a>
+          <Button
+            size="lg"
+            className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold"
+            asChild
+          >
+            <a href="/pricing">
+              Stop Second-Guessing. Start Executing with Confidence →
+            </a>
           </Button>
+          <p className="text-sm text-[#4A5859] mt-3">
+            Essential $29 | Custom $99 | Ultra Bundle $497
+          </p>
+          <div className="flex items-center justify-center gap-4 mt-3 text-xs text-[#4A5859]">
+            <span>🔒 Secure Checkout</span>
+            <span>💳 Money-Back Guarantee</span>
+            <span>⭐ 4.8/5 Stars</span>
+          </div>
         </div>
       </div>
     </section>
