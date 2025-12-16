@@ -86,12 +86,12 @@ export function ProblemSolution({
 }: ProblemSolutionSectionProps) {
   if (variant === "two-column") {
     return (
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-16 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Headline */}
           <div className="text-center mb-8">
             <h2 className="font-sans font-semibold text-3xl sm:text-4xl lg:text-5xl text-[#2C5F4D] mb-4 text-balance">
-              Your fitness. Your plan. Your race.
+              Your fitness. Your crew. Your race.
             </h2>
             <p className="font-serif text-lg text-[#4A5859] max-w-3xl mx-auto mb-8">
               AI-powered race plan personalized to YOUR fitness.
@@ -131,12 +131,12 @@ export function ProblemSolution({
               className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold"
               asChild
             >
-              <a href="/pricing">
+              <a href="#pricing">
                 Stop Second-Guessing. Start Executing with Confidence
               </a>
             </Button>
             <p className="text-sm text-[#4A5859] mt-3">
-              Essential $29 | Custom $99 | Ultra Bundle $497
+              Essential $29 | Custom $99
             </p>
             <div className="flex items-center justify-center gap-4 mt-3 text-xs text-[#4A5859]">
               <span>🔒 Secure Checkout</span>
@@ -156,12 +156,12 @@ export function ProblemSolution({
 // Helper component for timeline variation
 function TimelineVariation() {
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-16 overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Headline (same as two-column) */}
         <div className="text-center mb-8">
           <h2 className="font-sans font-semibold text-3xl sm:text-4xl lg:text-5xl text-[#2C5F4D] mb-4 text-balance">
-            Your fitness. Your plan. Your race.
+            Your fitness. Your crew. Your race.
           </h2>
           <p className="font-serif text-lg text-[#4A5859] max-w-3xl mx-auto mb-8">
             AI-powered race plan personalized to YOUR fitness.
@@ -213,7 +213,7 @@ function TimelineVariation() {
             className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold"
             asChild
           >
-            <a href="/pricing">
+            <a href="#pricing">
               Stop Second-Guessing. Start Executing with Confidence →
             </a>
           </Button>

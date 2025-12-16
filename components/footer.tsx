@@ -5,29 +5,30 @@ export function Footer() {
   return (
     <footer className="bg-[#2C5F4D] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-12 mb-12">
           {/* Branding */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-end gap-1.5">
+              {/* Mountain Icon */}
               <Image
-                src="/PaceLine Logo.png"
-                alt="Paceline Logo"
-                width={150}
-                height={40}
-                className="h-8 w-auto brightness-0 invert"
+                src="/paceline-icon.svg"
+                alt="Paceline Icon"
+                width={80}
+                height={80}
+                className="h-11 w-auto brightness-0 invert"
+              />
+              {/* PACELINE Text */}
+              <Image
+                src="/paceline-text.svg"
+                alt="Paceline"
+                width={200}
+                height={50}
+                className="h-9 w-auto brightness-0 invert"
               />
             </div>
             <p className="font-serif text-sm text-white/80 leading-relaxed">
-              Stop piecing together advice. Start executing with confidence.
+              Stop piecing together advice.<br />Start executing with confidence.
             </p>
-            <div className="flex gap-4">
-              <a href="#" aria-label="Instagram" className="hover:text-[#D4B896] transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" aria-label="Facebook" className="hover:text-[#D4B896] transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-            </div>
           </div>
 
           {/* Product */}
@@ -40,13 +41,8 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/pricing" className="text-white/80 hover:text-white transition-colors">
+                <a href="#pricing" className="text-white/80 hover:text-white transition-colors">
                   Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#sample-guide" className="text-white/80 hover:text-white transition-colors">
-                  Sample Guides
                 </a>
               </li>
               <li>
@@ -54,37 +50,17 @@ export function Footer() {
                   FAQs
                 </a>
               </li>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h4 className="font-sans font-semibold text-lg mb-4">Resources</h4>
-            <ul className="space-y-2 font-serif text-sm">
               <li>
-                <span className="text-white/60">Blog (Coming Soon)</span>
-              </li>
-              <li>
-                <a href="#lead-magnet" className="text-white/80 hover:text-white transition-colors">
-                  Strategy Checklist
-                </a>
-              </li>
-              <li>
-                <a href="#contact" className="text-white/80 hover:text-white transition-colors">
-                  Contact Us
-                </a>
-              </li>
-              <li>
-                <a href="#support" className="text-white/80 hover:text-white transition-colors">
-                  Support
+                <a href="/dashboard" className="text-white/80 hover:text-white transition-colors">
+                  Dashboard
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Contact & Legal */}
+          {/* Legal & Support */}
           <div>
-            <h4 className="font-sans font-semibold text-lg mb-4">Contact</h4>
+            <h4 className="font-sans font-semibold text-lg mb-4">Legal & Support</h4>
             <div className="space-y-2 font-serif text-sm mb-6">
               <p className="text-white/80">
                 <a href="mailto:support@paceline.run" className="hover:text-white transition-colors">
