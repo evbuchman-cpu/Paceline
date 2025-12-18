@@ -6,7 +6,6 @@ import { HowItWorks } from "@/components/how-it-works"
 import { Testimonials } from "@/components/testimonials"
 import { Pricing } from "@/components/pricing"
 import { FAQ } from "@/components/faq"
-import { FinalCTA } from "@/components/final-cta"
 import { Footer } from "@/components/footer"
 
 export default function Home() {
@@ -20,7 +19,6 @@ export default function Home() {
       <Testimonials />
       <Pricing />
       <FAQ />
-      <FinalCTA />
       <Footer />
     </main>
   )

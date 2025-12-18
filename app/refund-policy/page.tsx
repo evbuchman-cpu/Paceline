@@ -142,18 +142,6 @@ export default function RefundPolicy() {
                       guide.
                     </p>
                   </div>
-
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">
-                      Ultra Bundle ($497 for 5 races)
-                    </h3>
-                    <p className="leading-relaxed">
-                      Full refund available within 7 days of purchase if NO
-                      guides have been generated or accessed. If you have
-                      received even one guide from your bundle, you are not
-                      eligible for a refund. Partial refunds are not available.
-                    </p>
-                  </div>
                 </div>
               </section>
 

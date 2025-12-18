@@ -15,23 +15,21 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative pt-8 pb-8 md:pt-12 md:pb-12 px-4 sm:px-6 lg:px-8 min-h-screen overflow-hidden"
+      className="relative pt-16 pb-12 md:pt-24 md:pb-20 px-4 sm:px-6 lg:px-8 min-h-[90vh] flex items-center overflow-hidden"
     >
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div className="space-y-6">
             <div className="space-y-5">
               {/*
-                LOCKED: Hero headline sizing - DO NOT MODIFY
-                These exact sizes prevent text overlap with image while keeping each sentence on ONE line
-                - text-[22px] sm:text-[28px] lg:text-[36px] xl:text-[42px] - Carefully calibrated
-                - whitespace-nowrap - Required to keep sentences on single lines
+                Hero headline sizing - optimized for visual impact
+                - text-[26px] sm:text-[32px] lg:text-[38px] xl:text-[44px] - Mobile-friendly sizing
+                - whitespace-nowrap - Keeps each sentence on one line for dramatic effect
                 - font-bold - Brand requirement (700 weight)
-                If changes needed, test thoroughly on all breakpoints to ensure no image overlap
               */}
-              <h1 className="font-sans text-[22px] sm:text-[28px] lg:text-[36px] xl:text-[42px] font-bold text-foreground leading-[1.2]">
-                <span className="block whitespace-nowrap">Stop piecing together advice.</span>
-                <span className="block whitespace-nowrap text-[#2C5F4D]">Start executing with confidence.</span>
+              <h1 className="font-sans text-[26px] sm:text-[32px] lg:text-[38px] xl:text-[44px] font-bold text-foreground leading-[1.2]">
+                <span className="block whitespace-nowrap">8 Sections. Zero Guesswork.</span>
+                <span className="block whitespace-nowrap text-[#2C5F4D]">One Goal: The Finish Line.</span>
               </h1>
               <div className="font-serif text-sm sm:text-base lg:text-base text-[#4A5859] leading-[1.6] space-y-2">
                 <p className="whitespace-nowrap">
@@ -50,7 +48,7 @@ export function Hero() {
               <Button
                 size="lg"
                 onClick={() => scrollToSection("pricing")}
-                className="bg-[#C87350] hover:bg-[#A85A3C] text-white text-base font-semibold"
+                className="bg-[#C87350] hover:bg-[#A85A3C] text-white text-lg font-bold px-10 py-7 shadow-xl"
                 data-testid="button-hero-primary-cta"
               >
                 Build Your Race Plan

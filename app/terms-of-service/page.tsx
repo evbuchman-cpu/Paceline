@@ -93,7 +93,7 @@ export default function TermsOfService() {
                   <ul className="list-disc list-inside space-y-1 ml-4">
                     <li>
                       Pay all applicable fees as described in our pricing tiers
-                      (Essential, Custom, or Ultra Bundle)
+                      (Essential or Custom)
                     </li>
                     <li>
                       Provide current, complete, and accurate billing
