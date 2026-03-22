@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Strava OAuth Authorization Endpoint
  * Redirects user to Strava's OAuth authorization page

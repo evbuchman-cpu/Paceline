@@ -9,6 +9,8 @@ import {
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Strava Activity Analysis Endpoint
  * Fetches 90 days of Strava activities and analyzes fitness metrics

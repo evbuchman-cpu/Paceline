@@ -5,6 +5,8 @@ import { exchangeCodeForToken } from "@/lib/strava-client";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Strava OAuth Callback Endpoint
  * Handles the OAuth callback from Strava

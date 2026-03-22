@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/questionnaire/[id]
  * Retrieve a specific questionnaire by ID

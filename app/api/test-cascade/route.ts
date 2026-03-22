@@ -10,6 +10,8 @@ import {
   generateMentalStrategy,
 } from "@/lib/ai-cascade";
 
+export const dynamic = 'force-dynamic';
+
 // Test endpoint for AI cascade - DELETE before production
 export async function POST(req: Request) {
   try {

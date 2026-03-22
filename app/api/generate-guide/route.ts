@@ -8,6 +8,9 @@ import { randomUUID } from "crypto";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 
+// Force this route to be dynamic (not statically analyzed during build)
+export const dynamic = 'force-dynamic';
+
 // AI Cascade imports
 import {
   generateRaceOverview,

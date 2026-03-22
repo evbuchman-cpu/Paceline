@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Star, ArrowRight } from "lucide-react"
+import { Star } from "lucide-react"
 import Image from "next/image"
 
 const scrollToSection = (id: string) => {

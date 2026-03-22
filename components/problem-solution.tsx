@@ -21,7 +21,6 @@ import {
 
 interface ProblemSolutionSectionProps {
   variant?: "two-column" | "timeline"
-  className?: string
 }
 
 // Problem items data
@@ -82,7 +81,6 @@ const solutionItems = [
 
 export function ProblemSolution({
   variant = "two-column",
-  className,
 }: ProblemSolutionSectionProps) {
   if (variant === "two-column") {
     return (

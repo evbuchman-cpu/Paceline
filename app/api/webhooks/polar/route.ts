@@ -8,6 +8,8 @@ import { logger } from "@/lib/logger";
 // Email import
 import { sendPaymentConfirmationEmail } from "@/lib/email-sender";
 
+export const dynamic = 'force-dynamic';
+
 // Utility function to safely parse dates
 function safeParseDate(value: string | Date | null | undefined): Date | null {
   if (!value) return null;

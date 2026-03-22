@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { randomUUID } from "crypto";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/questionnaire
  * Create a new questionnaire
