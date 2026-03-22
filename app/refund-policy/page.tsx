@@ -30,7 +30,7 @@ export default function RefundPolicy() {
                 </h2>
                 <p className="leading-relaxed">
                   At Paceline, we stand behind the quality of our AI-powered
-                  race-day execution guides. We offer a 7-day refund window to
+                  race-day execution guides. We offer a 30-day refund window to
                   ensure you&apos;re completely satisfied with your purchase.
                   This policy explains when refunds are available and the
                   process for requesting one.
@@ -39,17 +39,17 @@ export default function RefundPolicy() {
 
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                  2. 7-Day Refund Window
+                  2. 30-Day Refund Window
                 </h2>
                 <div className="space-y-3">
                   <p className="leading-relaxed">
-                    You may request a full refund within 7 calendar days of your
+                    You may request a full refund within 30 calendar days of your
                     purchase date, subject to the conditions outlined in this
                     policy.
                   </p>
                   <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
                     <p className="font-medium text-amber-900 dark:text-amber-100">
-                      Important: The 7-day window starts from your purchase date,
+                      Important: The 30-day window starts from your purchase date,
                       not from when you complete your questionnaire or receive
                       your guide.
                     </p>
@@ -68,7 +68,7 @@ export default function RefundPolicy() {
                     </h3>
                     <ul className="list-disc list-inside space-y-2 ml-4">
                       <li>
-                        Your refund request is made within 7 days of purchase
+                        Your refund request is made within 30 days of purchase
                       </li>
                       <li>
                         Your personalized race guide has NOT been fully generated
@@ -88,7 +88,7 @@ export default function RefundPolicy() {
                     </h3>
                     <ul className="list-disc list-inside space-y-2 ml-4">
                       <li>
-                        More than 7 days have passed since your purchase date
+                        More than 30 days have passed since your purchase date
                       </li>
                       <li>
                         Your AI-generated race guide has been fully generated and
@@ -126,7 +126,7 @@ export default function RefundPolicy() {
                       Essential Tier ($29)
                     </h3>
                     <p className="leading-relaxed">
-                      Full refund available within 7 days if guide has not been
+                      Full refund available within 30 days if guide has not been
                       generated or accessed.
                     </p>
                   </div>
@@ -136,7 +136,7 @@ export default function RefundPolicy() {
                       Custom Tier ($99)
                     </h3>
                     <p className="leading-relaxed">
-                      Full refund available within 7 days if guide has not been
+                      Full refund available within 30 days if guide has not been
                       generated or accessed. This includes purchases where you
                       connected your Strava account but did not receive the final
                       guide.
