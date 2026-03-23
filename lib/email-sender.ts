@@ -2,6 +2,7 @@ import { resend } from './resend-client';
 import GuideDeliveryEmail from '@/emails/guide-delivery';
 import GuideFailedEmail from '@/emails/guide-failed';
 import PaymentConfirmationEmail from '@/emails/payment-confirmation';
+import LeadMagnetDeliveryEmail from '@/emails/lead-magnet-delivery';
 import { logger } from '@/lib/logger';
 
 // Type definitions
@@ -137,5 +138,28 @@ export async function sendPaymentConfirmationEmail(data: PaymentConfirmationData
       react: PaymentConfirmationEmail(data),
     }),
     'Payment Confirmation Email'
+  );
+}
+
+// 4. Lead Magnet Delivery Email
+interface LeadMagnetData {
+  email: string;
+  firstName: string | null;
+}
+
+export async function sendLeadMagnetEmail(data: LeadMagnetData) {
+  if (!data.email) {
+    logger.error("Cannot send lead magnet email: missing email", undefined);
+    return { success: false, error: 'Missing email' };
+  }
+
+  return sendWithRetry(
+    () => resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL!,
+      to: data.email,
+      subject: 'Your Race Day Readiness Checklist [Download Inside]',
+      react: LeadMagnetDeliveryEmail(data),
+    }),
+    'Lead Magnet Delivery Email'
   );
 }

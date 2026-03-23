@@ -169,3 +169,12 @@ export const race = pgTable("race", {
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
+
+// Leads (email capture for lead magnets)
+export const lead = pgTable("lead", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  firstName: text("firstName"),
+  source: text("source").notNull().default("checklist"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});

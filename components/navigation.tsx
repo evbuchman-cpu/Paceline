@@ -112,7 +112,7 @@ export function Navigation() {
                       <a href="/sign-in">Sign In</a>
                     </Button>
                     <Button className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-                      <a href="#pricing">Leadmagnet - Update?</a>
+                      <a href="#lead-magnet">Get Free Checklist</a>
                     </Button>
                   </>
                 )}
@@ -197,8 +197,8 @@ export function Navigation() {
                       </a>
                     </Button>
                     <Button className="w-full bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-                      <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>
-                        Leadmagnet - Update?
+                      <a href="#lead-magnet" onClick={() => setMobileMenuOpen(false)}>
+                        Get Free Checklist
                       </a>
                     </Button>
                   </>
