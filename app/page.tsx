@@ -15,10 +15,10 @@ export default function Home() {
       <Navigation />
       <Hero />
       <ProblemSolution />
+      <LeadMagnet />
       <Features />
       <HowItWorks />
       <Testimonials />
-      <LeadMagnet />
       <Pricing />
       <FAQ />
       <Footer />

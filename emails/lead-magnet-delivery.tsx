@@ -7,13 +7,16 @@ import {
 interface LeadMagnetDeliveryEmailProps {
   email: string;
   firstName: string | null;
+  pdfUrl: string;
+  appUrl?: string;
 }
 
 export default function LeadMagnetDeliveryEmail({
   firstName,
+  pdfUrl,
+  appUrl = 'https://paceline.com',
 }: LeadMagnetDeliveryEmailProps) {
   const greeting = firstName || 'there';
-  const pdfUrl = process.env.LEAD_MAGNET_PDF_URL || '#';
 
   return (
     <Html>
@@ -58,7 +61,7 @@ export default function LeadMagnetDeliveryEmail({
             <table cellPadding="0" cellSpacing="0" style={{ margin: '0 auto' }}>
               <tr>
                 <td style={buttonSecondary}>
-                  <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/pricing`} style={buttonSecondaryLink} target="_blank">
+                  <Link href={`${appUrl}/pricing`} style={buttonSecondaryLink} target="_blank">
                     See Paceline Plans
                   </Link>
                 </td>

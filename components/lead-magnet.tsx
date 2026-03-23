@@ -57,10 +57,10 @@ export function LeadMagnet() {
             FREE DOWNLOAD
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-[#2C5F4D] mb-4">
-            Not ready to commit? Start here.
+            Start planning your race—for free
           </h2>
           <p className="text-lg text-[#4A5859] max-w-2xl mx-auto">
-            Download the Race Day Readiness Checklist — the same frameworks inside every Paceline guide, free.
+            Download the Race Day Readiness Checklist and get the same frameworks used in every Paceline guide.
           </p>
         </div>
 

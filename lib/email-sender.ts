@@ -153,12 +153,25 @@ export async function sendLeadMagnetEmail(data: LeadMagnetData) {
     return { success: false, error: 'Missing email' };
   }
 
+  const pdfUrl = process.env.LEAD_MAGNET_PDF_URL;
+  if (!pdfUrl) {
+    logger.error("Cannot send lead magnet email: LEAD_MAGNET_PDF_URL not configured", undefined);
+    return { success: false, error: 'PDF URL not configured' };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
   return sendWithRetry(
     () => resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL!,
       to: data.email,
       subject: 'Your Race Day Readiness Checklist [Download Inside]',
-      react: LeadMagnetDeliveryEmail(data),
+      react: LeadMagnetDeliveryEmail({
+        email: data.email,
+        firstName: data.firstName,
+        pdfUrl: pdfUrl,
+        appUrl: appUrl,
+      }),
     }),
     'Lead Magnet Delivery Email'
   );
