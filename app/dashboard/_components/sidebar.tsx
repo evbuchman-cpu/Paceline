@@ -7,6 +7,7 @@ import {
   Settings,
   ClipboardList,
   FileText,
+  LayoutDashboard,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -18,6 +19,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
   {
     label: "Questionnaire",
     href: "/dashboard/questionnaire",

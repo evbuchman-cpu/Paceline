@@ -1,19 +1,9 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
+import { Check, Star } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { Check } from "lucide-react";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type SubscriptionDetails = {
   id: string;
@@ -40,37 +30,18 @@ interface PricingTableProps {
   subscriptionDetails: SubscriptionDetailsResult;
 }
 
-export default function PricingTable({
-  subscriptionDetails,
-}: PricingTableProps) {
+export default function PricingTable({ subscriptionDetails }: PricingTableProps) {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const session = await authClient.getSession();
-        setIsAuthenticated(!!session.data?.user);
-      } catch {
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
-  }, []);
 
   const handleCheckout = async (productId: string, slug: string) => {
-    if (isAuthenticated === false) {
-      router.push("/sign-in");
-      return;
-    }
-
     try {
-      await authClient.checkout({
-        products: [productId],
-        slug: slug,
-      });
-    } catch (error) {
-      console.error("Checkout failed:", error);
+      const session = await authClient.getSession();
+      if (!session.data?.user) {
+        router.push("/sign-in");
+        return;
+      }
+      await authClient.checkout({ products: [productId], slug });
+    } catch {
       toast.error("Oops, something went wrong");
     }
   };
@@ -78,294 +49,238 @@ export default function PricingTable({
   const handleManageSubscription = async () => {
     try {
       await authClient.customer.portal();
-    } catch (error) {
-      console.error("Failed to open customer portal:", error);
+    } catch {
       toast.error("Failed to open subscription management");
     }
   };
 
-  const ESSENTIAL_TIER = process.env.NEXT_PUBLIC_ESSENTIAL_TIER;
-  const ESSENTIAL_SLUG = process.env.NEXT_PUBLIC_ESSENTIAL_SLUG;
-  const CUSTOM_TIER = process.env.NEXT_PUBLIC_CUSTOM_TIER;
-  const CUSTOM_SLUG = process.env.NEXT_PUBLIC_CUSTOM_SLUG;
-  const ULTRA_BUNDLE_TIER = process.env.NEXT_PUBLIC_ULTRA_BUNDLE_TIER;
-  const ULTRA_BUNDLE_SLUG = process.env.NEXT_PUBLIC_ULTRA_BUNDLE_SLUG;
+  const ESSENTIAL_TIER = process.env.NEXT_PUBLIC_ESSENTIAL_TIER!;
+  const ESSENTIAL_SLUG = process.env.NEXT_PUBLIC_ESSENTIAL_SLUG!;
+  const CUSTOM_TIER = process.env.NEXT_PUBLIC_CUSTOM_TIER!;
+  const CUSTOM_SLUG = process.env.NEXT_PUBLIC_CUSTOM_SLUG!;
 
-  if (!ESSENTIAL_TIER || !ESSENTIAL_SLUG || !CUSTOM_TIER || !CUSTOM_SLUG || !ULTRA_BUNDLE_TIER || !ULTRA_BUNDLE_SLUG) {
-    throw new Error("Missing required environment variables for pricing tiers");
-  }
-
-  const isCurrentPlan = (tierProductId: string) => {
-    return (
-      subscriptionDetails.hasSubscription &&
-      subscriptionDetails.subscription?.productId === tierProductId &&
-      subscriptionDetails.subscription?.status === "active"
-    );
-  };
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  const isCurrentPlan = (tierProductId: string) =>
+    subscriptionDetails.hasSubscription &&
+    subscriptionDetails.subscription?.productId === tierProductId &&
+    subscriptionDetails.subscription?.status === "active";
 
   return (
-    <section className="flex flex-col items-center justify-center px-4 py-16 w-full">
-      <div className="text-center mb-12 max-w-3xl">
-        <h1 className="text-4xl font-semibold tracking-tight mb-4">
-          Get Your Personalized Race Plan in 10 Minutes
+    <section className="w-full min-h-screen" style={{ backgroundColor: "#F5F1EA" }}>
+      {/* Header */}
+      <div className="text-center pt-16 pb-12 px-4">
+        <h1
+          className="font-semibold text-3xl sm:text-4xl lg:text-5xl mb-4"
+          style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
+        >
+          Your Race Plan. Zero Stress.
         </h1>
-        <p className="text-xl text-muted-foreground">
-          Stop piecing together advice from Reddit. Get a data-driven race execution plan built for YOUR fitness and THIS course.
+        <p
+          className="text-xl max-w-xl mx-auto"
+          style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}
+        >
+          Choose your level of detail. Every tier saves you 25+ hours of race planning.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8 max-w-6xl w-full mb-12">
-        {/* Essential Tier */}
-        <Card className="relative h-fit">
+      {/* Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto px-4 pb-16">
+
+        {/* Essential */}
+        <div
+          className="order-2 md:order-1 p-8 bg-white border-2 border-stone-200 rounded-xl transition-all duration-300 hover:shadow-[0_8px_24px_rgba(44,95,77,0.20)] hover:-translate-y-[3px] relative"
+        >
           {isCurrentPlan(ESSENTIAL_TIER) && (
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <Badge
-                variant="secondary"
-                className="bg-green-100 text-green-800"
-              >
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="inline-block px-3 py-1 bg-green-100 text-green-800 font-semibold text-sm rounded-full" style={{ fontFamily: "Inter, sans-serif" }}>
                 Current Plan
-              </Badge>
+              </span>
             </div>
           )}
-          <CardHeader>
-            <CardTitle className="text-2xl">Essential</CardTitle>
-            <CardDescription>Your first ultra deserves a solid plan</CardDescription>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">$29</span>
-              <span className="text-muted-foreground">/race</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Basic pacing strategy (flat pace chart)</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Standard nutrition timeline</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Generic crew logistics sheet</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Course overview with elevation profile</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Drop bag checklist</span>
-            </div>
-          </CardContent>
-          <CardFooter>
-            {isCurrentPlan(ESSENTIAL_TIER) ? (
-              <div className="w-full space-y-2">
-                <Button
-                  className="w-full"
-                  variant="outline"
-                  onClick={handleManageSubscription}
-                >
-                  Manage Purchase
-                </Button>
-                {subscriptionDetails.subscription && (
-                  <p className="text-sm text-muted-foreground text-center">
-                    Purchased {formatDate(subscriptionDetails.subscription.currentPeriodStart)}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={() => handleCheckout(ESSENTIAL_TIER, ESSENTIAL_SLUG)}
-              >
-                {isAuthenticated === false
-                  ? "Sign In to Get Started"
-                  : "Get Essential"}
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
+          <h3 className="font-semibold text-2xl mb-2" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
+            First Ultra Fundamentals
+          </h3>
+          <p className="text-sm mb-4" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+            Everything you need to toe the line with confidence
+          </p>
+          <div className="mb-4">
+            <span className="font-bold text-4xl" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>$29</span>
+            <span style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}> per race</span>
+          </div>
+          <p className="text-sm mb-6" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+            Perfect for your first ultra or races where you just need the basics dialed. Get a complete pacing strategy, crew logistics, and drop bag plan — without the 30-hour research spiral.
+          </p>
+          <ul className="space-y-3 mb-8">
+            {[
+              "Section-by-section pacing strategy (flat terrain baseline)",
+              "Aid station cutoff tracker with buffer zones",
+              "Crew timing sheet with predicted arrivals",
+              "Drop bag checklist by station",
+              "Race overview (elevation, weather, course notes)",
+              "Nutrition timeline template",
+              "Mental strategy for tough miles",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                <span className="text-sm" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>{item}</span>
+              </li>
+            ))}
+          </ul>
+          {isCurrentPlan(ESSENTIAL_TIER) ? (
+            <button
+              onClick={handleManageSubscription}
+              className="w-full h-14 border-2 rounded-lg font-semibold transition-colors"
+              style={{ borderColor: "#2C5F4D", color: "#2C5F4D", backgroundColor: "transparent", fontFamily: "Inter, sans-serif" }}
+            >
+              Manage Purchase
+            </button>
+          ) : (
+            <button
+              onClick={() => handleCheckout(ESSENTIAL_TIER, ESSENTIAL_SLUG)}
+              className="w-full h-14 border-2 rounded-lg font-semibold transition-colors hover:bg-[#2C5F4D] hover:text-white"
+              style={{ borderColor: "#2C5F4D", color: "#2C5F4D", backgroundColor: "transparent", fontFamily: "Inter, sans-serif" }}
+            >
+              Start Planning
+            </button>
+          )}
+          <p className="text-xs text-center mt-2" style={{ color: "#4A5859", opacity: 0.6, fontFamily: "Inter, sans-serif" }}>
+            10-minute questionnaire • PDF delivered instantly
+          </p>
+          <p className="text-xs text-center mt-4 pt-4 border-t border-stone-200" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+            Need elevation-adjusted pacing? →{" "}
+            <span className="font-semibold" style={{ color: "#C87350" }}>Upgrade to Custom for $70 more</span>
+          </p>
+        </div>
 
-        {/* Custom Tier - Most Popular */}
-        <Card className="relative h-fit border-2 border-primary shadow-lg">
-          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-            <Badge className="bg-primary text-primary-foreground">
-              ★ Most Popular
-            </Badge>
+        {/* Custom — Most Popular */}
+        <div
+          className="order-1 md:order-2 p-8 bg-white border-2 rounded-xl relative transition-all duration-300 hover:shadow-[0_12px_32px_rgba(200,115,80,0.25)] hover:-translate-y-[5px] md:scale-105"
+          style={{ borderColor: "#C87350" }}
+        >
+          <div className="absolute -top-3 right-4">
+            <span
+              className="inline-flex items-center gap-1 px-3 py-1 text-white font-semibold text-sm rounded-full shadow-md"
+              style={{ backgroundColor: "#C87350", fontFamily: "Inter, sans-serif" }}
+            >
+              <Star className="w-4 h-4 fill-white" />
+              MOST POPULAR
+            </span>
           </div>
           {isCurrentPlan(CUSTOM_TIER) && (
-            <div className="absolute -top-3 right-4">
-              <Badge
-                variant="secondary"
-                className="bg-green-100 text-green-800"
-              >
+            <div className="absolute -top-3 left-4">
+              <span className="inline-block px-3 py-1 bg-green-100 text-green-800 font-semibold text-sm rounded-full" style={{ fontFamily: "Inter, sans-serif" }}>
                 Current Plan
-              </Badge>
+              </span>
             </div>
           )}
-          <CardHeader>
-            <CardTitle className="text-2xl">Custom</CardTitle>
-            <CardDescription>Protect your year of training</CardDescription>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">$99</span>
-              <span className="text-muted-foreground">/race</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span className="font-medium">Everything in Essential, PLUS:</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>All Essential add-ons included ($40 value)</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Personalized pacing from YOUR Strava data</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Elevation-adjusted pace recommendations</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Crew timing with predicted arrivals</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Cutoff buffer calculator (🟢🟡🔴 status)</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Weather-adjusted strategy</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Contingency plans (GI, blisters, heat/cold)</span>
-            </div>
-          </CardContent>
-          <CardFooter>
-            {isCurrentPlan(CUSTOM_TIER) ? (
-              <div className="w-full space-y-2">
-                <Button
-                  className="w-full"
-                  variant="outline"
-                  onClick={handleManageSubscription}
-                >
-                  Manage Purchase
-                </Button>
-                {subscriptionDetails.subscription && (
-                  <p className="text-sm text-muted-foreground text-center">
-                    Purchased {formatDate(subscriptionDetails.subscription.currentPeriodStart)}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <Button
-                className="w-full"
-                onClick={() => handleCheckout(CUSTOM_TIER, CUSTOM_SLUG)}
-              >
-                {isAuthenticated === false
-                  ? "Sign In to Get Started"
-                  : "Get Custom"}
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
-
-        {/* Ultra Bundle Tier */}
-        <Card className="relative h-fit">
-          {isCurrentPlan(ULTRA_BUNDLE_TIER) && (
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <Badge
-                variant="secondary"
-                className="bg-green-100 text-green-800"
-              >
-                Current Plan
-              </Badge>
-            </div>
+          <h3 className="font-semibold text-2xl mb-2" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
+            Strava-Powered Race Strategy
+          </h3>
+          <p className="text-sm mb-4" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+            Your fitness data. Your race. Your custom blueprint.
+          </p>
+          <div className="mb-4">
+            <span className="font-bold text-4xl" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>$99</span>
+            <span style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}> per race</span>
+          </div>
+          <p className="text-sm mb-6" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+            Built for runners who want every decision made for them. We analyze 90 days of your Strava data to create elevation-adjusted pacing, predict your cutoff buffers down to the minute, and personalize nutrition to your gut.
+          </p>
+          <p className="text-xs mb-3" style={{ color: "#4A5859", opacity: 0.7, fontFamily: "Source Serif 4, serif" }}>
+            Everything in Essential, plus:
+          </p>
+          <ul className="space-y-3 mb-8">
+            {[
+              { bold: "Strava-powered pacing", rest: " (elevation-adjusted from your actual fitness)" },
+              { bold: "Cutoff buffer calculator", rest: " (🟢🟡🔴 status at every aid station)" },
+              { bold: "Personalized nutrition", rest: " (vegan, GF, caffeine-sensitive options)" },
+              { bold: "Weather-adjusted drop bag strategy", rest: " (race-week forecast integration)" },
+              { bold: null, rest: "Crew logistics with minute-by-minute predicted arrivals" },
+              { bold: null, rest: "Contingency protocols for GI issues, blisters, falling behind" },
+              { bold: null, rest: "Mental strategy tailored to your race fears" },
+            ].map((item, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                <span className="text-sm" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+                  {item.bold && <strong className="font-semibold">{item.bold}</strong>}
+                  {item.rest}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {isCurrentPlan(CUSTOM_TIER) ? (
+            <button
+              onClick={handleManageSubscription}
+              className="w-full h-16 rounded-lg font-bold text-lg shadow-lg text-white transition-colors"
+              style={{ backgroundColor: "#C87350", fontFamily: "Inter, sans-serif" }}
+            >
+              Manage Purchase
+            </button>
+          ) : (
+            <button
+              onClick={() => handleCheckout(CUSTOM_TIER, CUSTOM_SLUG)}
+              className="w-full h-16 rounded-lg font-bold text-lg shadow-lg text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: "#C87350", fontFamily: "Inter, sans-serif" }}
+            >
+              Build My Custom Plan
+            </button>
           )}
-          <CardHeader>
-            <CardTitle className="text-2xl">Ultra Bundle</CardTitle>
-            <CardDescription>Planning multiple races this year?</CardDescription>
-            <div className="mt-4">
-              <span className="text-4xl font-bold">$497</span>
-              <span className="text-muted-foreground"> for 5 races</span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              Just $99/race - Save $148 vs buying separately
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span className="font-medium">5× Custom Race Guides</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>All Essential & Custom add-ons (×5 races)</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>3 version updates per race (15 total)</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Bonus: Ultimate Ultramarathon Playbook PDF</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Valid for 12 months from purchase</span>
-            </div>
-          </CardContent>
-          <CardFooter>
-            {isCurrentPlan(ULTRA_BUNDLE_TIER) ? (
-              <div className="w-full space-y-2">
-                <Button
-                  className="w-full"
-                  variant="outline"
-                  onClick={handleManageSubscription}
-                >
-                  Manage Purchase
-                </Button>
-                {subscriptionDetails.subscription && (
-                  <p className="text-sm text-muted-foreground text-center">
-                    Purchased {formatDate(subscriptionDetails.subscription.currentPeriodStart)}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={() => handleCheckout(ULTRA_BUNDLE_TIER, ULTRA_BUNDLE_SLUG)}
-              >
-                {isAuthenticated === false
-                  ? "Sign In to Get Started"
-                  : "Get Ultra Bundle"}
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
+          <p className="text-xs text-center mt-2" style={{ color: "#4A5859", opacity: 0.6, fontFamily: "Inter, sans-serif" }}>
+            Connect Strava in 1 click • Guide ready in 5 minutes
+          </p>
+          <div className="flex items-center justify-center gap-2 mt-4 text-xs text-green-600">
+            <Check className="w-4 h-4" />
+            <span style={{ fontFamily: "Source Serif 4, serif" }}>60% of runners choose Custom for cutoff peace of mind</span>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-8 text-center max-w-2xl">
-        <p className="text-muted-foreground mb-4">
-          <strong>All plans include:</strong> 10-minute delivery • Money-back guarantee • Secure payment • Instant PDF download
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Questions? <span className="text-primary cursor-pointer hover:underline">Contact us</span>
-        </p>
+      {/* Money-Back Guarantee */}
+      <div className="max-w-3xl mx-auto px-4 pb-16">
+        <div
+          className="p-6 rounded-xl border-2 text-center"
+          style={{ backgroundColor: "#FFFFFF", borderColor: "#2C5F4D" }}
+        >
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <span className="text-3xl">✓</span>
+            <h3 className="font-semibold text-xl" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
+              30-Day Money-Back Guarantee
+            </h3>
+          </div>
+          <p style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+            Not satisfied? We&apos;ll refund you in full. No questions asked.
+          </p>
+        </div>
+      </div>
+
+      {/* Why Not DIY */}
+      <div className="max-w-4xl mx-auto px-4 pb-20">
+        <div className="p-8 bg-white border border-stone-200 rounded-xl">
+          <h3
+            className="font-semibold text-2xl mb-6 text-center"
+            style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
+          >
+            Why Not Just DIY Your Plan?
+          </h3>
+          <div className="space-y-4" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+            <p>You could absolutely build your own race plan. Here&apos;s what that looks like:</p>
+            <p>
+              <strong className="font-semibold">30 hours of research:</strong> Studying elevation profiles, calculating cutoffs, building crew sheets, researching nutrition strategies, reading race reports, testing gear.
+            </p>
+            <p>
+              <strong className="font-semibold">Trial and error:</strong> Hoping your pacing guess is right. Stressing about cutoffs. Wondering if you packed the right drop bag items.
+            </p>
+            <p>
+              <strong className="font-semibold">Race day anxiety:</strong> Did I forget something? Am I on pace? Should I slow down here?
+            </p>
+            <p className="pt-4 border-t border-stone-200">
+              <strong className="font-semibold" style={{ color: "#2C5F4D" }}>Paceline gives you those 30 hours back — and eliminates the guesswork.</strong>{" "}
+              Your plan is built from your actual fitness data, personalized to your gut and blister history, and updated with race-week weather. You get to focus on training, not spreadsheets.
+            </p>
+            <p className="font-semibold" style={{ color: "#C87350" }}>
+              Your race entry cost $200–400. Your gear cost $500+. Protect that investment with a plan that works.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );

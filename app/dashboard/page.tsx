@@ -5,7 +5,7 @@ import { db } from "@/db/drizzle";
 import { user, purchase, questionnaire, guide } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
-import { CountdownCard } from "./_components/CountdownCard";
+import { CountdownCard, type CountdownRace } from "./_components/CountdownCard";
 import { MyGuides } from "./_components/GuideCard";
 import {
   ReadinessChecklist,
@@ -67,40 +67,32 @@ export default async function Dashboard() {
     guideRows = rows as GuideRow[];
   }
 
-  // ── Determine the active guide for the countdown card ──────────────────────
-  // Active = earliest upcoming race date with a questionnaire
+  // ── Build countdown races — all upcoming races sorted soonest-first ─────────
   const now = new Date();
-  const upcomingRows = guideRows.filter(
-    (r) =>
-      r.questionnaire?.raceDate && new Date(r.questionnaire.raceDate) >= now
-  );
-  upcomingRows.sort(
-    (a, b) =>
-      new Date(a.questionnaire!.raceDate).getTime() -
-      new Date(b.questionnaire!.raceDate).getTime()
-  );
+  const upcomingRows = guideRows
+    .filter((r) => r.questionnaire?.raceDate && new Date(r.questionnaire.raceDate) >= now)
+    .sort(
+      (a, b) =>
+        new Date(a.questionnaire!.raceDate).getTime() -
+        new Date(b.questionnaire!.raceDate).getTime()
+    );
+
+  // Fallback: if no upcoming races, show the most recent one
+  const countdownRows = upcomingRows.length > 0 ? upcomingRows : guideRows.slice(0, 1);
+
+  const countdownRaces: CountdownRace[] = countdownRows
+    .filter((r) => r.questionnaire != null)
+    .map((r) => ({
+      questionnaire: {
+        raceName: r.questionnaire!.raceName,
+        raceDate: r.questionnaire!.raceDate,
+        completedAt: r.questionnaire!.completedAt,
+      },
+      guide: r.guide ? { id: r.guide.id, status: r.guide.status } : null,
+      purchase: { createdAt: r.purchase.createdAt, tier: r.purchase.tier },
+    }));
 
   const activeRow = upcomingRows[0] ?? guideRows[0] ?? null;
-
-  const activeGuide = activeRow
-    ? {
-        questionnaire: {
-          raceName: activeRow.questionnaire!.raceName,
-          raceDate: activeRow.questionnaire!.raceDate,
-          completedAt: activeRow.questionnaire!.completedAt,
-        },
-        guide: activeRow.guide
-          ? {
-              id: activeRow.guide.id,
-              status: activeRow.guide.status,
-            }
-          : null,
-        purchase: {
-          createdAt: activeRow.purchase.createdAt,
-          tier: activeRow.purchase.tier,
-        },
-      }
-    : null;
 
   // ── Build guide card props ──────────────────────────────────────────────────
   const guideCardProps = guideRows.map((row) => ({
@@ -127,7 +119,7 @@ export default async function Dashboard() {
     },
   }));
 
-  // ── Active guide for NextSteps ──────────────────────────────────────────────
+  // ── Active guide for NextSteps (use nearest upcoming race) ─────────────────
   const nextStepsGuide = activeRow
     ? {
         questionnaire: {
@@ -183,7 +175,7 @@ export default async function Dashboard() {
 
         {/* ── Section 2: Race Countdown ───────────────────────────────────── */}
         <CountdownCard
-          activeGuide={activeGuide}
+          races={countdownRaces}
           checklistProgress={checklistProgress}
           totalChecklistItems={TOTAL_CHECKLIST_ITEMS}
         />

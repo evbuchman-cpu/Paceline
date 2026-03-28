@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface GuideCardProps {
@@ -64,15 +66,12 @@ function getAidStationCount(sections: Record<string, unknown> | null): number | 
 }
 
 export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
+  const router = useRouter();
   const [liveStatus, setLiveStatus] = useState<GuideStatus | null>(
-    guide
-      ? {
-          status: guide.status,
-          pdfUrl: guide.pdfUrl,
-          error: guide.error,
-        }
-      : null
+    guide ? { status: guide.status, pdfUrl: guide.pdfUrl, error: guide.error } : null
   );
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const poll = useCallback(async () => {
     if (!guide) return;
@@ -82,7 +81,7 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
       const data = await res.json();
       setLiveStatus(data);
     } catch {
-      // silently skip failed polls
+      // silently skip
     }
   }, [guide]);
 
@@ -93,11 +92,23 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
     return () => clearInterval(interval);
   }, [guide, liveStatus?.status, poll]);
 
+  const handleDelete = async () => {
+    if (!guide) return;
+    setDeleting(true);
+    try {
+      await fetch(`/api/guide/${guide.id}`, { method: "DELETE" });
+      router.refresh();
+    } catch {
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
+  };
+
   const tierStyle = TIER_COLORS[purchase.tier] ?? TIER_COLORS.essential;
   const tierLabel = TIER_LABELS[purchase.tier] ?? purchase.tier;
   const currentStatus = liveStatus?.status ?? guide?.status;
 
-  // ── No guide at all: questionnaire incomplete
+  // ── No guide: questionnaire incomplete ──────────────────────────────────────
   if (!guide || !currentStatus) {
     return (
       <div
@@ -106,16 +117,10 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3
-              className="text-lg font-semibold mb-0.5"
-              style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
-            >
+            <h3 className="text-lg font-semibold mb-0.5" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
               {questionnaire.raceName}
             </h3>
-            <p
-              className="text-sm"
-              style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}
-            >
+            <p className="text-sm" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
               {formatRaceDate(questionnaire.raceDate)}
             </p>
           </div>
@@ -126,8 +131,6 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
             {tierLabel}
           </span>
         </div>
-
-        {/* Questionnaire incomplete */}
         <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: "#F0EBE3" }}>
           <span
             className="inline-flex items-center gap-1.5 text-sm font-medium px-2.5 py-1 rounded-full"
@@ -137,8 +140,8 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
             Questionnaire Incomplete
           </span>
           <Link
-            href={`/dashboard/questionnaire`}
-            className="text-sm font-semibold transition-colors"
+            href="/dashboard/questionnaire"
+            className="text-sm font-semibold"
             style={{ color: "#C87350", fontFamily: "Inter, sans-serif" }}
           >
             Complete Now →
@@ -153,35 +156,58 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
       className="rounded-xl border p-6 flex flex-col gap-4"
       style={{ borderColor: "#E8E0D6", backgroundColor: "#FFFFFF" }}
     >
-      {/* Header row */}
+      {/* Header */}
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3
-            className="text-lg font-semibold mb-0.5"
-            style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
-          >
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold mb-0.5 truncate" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
             {questionnaire.raceName}
           </h3>
-          <p
-            className="text-sm"
-            style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}
-          >
+          <p className="text-sm" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
             {formatRaceDate(questionnaire.raceDate)}
           </p>
         </div>
-        <span
-          className="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-          style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, fontFamily: "Inter, sans-serif" }}
-        >
-          {tierLabel}
-        </span>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span
+            className="text-xs font-semibold px-2.5 py-1 rounded-full"
+            style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, fontFamily: "Inter, sans-serif" }}
+          >
+            {tierLabel}
+          </span>
+          {/* Delete button */}
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="p-1.5 rounded-lg transition-colors hover:bg-red-50"
+              title="Remove guide"
+            >
+              <Trash2 className="w-4 h-4" style={{ color: "#C8BFB5" }} />
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs" style={{ color: "#A85A3C", fontFamily: "Inter, sans-serif" }}>Remove?</span>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-xs font-semibold px-2 py-1 rounded text-white"
+                style={{ backgroundColor: "#A85A3C", fontFamily: "Inter, sans-serif" }}
+              >
+                {deleting ? "..." : "Yes"}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs font-medium px-2 py-1 rounded border"
+                style={{ borderColor: "#E8E0D6", color: "#4A5859", fontFamily: "Inter, sans-serif" }}
+              >
+                No
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Status row */}
-      <div
-        className="flex flex-col gap-3 pt-3 border-t"
-        style={{ borderColor: "#F0EBE3" }}
-      >
+      {/* Status */}
+      <div className="flex flex-col gap-3 pt-3 border-t" style={{ borderColor: "#F0EBE3" }}>
+
         {/* GENERATING */}
         {currentStatus === "generating" && (
           <div className="flex flex-col gap-2">
@@ -194,33 +220,21 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
                 Generating...
               </span>
               {liveStatus?.step && (
-                <span
-                  className="text-xs"
-                  style={{ color: "#4A5859", fontFamily: "Inter, sans-serif" }}
-                >
+                <span className="text-xs" style={{ color: "#4A5859", fontFamily: "Inter, sans-serif" }}>
                   Step {liveStatus.step} of {liveStatus.totalSteps}
                 </span>
               )}
             </div>
             {liveStatus?.stepName && (
-              <p
-                className="text-sm"
-                style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}
-              >
+              <p className="text-sm" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
                 {liveStatus.stepName}...
               </p>
             )}
-            {/* Animated progress bar */}
-            <div
-              className="w-full rounded-full overflow-hidden"
-              style={{ height: "4px", backgroundColor: "#F0EBE3" }}
-            >
+            <div className="w-full rounded-full overflow-hidden" style={{ height: "4px", backgroundColor: "#F0EBE3" }}>
               <div
                 className="h-full rounded-full animate-pulse"
                 style={{
-                  width: liveStatus?.step
-                    ? `${((liveStatus.step - 1) / (liveStatus.totalSteps ?? 8)) * 100 + 5}%`
-                    : "15%",
+                  width: liveStatus?.step ? `${((liveStatus.step - 1) / (liveStatus.totalSteps ?? 8)) * 100 + 5}%` : "15%",
                   backgroundColor: "#C87350",
                   transition: "width 1s ease",
                 }}
@@ -246,53 +260,36 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
                     href={liveStatus?.pdfUrl ?? guide.pdfUrl ?? ""}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-colors"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white"
                     style={{ backgroundColor: "#C87350", fontFamily: "Inter, sans-serif" }}
                   >
                     Download PDF
                   </a>
                 )}
                 <Link
-                  href={`/dashboard/guides`}
-                  className="text-sm font-medium transition-colors"
+                  href="/dashboard/guides"
+                  className="text-sm font-medium"
                   style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
                 >
                   View Guide →
                 </Link>
               </div>
             </div>
-
-            {/* Summary row */}
-            <div
-              className="flex flex-wrap gap-4 pt-2 border-t"
-              style={{ borderColor: "#F0EBE3" }}
-            >
+            <div className="flex flex-wrap gap-4 pt-2 border-t" style={{ borderColor: "#F0EBE3" }}>
               <div>
-                <span
-                  className="block text-xs uppercase tracking-wide font-medium mb-0.5"
-                  style={{ color: "#4A5859", opacity: 0.6, fontFamily: "Inter, sans-serif" }}
-                >
+                <span className="block text-xs uppercase tracking-wide font-medium mb-0.5" style={{ color: "#4A5859", opacity: 0.6, fontFamily: "Inter, sans-serif" }}>
                   Goal Time
                 </span>
-                <span
-                  className="text-sm font-semibold"
-                  style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
-                >
+                <span className="text-sm font-semibold" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
                   {questionnaire.goalFinishTime}
                 </span>
               </div>
               {getAidStationCount(guide.sections) !== null && (
                 <div>
-                  <span
-                    className="block text-xs uppercase tracking-wide font-medium mb-0.5"
-                    style={{ color: "#4A5859", opacity: 0.6, fontFamily: "Inter, sans-serif" }}
-                  >
+                  <span className="block text-xs uppercase tracking-wide font-medium mb-0.5" style={{ color: "#4A5859", opacity: 0.6, fontFamily: "Inter, sans-serif" }}>
                     Aid Stations
                   </span>
-                  <span
-                    className="text-sm font-semibold"
-                    style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
-                  >
+                  <span className="text-sm font-semibold" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
                     {getAidStationCount(guide.sections)}
                   </span>
                 </div>
@@ -313,14 +310,14 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
             </span>
             <div className="flex items-center gap-4">
               <button
-                onClick={() => {
+                onClick={() =>
                   fetch("/api/generate-guide", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ questionnaireId: questionnaire.id }),
-                  }).then(() => poll());
-                }}
-                className="text-sm font-semibold transition-colors"
+                  }).then(() => poll())
+                }
+                className="text-sm font-semibold"
                 style={{ color: "#C87350", fontFamily: "Inter, sans-serif" }}
               >
                 Retry
@@ -350,31 +347,19 @@ export function MyGuides({ guides }: MyGuidesProps) {
   if (guides.length === 0) {
     return (
       <section>
-        <h2
-          className="text-xl font-semibold mb-4"
-          style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
-        >
+        <h2 className="text-xl font-semibold mb-4" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
           My Guides
         </h2>
-        <div
-          className="rounded-xl border p-10 text-center"
-          style={{ borderColor: "#E8E0D6", backgroundColor: "#FAFAF8" }}
-        >
-          <p
-            className="text-lg mb-2 font-semibold"
-            style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
-          >
+        <div className="rounded-xl border p-10 text-center" style={{ borderColor: "#E8E0D6", backgroundColor: "#FAFAF8" }}>
+          <p className="text-lg mb-2 font-semibold" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
             Your race plan starts here.
           </p>
-          <p
-            className="text-base mb-6 max-w-md mx-auto"
-            style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}
-          >
+          <p className="text-base mb-6 max-w-md mx-auto" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
             Stop piecing together advice from Reddit threads. Get a plan built around your fitness, your crew, and your race.
           </p>
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white"
             style={{ backgroundColor: "#C87350", fontFamily: "Inter, sans-serif" }}
           >
             Get My Race Guide →
@@ -386,10 +371,7 @@ export function MyGuides({ guides }: MyGuidesProps) {
 
   return (
     <section>
-      <h2
-        className="text-xl font-semibold mb-4"
-        style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}
-      >
+      <h2 className="text-xl font-semibold mb-4" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
         My Guides
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
