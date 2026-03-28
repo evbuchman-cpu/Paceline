@@ -20,7 +20,7 @@ interface GuideCardProps {
     raceDate: Date;
     goalFinishTime: string;
     completedAt: Date | null;
-  };
+  } | null;
   purchase: {
     id: string;
     tier: string;
@@ -112,8 +112,8 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
   const tierLabel = TIER_LABELS[purchase.tier] ?? purchase.tier;
   const currentStatus = liveStatus?.status ?? guide?.status;
 
-  // ── No guide: questionnaire incomplete ──────────────────────────────────────
-  if (!guide || !currentStatus) {
+  // ── No guide or no questionnaire: incomplete / not started ─────────────────
+  if (!guide || !currentStatus || !questionnaire) {
     return (
       <div
         className="rounded-xl border p-6 flex flex-col gap-4"
@@ -122,18 +122,59 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-lg font-semibold mb-0.5" style={{ color: "#2C5F4D", fontFamily: "Inter, sans-serif" }}>
-              {questionnaire.raceName}
+              {questionnaire?.raceName ?? "New Race Guide"}
             </h3>
-            <p className="text-sm" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
-              {formatRaceDate(questionnaire.raceDate)}
-            </p>
+            {questionnaire?.raceDate && (
+              <p className="text-sm" style={{ color: "#4A5859", fontFamily: "Source Serif 4, serif" }}>
+                {formatRaceDate(questionnaire.raceDate)}
+              </p>
+            )}
           </div>
-          <span
-            className="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-            style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, fontFamily: "Inter, sans-serif" }}
-          >
-            {tierLabel}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+              style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, fontFamily: "Inter, sans-serif" }}
+            >
+              {tierLabel}
+            </span>
+            {/* Archive this purchase */}
+            {!confirmDelete ? (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
+                title="Hide from dashboard"
+              >
+                <Trash2 className="w-4 h-4" style={{ color: "#C8BFB5" }} />
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs" style={{ color: "#C87350", fontFamily: "Inter, sans-serif" }}>Hide?</span>
+                <button
+                  onClick={async () => {
+                    setDeleting(true);
+                    await fetch(`/api/purchase/${purchase.id}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ action: "archive" }),
+                    });
+                    router.refresh();
+                  }}
+                  disabled={deleting}
+                  className="text-xs font-semibold px-2 py-1 rounded text-white"
+                  style={{ backgroundColor: "#C87350", fontFamily: "Inter, sans-serif" }}
+                >
+                  {deleting ? "..." : "Yes"}
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="text-xs font-medium px-2 py-1 rounded border"
+                  style={{ borderColor: "#E8E0D6", color: "#4A5859", fontFamily: "Inter, sans-serif" }}
+                >
+                  No
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: "#F0EBE3" }}>
           <span
@@ -144,7 +185,7 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
             Questionnaire Incomplete
           </span>
           <Link
-            href="/dashboard/questionnaire"
+            href={`/dashboard/questionnaire?purchaseId=${purchase.id}`}
             className="text-sm font-semibold"
             style={{ color: "#C87350", fontFamily: "Inter, sans-serif" }}
           >

@@ -100,6 +100,7 @@ export const purchase = pgTable("purchase", {
   polarOrderId: text("polarOrderId"), // if from Polar.sh order
   status: text("status").notNull().default("pending"), // "pending" | "completed" | "refunded"
   guidesRemaining: integer("guidesRemaining").default(1), // for Ultra Bundle
+  archivedAt: timestamp("archivedAt"), // null = visible, set = hidden from dashboard
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });

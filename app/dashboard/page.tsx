@@ -126,8 +126,10 @@ export default async function Dashboard() {
     ?? guideRows[0]
     ?? null;
 
-  // ── Build guide card props — exclude archived ──────────────────────────────
-  const guideCardProps = guideRows.filter((row) => !row.guide?.archivedAt).map((row) => ({
+  // ── Build guide card props — exclude archived guides and archived purchases ─
+  const guideCardProps = guideRows
+    .filter((row) => !row.guide?.archivedAt && !row.purchase.archivedAt)
+    .map((row) => ({
     guide: row.guide
       ? {
           id: row.guide.id,
@@ -138,13 +140,13 @@ export default async function Dashboard() {
           createdAt: row.guide.createdAt,
         }
       : null,
-    questionnaire: {
-      id: row.questionnaire?.id ?? "",
-      raceName: row.questionnaire?.raceName ?? row.purchase.tier,
-      raceDate: row.questionnaire?.raceDate ?? new Date(),
-      goalFinishTime: row.questionnaire?.goalFinishTime ?? "",
-      completedAt: row.questionnaire?.completedAt ?? null,
-    },
+    questionnaire: row.questionnaire ? {
+      id: row.questionnaire.id,
+      raceName: row.questionnaire.raceName,
+      raceDate: row.questionnaire.raceDate,
+      goalFinishTime: row.questionnaire.goalFinishTime,
+      completedAt: row.questionnaire.completedAt,
+    } : null,
     purchase: {
       id: row.purchase.id,
       tier: row.purchase.tier,
