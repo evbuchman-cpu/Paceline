@@ -21,7 +21,7 @@ import { ReactNode } from "react";
 export default function DashboardTopNav({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-col">
-      <header className="sticky top-0 z-10 flex h-14 lg:h-[52px] items-center gap-4 px-3 backdrop-blur-md bg-white/80">
+      <header className="sticky top-0 z-10 flex h-14 lg:h-[52px] items-center gap-4 px-3 backdrop-blur-md bg-[#F5F1EA]/80">
         <Dialog>
           <SheetTrigger className="min-[1024px]:hidden p-2 transition">
             <Link prefetch={true} href="/dashboard">

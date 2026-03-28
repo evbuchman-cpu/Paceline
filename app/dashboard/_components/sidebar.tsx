@@ -42,7 +42,7 @@ export default function DashboardSideBar() {
   const router = useRouter();
 
   return (
-    <div className="min-[1024px]:block hidden w-64 h-full bg-background">
+    <div className="min-[1024px]:block hidden w-64 h-full bg-[#F5F1EA]">
       <div className="flex h-full flex-col">
         <div className="flex h-[3.45rem] items-center px-4">
           <Link
