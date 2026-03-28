@@ -24,7 +24,7 @@ export default async function GuidesPage() {
   const archived = userGuides.filter((g) => !!g.guide.archivedAt);
 
   return (
-    <div style={{ backgroundColor: "#F5F1EA", minHeight: "100%" }}>
+    <div style={{ backgroundColor: "#F5F1EA", minHeight: "100vh" }}>
       {/* Header */}
       <div className="px-6 py-5" style={{ backgroundColor: "#2C5F4D" }}>
         <p className="text-base" style={{ color: "rgba(255,255,255,0.65)", fontFamily: "Source Serif 4, serif", marginBottom: "2px" }}>
