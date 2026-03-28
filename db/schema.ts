@@ -171,6 +171,17 @@ export const race = pgTable("race", {
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
 
+// Standalone user races (no guide required)
+export const userRace = pgTable("userRace", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  raceName: text("raceName").notNull(),
+  raceDate: timestamp("raceDate").notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
 // Leads (email capture for lead magnets)
 export const lead = pgTable("lead", {
   id: text("id").primaryKey(),
