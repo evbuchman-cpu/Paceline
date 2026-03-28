@@ -75,6 +75,7 @@ export default async function Dashboard() {
     .filter((r) => r.questionnaire?.raceDate != null)
     .filter((r) => new Date(r.questionnaire!.raceDate) >= now)
     .filter((r) => r.guide?.status === "completed" || r.guide?.status === "generating")
+    .filter((r) => !r.guide?.archivedAt && !r.purchase.archivedAt)
     .map((r) => ({
       id: r.questionnaire!.id,
       source: "guide" as const,
