@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   ShoppingBag,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -49,7 +50,8 @@ export default function DashboardSideBar() {
             className="flex items-center hover:cursor-pointer"
             href="/"
           >
-            <span className="font-sans font-bold text-xl text-[#2C5F4D]">PACELINE</span>
+            <Image src="/paceline-icon.svg" alt="Paceline Icon" width={80} height={80} className="h-9 w-auto" priority />
+            <Image src="/paceline-text.svg" alt="Paceline" width={200} height={50} className="h-7 w-auto" priority />
           </Link>
         </div>
 
