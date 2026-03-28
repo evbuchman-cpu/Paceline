@@ -187,8 +187,19 @@ function AddRaceForm({ onClose }: { onClose: () => void }) {
 const ADD_NEW_VALUE = "__add_new__";
 
 export function CountdownCard({ races, checklistProgress, totalChecklistItems }: CountdownCardProps) {
+  const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const [removing, setRemoving] = useState(false);
+
+  const handleRemoveRace = async (raceId: string) => {
+    setRemoving(true);
+    await fetch(`/api/user/races/${raceId}`, { method: "DELETE" });
+    setConfirmRemove(false);
+    setSelectedIndex(0);
+    router.refresh();
+  };
 
   const checkedCount = Object.values(checklistProgress).filter(Boolean).length;
   const checklistPct = totalChecklistItems > 0 ? (checkedCount / totalChecklistItems) * 100 : 0;
@@ -317,6 +328,35 @@ export function CountdownCard({ races, checklistProgress, totalChecklistItems }:
                 >
                   Get a guide →
                 </Link>
+              )}
+              {race.source === "standalone" && !confirmRemove && (
+                <button
+                  onClick={() => setConfirmRemove(true)}
+                  className="text-xs"
+                  style={{ color: "rgba(255,255,255,0.35)", fontFamily: "Inter, sans-serif" }}
+                >
+                  Remove
+                </button>
+              )}
+              {race.source === "standalone" && confirmRemove && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.6)", fontFamily: "Inter, sans-serif" }}>Remove race?</span>
+                  <button
+                    onClick={() => handleRemoveRace(race.id)}
+                    disabled={removing}
+                    className="text-xs font-semibold px-2 py-0.5 rounded"
+                    style={{ backgroundColor: "#A85A3C", color: "#FFFFFF", fontFamily: "Inter, sans-serif" }}
+                  >
+                    {removing ? "..." : "Yes"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmRemove(false)}
+                    className="text-xs"
+                    style={{ color: "rgba(255,255,255,0.5)", fontFamily: "Inter, sans-serif" }}
+                  >
+                    No
+                  </button>
+                </div>
               )}
             </div>
 
