@@ -42,9 +42,9 @@ export default function DashboardSideBar() {
   const router = useRouter();
 
   return (
-    <div className="min-[1024px]:block hidden w-64 border-r h-full bg-background">
+    <div className="min-[1024px]:block hidden w-64 h-full bg-background">
       <div className="flex h-full flex-col">
-        <div className="flex h-[3.45rem] items-center border-b px-4">
+        <div className="flex h-[3.45rem] items-center px-4">
           <Link
             prefetch={true}
             className="flex items-center hover:cursor-pointer"
