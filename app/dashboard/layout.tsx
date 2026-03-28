@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
-import DashboardTopNavbar from "./_components/top-navbar";
+import DashboardTopNav from "./_components/navbar";
+import DashboardSideBar from "./_components/sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -7,6 +8,11 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   return (
-    <DashboardTopNavbar>{children}</DashboardTopNavbar>
+    <div className="flex h-screen overflow-hidden w-full">
+      <DashboardSideBar />
+      <main className="flex-1 overflow-y-auto">
+        <DashboardTopNav>{children}</DashboardTopNav>
+      </main>
+    </div>
   );
 }

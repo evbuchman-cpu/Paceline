@@ -192,7 +192,7 @@ export default async function Dashboard() {
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────────── */}
-      <div className="px-4 md:px-8 py-6 flex flex-col gap-8 max-w-5xl mx-auto w-full">
+      <div className="px-4 md:px-6 py-6 flex flex-col gap-8 max-w-5xl">
 
         {/* ── Section 2: Race Countdown ───────────────────────────────────── */}
         <CountdownCard
