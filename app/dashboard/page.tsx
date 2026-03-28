@@ -1,36 +1,215 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { SectionCards } from "./_components/section-cards";
-import { ChartAreaInteractive } from "./_components/chart-interactive";
+import { db } from "@/db/drizzle";
+import { user, purchase, questionnaire, guide } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
+
+import { CountdownCard } from "./_components/CountdownCard";
+import { MyGuides } from "./_components/GuideCard";
+import {
+  ReadinessChecklist,
+  TOTAL_CHECKLIST_ITEMS,
+} from "./_components/ReadinessChecklist";
+import { NextSteps } from "./_components/NextSteps";
+import { QuickActions } from "./_components/QuickActions";
+
+export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  const result = await auth.api.getSession({
-    headers: await headers(), // you need to pass the headers object.
-  });
-
-  if (!result?.session?.userId) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.session?.userId) {
     redirect("/sign-in");
   }
 
+  const userId = session.user.id;
+  const firstName = session.user.name?.split(" ")[0] ?? "Runner";
+
+  // ── Fetch all data in parallel ──────────────────────────────────────────────
+  const [userData, purchaseRows] = await Promise.all([
+    db
+      .select({ checklistProgress: user.checklistProgress })
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1),
+    db
+      .select()
+      .from(purchase)
+      .where(eq(purchase.userId, userId))
+      .orderBy(desc(purchase.createdAt)),
+  ]);
+
+  const checklistProgress =
+    (userData[0]?.checklistProgress as Record<string, boolean> | null) ?? {};
+
+  // ── For each purchase, fetch associated questionnaire + guide ───────────────
+  type GuideRow = {
+    purchase: typeof purchase.$inferSelect;
+    questionnaire: typeof questionnaire.$inferSelect | null;
+    guide: typeof guide.$inferSelect | null;
+  };
+
+  let guideRows: GuideRow[] = [];
+
+  if (purchaseRows.length > 0) {
+    const rows = await db
+      .select({
+        purchase,
+        questionnaire,
+        guide,
+      })
+      .from(purchase)
+      .leftJoin(questionnaire, eq(questionnaire.purchaseId, purchase.id))
+      .leftJoin(guide, eq(guide.questionnaireId, questionnaire.id))
+      .where(eq(purchase.userId, userId))
+      .orderBy(desc(purchase.createdAt));
+
+    guideRows = rows as GuideRow[];
+  }
+
+  // ── Determine the active guide for the countdown card ──────────────────────
+  // Active = earliest upcoming race date with a questionnaire
+  const now = new Date();
+  const upcomingRows = guideRows.filter(
+    (r) =>
+      r.questionnaire?.raceDate && new Date(r.questionnaire.raceDate) >= now
+  );
+  upcomingRows.sort(
+    (a, b) =>
+      new Date(a.questionnaire!.raceDate).getTime() -
+      new Date(b.questionnaire!.raceDate).getTime()
+  );
+
+  const activeRow = upcomingRows[0] ?? guideRows[0] ?? null;
+
+  const activeGuide = activeRow
+    ? {
+        questionnaire: {
+          raceName: activeRow.questionnaire!.raceName,
+          raceDate: activeRow.questionnaire!.raceDate,
+          completedAt: activeRow.questionnaire!.completedAt,
+        },
+        guide: activeRow.guide
+          ? {
+              id: activeRow.guide.id,
+              status: activeRow.guide.status,
+            }
+          : null,
+        purchase: {
+          createdAt: activeRow.purchase.createdAt,
+          tier: activeRow.purchase.tier,
+        },
+      }
+    : null;
+
+  // ── Build guide card props ──────────────────────────────────────────────────
+  const guideCardProps = guideRows.map((row) => ({
+    guide: row.guide
+      ? {
+          id: row.guide.id,
+          status: row.guide.status,
+          pdfUrl: row.guide.pdfUrl || null,
+          error: row.guide.error || null,
+          sections: row.guide.sections as Record<string, unknown> | null,
+          createdAt: row.guide.createdAt,
+        }
+      : null,
+    questionnaire: {
+      id: row.questionnaire?.id ?? "",
+      raceName: row.questionnaire?.raceName ?? row.purchase.tier,
+      raceDate: row.questionnaire?.raceDate ?? new Date(),
+      goalFinishTime: row.questionnaire?.goalFinishTime ?? "",
+      completedAt: row.questionnaire?.completedAt ?? null,
+    },
+    purchase: {
+      id: row.purchase.id,
+      tier: row.purchase.tier,
+    },
+  }));
+
+  // ── Active guide for NextSteps ──────────────────────────────────────────────
+  const nextStepsGuide = activeRow
+    ? {
+        questionnaire: {
+          raceName: activeRow.questionnaire!.raceName,
+          raceDate: activeRow.questionnaire!.raceDate,
+          completedAt: activeRow.questionnaire!.completedAt,
+        },
+        guide: activeRow.guide
+          ? {
+              id: activeRow.guide.id,
+              status: activeRow.guide.status,
+            }
+          : null,
+      }
+    : null;
+
+  // ── Race date for checklist overdue detection ───────────────────────────────
+  const checklistRaceDate = activeRow?.questionnaire?.raceDate
+    ? new Date(activeRow.questionnaire.raceDate)
+    : null;
+
   return (
-    <section className="flex flex-col items-start justify-start p-6 w-full">
-      <div className="w-full">
-        <div className="flex flex-col items-start justify-center gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Interactive Chart
-          </h1>
-          <p className="text-muted-foreground">
-            Interactive chart with data visualization and interactive elements.
-          </p>
-        </div>
-        <div className="@container/main flex flex-1 flex-col gap-2">
-          <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-            <SectionCards />
-            <ChartAreaInteractive />
-          </div>
-        </div>
+    <div style={{ backgroundColor: "#F5F1EA", minHeight: "100%" }}>
+      {/* ── Section 1: Header bar ─────────────────────────────────────────── */}
+      <div
+        className="px-6 py-5"
+        style={{ backgroundColor: "#2C5F4D" }}
+      >
+        <p
+          className="text-base"
+          style={{
+            color: "rgba(255,255,255,0.65)",
+            fontFamily: "Source Serif 4, serif",
+            marginBottom: "2px",
+          }}
+        >
+          Dashboard
+        </p>
+        <h1
+          className="font-semibold"
+          style={{
+            color: "#FFFFFF",
+            fontFamily: "Inter, sans-serif",
+            fontSize: "clamp(22px, 3vw, 30px)",
+          }}
+        >
+          Welcome back, {firstName}. Race day is coming.
+        </h1>
       </div>
-    </section>
+
+      {/* ── Main content ─────────────────────────────────────────────────── */}
+      <div className="px-4 md:px-6 py-6 flex flex-col gap-8 max-w-5xl">
+
+        {/* ── Section 2: Race Countdown ───────────────────────────────────── */}
+        <CountdownCard
+          activeGuide={activeGuide}
+          checklistProgress={checklistProgress}
+          totalChecklistItems={TOTAL_CHECKLIST_ITEMS}
+        />
+
+        {/* ── Section 5: Next Steps (shown before guides on purpose — coach talks first) */}
+        <NextSteps
+          activeGuide={nextStepsGuide}
+          checklistProgress={checklistProgress}
+          totalChecklistItems={TOTAL_CHECKLIST_ITEMS}
+          hasPurchase={purchaseRows.length > 0}
+        />
+
+        {/* ── Section 3: My Guides ────────────────────────────────────────── */}
+        <MyGuides guides={guideCardProps} />
+
+        {/* ── Section 4: Race Readiness Checklist ─────────────────────────── */}
+        <div id="checklist">
+          <ReadinessChecklist
+            initialProgress={checklistProgress}
+            raceDate={checklistRaceDate}
+          />
+        </div>
+
+        {/* ── Section 6: Quick Actions ────────────────────────────────────── */}
+        <QuickActions />
+      </div>
+    </div>
   );
 }

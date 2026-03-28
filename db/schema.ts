@@ -16,6 +16,7 @@ export const user = pgTable("user", {
   image: text("image"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  checklistProgress: jsonb("checklistProgress"), // { [itemId: string]: boolean }
 });
 
 export const session = pgTable("session", {
