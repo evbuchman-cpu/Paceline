@@ -152,6 +152,7 @@ export const guide = pgTable("guide", {
   aiCost: integer("aiCost"), // cost in cents ($0.50-1.00)
   status: text("status").notNull().default("generating"), // "generating" | "completed" | "failed"
   error: text("error"), // error message if failed
+  archivedAt: timestamp("archivedAt"), // null = active, set = archived
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });

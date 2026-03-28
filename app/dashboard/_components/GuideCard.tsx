@@ -92,11 +92,15 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
     return () => clearInterval(interval);
   }, [guide, liveStatus?.status, poll]);
 
-  const handleDelete = async () => {
+  const handleArchive = async () => {
     if (!guide) return;
     setDeleting(true);
     try {
-      await fetch(`/api/guide/${guide.id}`, { method: "DELETE" });
+      await fetch(`/api/guide/${guide.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "archive" }),
+      });
       router.refresh();
     } catch {
       setDeleting(false);
@@ -177,19 +181,19 @@ export function GuideCard({ guide, questionnaire, purchase }: GuideCardProps) {
           {!confirmDelete ? (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="p-1.5 rounded-lg transition-colors hover:bg-red-50"
-              title="Remove guide"
+              className="p-1.5 rounded-lg transition-colors hover:bg-stone-100"
+              title="Archive guide"
             >
               <Trash2 className="w-4 h-4" style={{ color: "#C8BFB5" }} />
             </button>
           ) : (
             <div className="flex items-center gap-1.5">
-              <span className="text-xs" style={{ color: "#A85A3C", fontFamily: "Inter, sans-serif" }}>Remove?</span>
+              <span className="text-xs" style={{ color: "#A85A3C", fontFamily: "Inter, sans-serif" }}>Archive?</span>
               <button
-                onClick={handleDelete}
+                onClick={handleArchive}
                 disabled={deleting}
                 className="text-xs font-semibold px-2 py-1 rounded text-white"
-                style={{ backgroundColor: "#A85A3C", fontFamily: "Inter, sans-serif" }}
+                style={{ backgroundColor: "#C87350", fontFamily: "Inter, sans-serif" }}
               >
                 {deleting ? "..." : "Yes"}
               </button>

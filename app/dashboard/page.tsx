@@ -126,8 +126,8 @@ export default async function Dashboard() {
     ?? guideRows[0]
     ?? null;
 
-  // ── Build guide card props ──────────────────────────────────────────────────
-  const guideCardProps = guideRows.map((row) => ({
+  // ── Build guide card props — exclude archived ──────────────────────────────
+  const guideCardProps = guideRows.filter((row) => !row.guide?.archivedAt).map((row) => ({
     guide: row.guide
       ? {
           id: row.guide.id,
