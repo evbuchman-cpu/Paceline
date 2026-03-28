@@ -74,6 +74,7 @@ export default async function Dashboard() {
   const guideCountdownRaces: CountdownRace[] = guideRows
     .filter((r) => r.questionnaire?.raceDate != null)
     .filter((r) => new Date(r.questionnaire!.raceDate) >= now)
+    .filter((r) => r.guide?.status === "completed" || r.guide?.status === "generating")
     .map((r) => ({
       id: r.questionnaire!.id,
       source: "guide" as const,
