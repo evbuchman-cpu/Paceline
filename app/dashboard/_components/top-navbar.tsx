@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +15,7 @@ const navLinks = [
   { label: "Settings", href: "/dashboard/settings" },
 ];
 
-export default function DashboardTopNavbar({ children }: { children: React.ReactNode }) {
+export default function DashboardTopNavbar({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
