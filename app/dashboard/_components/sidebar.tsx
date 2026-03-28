@@ -5,9 +5,9 @@ import clsx from "clsx";
 import {
   LucideIcon,
   Settings,
-  ClipboardList,
   FileText,
   LayoutDashboard,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,14 +25,14 @@ const navItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    label: "Questionnaire",
-    href: "/dashboard/questionnaire",
-    icon: ClipboardList,
-  },
-  {
     label: "My Guides",
     href: "/dashboard/guides",
     icon: FileText,
+  },
+  {
+    label: "Get a Guide",
+    href: "/pricing",
+    icon: ShoppingBag,
   },
 ];
 
