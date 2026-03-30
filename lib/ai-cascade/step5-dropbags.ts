@@ -39,10 +39,10 @@ export async function generateDropBagStrategy(
   const dropBagStations = input.aidStations.filter((s) => s.dropBagAccess);
 
   if (dropBagStations.length === 0) {
-    console.log("📊 No drop bag stations - generating minimal strategy");
+    logger.debug("AI Step 5: No drop bag stations - generating minimal strategy");
 
     const generationTime = Date.now() - startTime;
-    console.log(`✅ Step 5 - Drop Bag Strategy complete (no stations): ${generationTime}ms`);
+    logger.debug("AI Step 5: Drop Bag Strategy complete (no stations)", { generationTime });
 
     return {
       success: true,
@@ -141,9 +141,11 @@ Max 8 items per station packingList. Be specific (e.g., "Injinji toe socks" not 
   }
 
   const generationTime = Date.now() - startTime;
-  console.log(
-    `✅ Step 5 - Drop Bag Strategy complete: ${generationTime}ms | ${response.usage.input_tokens} in / ${response.usage.output_tokens} out`
-  );
+  logger.debug("AI Step 5: Drop Bag Strategy complete", {
+    generationTime,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  });
 
   return {
     success: true,

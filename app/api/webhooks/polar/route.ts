@@ -1,7 +1,7 @@
 import { db } from "@/db/drizzle";
 import { purchase, subscription, user } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { randomUUID } from "crypto";
+import { randomUUID, createHmac, timingSafeEqual } from "crypto";
 import { headers } from "next/headers";
 import { logger } from "@/lib/logger";
 
@@ -27,13 +27,17 @@ function mapProductIdToTier(productId: string): "essential" | "custom" | "ultra_
   return tierMap[productId] || null;
 }
 
-// TODO: Re-enable webhook signature verification for production security
-// function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-//   const hmac = crypto.createHmac("sha256", secret);
-//   hmac.update(payload);
-//   const expectedSignature = hmac.digest("hex");
-//   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
-// }
+function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+  const hmac = createHmac("sha256", secret);
+  hmac.update(payload);
+  const expectedSignature = hmac.digest("hex");
+  try {
+    return timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+  } catch {
+    // Buffers of different lengths throw — signature is invalid
+    return false;
+  }
+}
 
 export async function POST(req: Request) {
   logger.debug("Webhook request received from Polar.sh");
@@ -60,9 +64,10 @@ export async function POST(req: Request) {
       return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
 
-    // Note: Polar uses different signature formats, may need adjustment
-    // For now, let's log and process anyway for debugging
-    logger.warn("Signature verification temporarily disabled for debugging");
+    if (!verifyWebhookSignature(rawBody, signature, webhookSecret)) {
+      logger.error("Webhook signature validation failed: signature mismatch");
+      return Response.json({ error: "Invalid signature" }, { status: 401 });
+    }
 
     const data = JSON.parse(rawBody);
     const eventType = data.type;
@@ -123,7 +128,6 @@ export async function POST(req: Request) {
           set: {
             modifiedAt: safeParseDate(subscriptionData.modified_at || subscriptionData.modifiedAt) || new Date(),
             status: subscriptionData.status,
-            updatedAt: new Date(),
           },
         });
 

@@ -1,5 +1,7 @@
 import { generateGuidePDF, getGuideHTML } from '@/lib/pdf-generator';
 import { NextResponse } from 'next/server';
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import type { GuideData, QuestionnaireData } from '@/lib/pdf-generator';
 
 // Sample data for testing PDF generation
@@ -531,6 +533,15 @@ const sampleQuestionnaire: QuestionnaireData = {
 };
 
 export async function GET(request: Request) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const format = searchParams.get('format');
 

@@ -8,6 +8,7 @@ import {
 } from "@/lib/strava-client";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
       stravaAccount.accessTokenExpiresAt &&
       new Date(stravaAccount.accessTokenExpiresAt) < new Date()
     ) {
-      console.log("🔄 Strava access token expired, refreshing...");
+      logger.info("Strava access token expired, refreshing");
 
       if (!stravaAccount.refreshToken) {
         return Response.json(
@@ -96,17 +97,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("📊 Fetching Strava activities for user:", session.user.id);
+    logger.info("Fetching Strava activities", { userId: session.user.id });
 
     // Fetch 90 days of activities
     const activities = await fetchActivities(accessToken, 90);
 
-    console.log(`✅ Fetched ${activities.length} activities from Strava`);
+    logger.info("Strava activities fetched", { count: activities.length });
 
     // Analyze activities
     const analysis = await analyzeActivities(activities);
 
-    console.log("📈 Strava analysis complete:", {
+    logger.info("Strava analysis complete", {
       totalActivities: analysis.totalActivities,
       weeklyVolume: analysis.weeklyVolume,
       averageFlatPace: analysis.averageFlatPace,

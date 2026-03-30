@@ -55,10 +55,14 @@ interface NutritionPreferences {
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
   let guideId: string | null = null;
+  // Hoisted so the catch block can reference them for failure email
+  let session: Awaited<ReturnType<typeof auth.api.getSession>> | null = null;
+  let q: typeof import("@/db/schema").questionnaire.$inferSelect | null = null;
+  let p: typeof import("@/db/schema").purchase.$inferSelect | null = null;
 
   try {
     // Step 1: Verify authentication
-    const session = await auth.api.getSession({
+    session = await auth.api.getSession({
       headers: await headers(),
     });
 
@@ -93,7 +97,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { questionnaire: q, purchase: p } = questionnaireResult[0];
+    ({ questionnaire: q, purchase: p } = questionnaireResult[0]);
 
     // Step 4: Verify ownership
     if (p.userId !== session.user.id) {
@@ -428,24 +432,26 @@ export async function POST(req: NextRequest) {
           })
           .where(eq(guide.id, guideId));
 
-        // Send guide failed email
-        await sendGuideFailedEmail({
-          user: {
-            name: session.user.name,
-            email: session.user.email,
-          },
-          questionnaire: {
-            raceName: q.raceName,
-            raceDate: q.raceDate,
-            firstName: q.firstName || session.user.name,
-          },
-          guide: {
-            error: error instanceof Error ? error.message : 'Unknown error',
-          },
-          purchase: {
-            tier: p.tier,
-          },
-        });
+        // Send guide failed email only if we have enough context to do so
+        if (session && q && p) {
+          await sendGuideFailedEmail({
+            user: {
+              name: session.user.name,
+              email: session.user.email,
+            },
+            questionnaire: {
+              raceName: q.raceName,
+              raceDate: q.raceDate,
+              firstName: q.firstName || session.user.name,
+            },
+            guide: {
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+            purchase: {
+              tier: p.tier,
+            },
+          });
+        }
 
         logger.info("Guide failed email sent", { guideId });
       } catch (updateError) {
