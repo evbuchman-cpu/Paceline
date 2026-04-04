@@ -5,6 +5,8 @@ import { essentialQuestionnaireSchema } from "@/lib/schemas/questionnaire";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { randomUUID } from "crypto";
+import { checkRateLimit, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limiter";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Unauthorized - please sign in" },
         { status: 401 }
+      );
+    }
+
+    // Check rate limit (10 requests per hour)
+    const rateLimitResult = checkRateLimit(
+      `questionnaire:${session.user.id}`,
+      RATE_LIMITS.QUESTIONNAIRE
+    );
+
+    if (!rateLimitResult.allowed) {
+      logger.warn("Rate limit exceeded for questionnaire submission", {
+        userId: session.user.id,
+        retryAfter: rateLimitResult.retryAfter,
+      });
+
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message: `You can submit up to 10 questionnaires per hour. Please try again in ${rateLimitResult.retryAfter} seconds.`,
+          retryAfter: rateLimitResult.retryAfter,
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
       );
     }
 

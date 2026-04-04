@@ -36,6 +36,9 @@ import { validateAndCorrectGuideData } from "@/lib/guide-validator";
 // Email imports
 import { sendGuideDeliveryEmail, sendGuideFailedEmail } from "@/lib/email-sender";
 
+// Rate limiting
+import { checkRateLimit, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limiter";
+
 // Request validation schema
 const generateGuideRequestSchema = z.object({
   questionnaireId: z.string().uuid(),
@@ -66,6 +69,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Unauthorized - please sign in" },
         { status: 401 }
+      );
+    }
+
+    // Step 1.5: Check rate limit (3 requests per hour)
+    const rateLimitResult = checkRateLimit(
+      `generate-guide:${session.user.id}`,
+      RATE_LIMITS.GENERATE_GUIDE
+    );
+
+    if (!rateLimitResult.allowed) {
+      logger.warn("Rate limit exceeded for guide generation", {
+        userId: session.user.id,
+        retryAfter: rateLimitResult.retryAfter,
+      });
+
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message: `You can generate up to 3 guides per hour. Please try again in ${rateLimitResult.retryAfter} seconds.`,
+          retryAfter: rateLimitResult.retryAfter,
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
       );
     }
 

@@ -1,7 +1,7 @@
 import { db } from "@/db/drizzle";
 import { purchase, subscription, user } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { randomUUID } from "crypto";
+import { randomUUID, createHmac, timingSafeEqual } from "crypto";
 import { headers } from "next/headers";
 import { logger } from "@/lib/logger";
 
@@ -27,13 +27,24 @@ function mapProductIdToTier(productId: string): "essential" | "custom" | "ultra_
   return tierMap[productId] || null;
 }
 
-// TODO: Re-enable webhook signature verification for production security
-// function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-//   const hmac = crypto.createHmac("sha256", secret);
-//   hmac.update(payload);
-//   const expectedSignature = hmac.digest("hex");
-//   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
-// }
+// Webhook signature verification for production security
+function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+  try {
+    const hmac = createHmac("sha256", secret);
+    hmac.update(payload);
+    const expectedSignature = hmac.digest("hex");
+
+    // Ensure both signatures are the same length before comparison
+    if (signature.length !== expectedSignature.length) {
+      return false;
+    }
+
+    return timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+  } catch (error) {
+    logger.error("Error verifying webhook signature", { error });
+    return false;
+  }
+}
 
 export async function POST(req: Request) {
   logger.debug("Webhook request received from Polar.sh");
@@ -60,9 +71,16 @@ export async function POST(req: Request) {
       return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
 
-    // Note: Polar uses different signature formats, may need adjustment
-    // For now, let's log and process anyway for debugging
-    logger.warn("Signature verification temporarily disabled for debugging");
+    // Verify webhook signature for security
+    const isValidSignature = verifyWebhookSignature(rawBody, signature, webhookSecret);
+    if (!isValidSignature) {
+      logger.error("Webhook signature validation failed: Invalid signature", {
+        providedSignature: signature.substring(0, 10) + "...", // Log only first 10 chars for security
+      });
+      return Response.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    logger.info("Webhook signature verified successfully");
 
     const data = JSON.parse(rawBody);
     const eventType = data.type;

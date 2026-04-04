@@ -8,6 +8,8 @@ import {
 } from "@/lib/strava-client";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
+import { checkRateLimit, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limiter";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +39,31 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check rate limit (5 requests per hour)
+    const rateLimitResult = checkRateLimit(
+      `strava-analyze:${session.user.id}`,
+      RATE_LIMITS.STRAVA_ANALYZE
+    );
+
+    if (!rateLimitResult.allowed) {
+      logger.warn("Rate limit exceeded for Strava analysis", {
+        userId: session.user.id,
+        retryAfter: rateLimitResult.retryAfter,
+      });
+
+      return Response.json(
+        {
+          error: "Rate limit exceeded",
+          message: `You can analyze Strava data up to 5 times per hour. Please try again in ${rateLimitResult.retryAfter} seconds.`,
+          retryAfter: rateLimitResult.retryAfter,
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
+      );
     }
 
     // Get Strava account from database
