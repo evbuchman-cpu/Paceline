@@ -10,12 +10,12 @@ export function Pricing() {
     router.push(`/checkout?product=${encodeURIComponent(productId)}&slug=${encodeURIComponent(slug)}`);
   };
 
-  const ESSENTIAL_TIER = process.env.NEXT_PUBLIC_ESSENTIAL_TIER;
-  const ESSENTIAL_SLUG = process.env.NEXT_PUBLIC_ESSENTIAL_SLUG;
-  const CUSTOM_TIER = process.env.NEXT_PUBLIC_CUSTOM_TIER;
-  const CUSTOM_SLUG = process.env.NEXT_PUBLIC_CUSTOM_SLUG;
-  const ULTRA_BUNDLE_TIER = process.env.NEXT_PUBLIC_ULTRA_BUNDLE_TIER;
-  const ULTRA_BUNDLE_SLUG = process.env.NEXT_PUBLIC_ULTRA_BUNDLE_SLUG;
+  const ESSENTIAL_TIER = process.env.NEXT_PUBLIC_ESSENTIAL_TIER?.trim();
+  const ESSENTIAL_SLUG = process.env.NEXT_PUBLIC_ESSENTIAL_SLUG?.trim();
+  const CUSTOM_TIER = process.env.NEXT_PUBLIC_CUSTOM_TIER?.trim();
+  const CUSTOM_SLUG = process.env.NEXT_PUBLIC_CUSTOM_SLUG?.trim();
+  const ULTRA_BUNDLE_TIER = process.env.NEXT_PUBLIC_ULTRA_BUNDLE_TIER?.trim();
+  const ULTRA_BUNDLE_SLUG = process.env.NEXT_PUBLIC_ULTRA_BUNDLE_SLUG?.trim();
 
   if (!ESSENTIAL_TIER || !ESSENTIAL_SLUG || !CUSTOM_TIER || !CUSTOM_SLUG || !ULTRA_BUNDLE_TIER || !ULTRA_BUNDLE_SLUG) {
     console.error("Missing pricing tier environment variables");

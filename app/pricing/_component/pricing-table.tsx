@@ -43,10 +43,10 @@ export default function PricingTable({ subscriptionDetails }: PricingTableProps)
     }
   };
 
-  const ESSENTIAL_TIER = process.env.NEXT_PUBLIC_ESSENTIAL_TIER!;
-  const ESSENTIAL_SLUG = process.env.NEXT_PUBLIC_ESSENTIAL_SLUG!;
-  const CUSTOM_TIER = process.env.NEXT_PUBLIC_CUSTOM_TIER!;
-  const CUSTOM_SLUG = process.env.NEXT_PUBLIC_CUSTOM_SLUG!;
+  const ESSENTIAL_TIER = process.env.NEXT_PUBLIC_ESSENTIAL_TIER?.trim() ?? "";
+  const ESSENTIAL_SLUG = process.env.NEXT_PUBLIC_ESSENTIAL_SLUG?.trim() ?? "";
+  const CUSTOM_TIER = process.env.NEXT_PUBLIC_CUSTOM_TIER?.trim() ?? "";
+  const CUSTOM_SLUG = process.env.NEXT_PUBLIC_CUSTOM_SLUG?.trim() ?? "";
 
   const isCurrentPlan = (tierProductId: string) =>
     subscriptionDetails.hasSubscription &&

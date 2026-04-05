@@ -16,8 +16,8 @@ import { Suspense } from "react";
 function CheckoutInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const product = searchParams.get("product");
-  const slug = searchParams.get("slug");
+  const product = searchParams.get("product")?.trim();
+  const slug = searchParams.get("slug")?.trim();
   const triggered = useRef(false);
 
   useEffect(() => {
