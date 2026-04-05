@@ -1,10 +1,6 @@
 import { uploadImageAssets } from "@/lib/upload-image";
 import { NextRequest, NextResponse } from "next/server";
 
-export const config = {
-  api: { bodyParser: false }, // Disable default body parsing
-};
-
 export async function POST(req: NextRequest) {
   try {
     // Parse the form data
