@@ -27,14 +27,20 @@ function mapProductIdToTier(productId: string): "essential" | "custom" | "ultra_
   return tierMap[productId] || null;
 }
 
+// Webhook signature verification for production security
 function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-  const hmac = createHmac("sha256", secret);
-  hmac.update(payload);
-  const expectedSignature = hmac.digest("hex");
   try {
+    const hmac = createHmac("sha256", secret);
+    hmac.update(payload);
+    const expectedSignature = hmac.digest("hex");
+
+    if (signature.length !== expectedSignature.length) {
+      return false;
+    }
+
     return timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
-  } catch {
-    // Buffers of different lengths throw — signature is invalid
+  } catch (error) {
+    logger.error("Error verifying webhook signature", { error });
     return false;
   }
 }
@@ -64,10 +70,15 @@ export async function POST(req: Request) {
       return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
 
-    if (!verifyWebhookSignature(rawBody, signature, webhookSecret)) {
-      logger.error("Webhook signature validation failed: signature mismatch");
+    const isValidSignature = verifyWebhookSignature(rawBody, signature, webhookSecret);
+    if (!isValidSignature) {
+      logger.error("Webhook signature validation failed: Invalid signature", {
+        providedSignature: signature.substring(0, 10) + "...",
+      });
       return Response.json({ error: "Invalid signature" }, { status: 401 });
     }
+
+    logger.info("Webhook signature verified successfully");
 
     const data = JSON.parse(rawBody);
     const eventType = data.type;
