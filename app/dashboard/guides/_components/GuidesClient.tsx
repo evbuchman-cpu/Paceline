@@ -289,9 +289,10 @@ function ArchivedGuideCard({ row }: { row: GuideRow }) {
 interface GuidesClientProps {
   active: GuideRow[];
   archived: GuideRow[];
+  hasPurchase: boolean;
 }
 
-export function GuidesClient({ active, archived }: GuidesClientProps) {
+export function GuidesClient({ active, archived, hasPurchase }: GuidesClientProps) {
   const [archiveOpen, setArchiveOpen] = useState(false);
 
   return (
@@ -303,7 +304,7 @@ export function GuidesClient({ active, archived }: GuidesClientProps) {
             Active Guides
           </h2>
           <Link
-            href="/dashboard/questionnaire"
+            href={hasPurchase ? "/dashboard/questionnaire" : "/pricing"}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white"
             style={{ backgroundColor: "#C87350", fontFamily: "Inter, sans-serif" }}
           >
