@@ -39,13 +39,10 @@ function CheckoutInner() {
         return;
       }
 
-      // Signed in — fire checkout immediately
-      try {
-        await authClient.checkout({ products: [product], slug });
-      } catch {
-        // If checkout fails, send user back to pricing
-        router.replace("/#pricing");
-      }
+      // Signed in — navigate to the Better Auth / Polar checkout endpoint.
+      // The plugin registers GET /api/auth/checkout/[slug] which creates the
+      // Polar checkout session and redirects the browser to Polar's payment page.
+      window.location.href = `/api/auth/checkout/${encodeURIComponent(slug)}`;
     }
 
     run();
