@@ -6,6 +6,8 @@ import { purchase, questionnaire } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { QuestionnaireClient } from "./questionnaire-client";
 
+export const dynamic = 'force-dynamic';
+
 export default async function QuestionnairePage({
   searchParams,
 }: {
