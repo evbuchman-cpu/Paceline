@@ -18,7 +18,6 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Step 1: Verify authentication
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -33,7 +32,6 @@ export async function GET(
     const guideId = params.id;
     logger.info("Download request for guide", { guideId, userId: session.user.id });
 
-    // Step 2: Fetch guide with purchase info
     const guideResult = await db
       .select({
         guide: guide,
@@ -54,7 +52,6 @@ export async function GET(
 
     const { guide: g, purchase: p } = guideResult[0];
 
-    // Step 3: Verify ownership
     if (p.userId !== session.user.id) {
       logger.warn("Unauthorized download attempt", {
         guideId,
@@ -67,7 +64,6 @@ export async function GET(
       );
     }
 
-    // Step 4: Check if guide is completed
     if (g.status !== "completed") {
       logger.warn("Download attempt for incomplete guide", {
         guideId,
@@ -85,7 +81,6 @@ export async function GET(
       );
     }
 
-    // Step 5: Verify PDF URL exists
     if (!g.pdfUrl) {
       logger.error("Guide missing PDF URL", { guideId });
       return NextResponse.json(
@@ -97,11 +92,8 @@ export async function GET(
     logger.info("Redirecting to PDF download", {
       guideId,
       userId: session.user.id,
-      pdfUrl: g.pdfUrl
     });
 
-    // Step 6: Redirect to R2 PDF URL
-    // Using 307 Temporary Redirect to maintain GET method
     return NextResponse.redirect(g.pdfUrl, 307);
 
   } catch (error) {

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import {
   generateRaceOverview,
   generatePacingStrategy,
@@ -12,8 +14,17 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-// Test endpoint for AI cascade - DELETE before production
+// Test endpoint for AI cascade — development only
 export async function POST(req: Request) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await req.json().catch(() => ({}));
 
@@ -49,9 +60,7 @@ export async function POST(req: Request) {
     let totalCost = 0;
     let totalTime = 0;
 
-    console.log("\n========================================");
-    console.log("🧪 AI CASCADE TEST STARTED");
-    console.log("========================================\n");
+    // (dev-only test cascade started)
 
     // Step 1: Race Overview
     if (stepsToRun.includes("overview") || stepsToRun.includes("all")) {
@@ -160,11 +169,7 @@ export async function POST(req: Request) {
       }
     }
 
-    console.log("\n========================================");
-    console.log("✅ AI CASCADE TEST COMPLETE");
-    console.log(`Total Time: ${(totalTime / 1000).toFixed(2)}s`);
-    console.log(`Total Cost: $${totalCost.toFixed(4)}`);
-    console.log("========================================\n");
+    // (dev-only test cascade complete)
 
     return NextResponse.json({
       success: true,
@@ -178,7 +183,7 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error("❌ AI Cascade test failed:", error);
+    // (dev-only error, not using logger)
     return NextResponse.json(
       {
         success: false,
@@ -191,6 +196,9 @@ export async function POST(req: Request) {
 
 // GET endpoint for easy browser testing
 export async function GET() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   return NextResponse.json({
     message: "AI Cascade Test Endpoint - All 8 Steps",
     usage: {

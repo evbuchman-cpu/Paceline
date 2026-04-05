@@ -1,30 +1,13 @@
 "use client";
 import { Check, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
-import { toast } from "sonner"
 
 export function Pricing() {
   const router = useRouter();
 
-  const handleCheckout = async (productId: string, slug: string) => {
-    try {
-      const session = await authClient.getSession();
-
-      if (!session.data?.user) {
-        router.push("/sign-in");
-        return;
-      }
-
-      await authClient.checkout({
-        products: [productId],
-        slug: slug,
-      });
-    } catch (error) {
-      console.error("Checkout failed:", error);
-      toast.error("Oops, something went wrong");
-    }
+  const handleCheckout = (productId: string, slug: string) => {
+    router.push(`/checkout?product=${encodeURIComponent(productId)}&slug=${encodeURIComponent(slug)}`);
   };
 
   const ESSENTIAL_TIER = process.env.NEXT_PUBLIC_ESSENTIAL_TIER;

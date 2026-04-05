@@ -1,4 +1,6 @@
 import { NextRequest } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +12,11 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(req: NextRequest) {
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const searchParams = req.nextUrl.searchParams;
     const questionnaireId = searchParams.get("questionnaireId");
 

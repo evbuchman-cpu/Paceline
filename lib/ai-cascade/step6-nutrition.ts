@@ -112,9 +112,11 @@ Max 15 timeline entries. Be specific: "1 Honey Stinger (160cal)" not "waffle". T
   }
 
   const generationTime = Date.now() - startTime;
-  console.log(
-    `✅ Step 6 - Nutrition Timeline complete: ${generationTime}ms | ${response.usage.input_tokens} in / ${response.usage.output_tokens} out`
-  );
+  logger.debug("AI Step 6: Nutrition Timeline complete", {
+    generationTime,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  });
 
   return {
     success: true,

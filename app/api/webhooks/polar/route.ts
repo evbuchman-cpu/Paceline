@@ -34,7 +34,6 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
     hmac.update(payload);
     const expectedSignature = hmac.digest("hex");
 
-    // Ensure both signatures are the same length before comparison
     if (signature.length !== expectedSignature.length) {
       return false;
     }
@@ -71,11 +70,10 @@ export async function POST(req: Request) {
       return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
 
-    // Verify webhook signature for security
     const isValidSignature = verifyWebhookSignature(rawBody, signature, webhookSecret);
     if (!isValidSignature) {
       logger.error("Webhook signature validation failed: Invalid signature", {
-        providedSignature: signature.substring(0, 10) + "...", // Log only first 10 chars for security
+        providedSignature: signature.substring(0, 10) + "...",
       });
       return Response.json({ error: "Invalid signature" }, { status: 401 });
     }
@@ -141,7 +139,6 @@ export async function POST(req: Request) {
           set: {
             modifiedAt: safeParseDate(subscriptionData.modified_at || subscriptionData.modifiedAt) || new Date(),
             status: subscriptionData.status,
-            updatedAt: new Date(),
           },
         });
 

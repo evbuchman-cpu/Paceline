@@ -42,10 +42,10 @@ export async function generateCrewLogistics(
                          input.crewSupport.toLowerCase() !== "none";
 
   if (!hasCrewSupport) {
-    console.log("📊 No crew support - generating minimal logistics");
+    logger.debug("AI Step 4: No crew support - generating minimal logistics");
 
     const generationTime = Date.now() - startTime;
-    console.log(`✅ Step 4 - Crew Logistics complete (no crew): ${generationTime}ms`);
+    logger.debug("AI Step 4: Crew Logistics complete (no crew)", { generationTime });
 
     return {
       success: true,
@@ -135,9 +135,11 @@ Tailor mental support to race stage: early=restraint, middle=grind, late=push.`;
   }
 
   const generationTime = Date.now() - startTime;
-  console.log(
-    `✅ Step 4 - Crew Logistics complete: ${generationTime}ms | ${response.usage.input_tokens} in / ${response.usage.output_tokens} out`
-  );
+  logger.debug("AI Step 4: Crew Logistics complete", {
+    generationTime,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  });
 
   return {
     success: true,

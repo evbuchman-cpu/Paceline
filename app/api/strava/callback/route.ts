@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { exchangeCodeForToken } from "@/lib/strava-client";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -95,7 +96,7 @@ export async function GET(req: NextRequest) {
       })
       .where(eq(questionnaire.id, questionnaireId));
 
-    console.log("✅ Strava OAuth successful for user:", session.user.id);
+    logger.info("Strava OAuth successful", { userId: session.user.id });
 
     // Check if this is a test questionnaire (temporary for testing)
     const questionnaireData = await db

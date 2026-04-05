@@ -107,9 +107,11 @@ Max 4 mantras, max 5 celebration milestones. Tailor to ${expLevel} level.`;
   }
 
   const generationTime = Date.now() - startTime;
-  console.log(
-    `✅ Step 8 - Mental Strategy complete: ${generationTime}ms | ${response.usage.input_tokens} in / ${response.usage.output_tokens} out`
-  );
+  logger.debug("AI Step 8: Mental Strategy complete", {
+    generationTime,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  });
 
   return {
     success: true,

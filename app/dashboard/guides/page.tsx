@@ -20,6 +20,15 @@ export default async function GuidesPage() {
     .where(eq(purchase.userId, session.user.id))
     .orderBy(desc(guide.createdAt));
 
+  // Check if user has any purchase with guides remaining
+  const userPurchases = await db
+    .select()
+    .from(purchase)
+    .where(eq(purchase.userId, session.user.id))
+    .limit(1);
+
+  const hasPurchase = userPurchases.length > 0 && (userPurchases[0].guidesRemaining ?? 0) > 0;
+
   const active = userGuides.filter((g) => !g.guide.archivedAt);
   const archived = userGuides.filter((g) => !!g.guide.archivedAt);
 
@@ -36,7 +45,7 @@ export default async function GuidesPage() {
       </div>
 
       <div className="px-4 md:px-6 py-6 max-w-5xl flex flex-col gap-8">
-        <GuidesClient active={active} archived={archived} />
+        <GuidesClient active={active} archived={archived} hasPurchase={hasPurchase} />
       </div>
     </div>
   );

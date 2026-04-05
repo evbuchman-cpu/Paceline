@@ -100,9 +100,11 @@ Be specific: "vomiting 3+ times/hr" not "severe vomiting".`;
   }
 
   const generationTime = Date.now() - startTime;
-  console.log(
-    `✅ Step 7 - Contingency Protocols complete: ${generationTime}ms | ${response.usage.input_tokens} in / ${response.usage.output_tokens} out`
-  );
+  logger.debug("AI Step 7: Contingency Protocols complete", {
+    generationTime,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  });
 
   return {
     success: true,
