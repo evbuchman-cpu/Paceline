@@ -1,9 +1,7 @@
 "use client";
 
 import { Check, Star } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 type SubscriptionDetails = {
   id: string;
@@ -33,17 +31,8 @@ interface PricingTableProps {
 export default function PricingTable({ subscriptionDetails }: PricingTableProps) {
   const router = useRouter();
 
-  const handleCheckout = async (productId: string, slug: string) => {
-    try {
-      const session = await authClient.getSession();
-      if (!session.data?.user) {
-        router.push("/sign-in");
-        return;
-      }
-      await authClient.checkout({ products: [productId], slug });
-    } catch {
-      toast.error("Oops, something went wrong");
-    }
+  const handleCheckout = (productId: string, slug: string) => {
+    router.push(`/checkout?product=${encodeURIComponent(productId)}&slug=${encodeURIComponent(slug)}`);
   };
 
   const handleManageSubscription = async () => {
