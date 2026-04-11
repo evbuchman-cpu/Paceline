@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 import { Suspense } from "react";
 
 /**
@@ -32,18 +31,8 @@ function CheckoutInner() {
       }
 
       try {
-        const session = await authClient.getSession();
-
-        if (!session.data?.user) {
-          // Not signed in — send to sign-in, then come straight back here
-          const returnTo = `/checkout?product=${encodeURIComponent(product)}&slug=${encodeURIComponent(slug)}`;
-          router.replace(`/sign-in?returnTo=${encodeURIComponent(returnTo)}`);
-          return;
-        }
-
-        // Signed in — navigate to the Better Auth / Polar checkout endpoint.
-        // The plugin registers GET /api/auth/checkout/[slug] which creates the
-        // Polar checkout session and redirects the browser to Polar's payment page.
+        // Go straight to the Better Auth / Polar checkout endpoint.
+        // authenticatedUsersOnly: false allows guest checkout through Polar.
         window.location.href = `/api/auth/checkout/${encodeURIComponent(slug)}`;
       } catch (err) {
         console.error("Checkout error:", err);

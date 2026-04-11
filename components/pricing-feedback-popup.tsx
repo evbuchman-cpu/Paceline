@@ -16,6 +16,41 @@ const PRICE_OPTIONS = [
   "I wouldn't pay — here's why:",
 ] as const;
 
+// Map price options to the matching beta product
+const BUY_CTA: Record<string, { label: string; price: string; slug: string; productId: string } | null> = {
+  "$10–15 — I'd try it at that price": {
+    label: "Get Essential Plan",
+    price: "$7",
+    slug: process.env.NEXT_PUBLIC_ESSENTIAL_SLUG ?? "",
+    productId: process.env.NEXT_PUBLIC_ESSENTIAL_TIER ?? "",
+  },
+  "$20–30 — Fair for what it does": {
+    label: "Get Custom Plan",
+    price: "$25",
+    slug: process.env.NEXT_PUBLIC_CUSTOM_SLUG ?? "",
+    productId: process.env.NEXT_PUBLIC_CUSTOM_TIER ?? "",
+  },
+  "$40–60 — If the plan is genuinely personalized": {
+    label: "Get Custom Plan",
+    price: "$25",
+    slug: process.env.NEXT_PUBLIC_CUSTOM_SLUG ?? "",
+    productId: process.env.NEXT_PUBLIC_CUSTOM_TIER ?? "",
+  },
+  "$75–100 — Worth it if it helps me finish": {
+    label: "Get Custom Plan",
+    price: "$25",
+    slug: process.env.NEXT_PUBLIC_CUSTOM_SLUG ?? "",
+    productId: process.env.NEXT_PUBLIC_CUSTOM_TIER ?? "",
+  },
+  "$100+ — Coach-level value, worth premium": {
+    label: "Get Custom Plan",
+    price: "$25",
+    slug: process.env.NEXT_PUBLIC_CUSTOM_SLUG ?? "",
+    productId: process.env.NEXT_PUBLIC_CUSTOM_TIER ?? "",
+  },
+  "I wouldn't pay — here's why:": null,
+};
+
 export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupProps) {
   const [visible, setVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -114,9 +149,31 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
     closePopup();
   };
 
+  const handleBuyNow = (cta: NonNullable<typeof BUY_CTA[string]>) => {
+    posthog.capture("pricing_feedback_popup_buy_clicked", {
+      selected_option: selectedOption,
+      product: cta.label,
+      price: cta.price,
+    });
+    // Submit feedback silently in the background before navigating
+    fetch("/api/pricing-feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        selectedOption,
+        customComment: customComment || undefined,
+        email: email || undefined,
+        page: "pricing",
+      }),
+    }).catch(() => {});
+    localStorage.setItem("paceline_feedback_submitted", "1");
+    window.location.href = `/checkout?product=${encodeURIComponent(cta.productId)}&slug=${encodeURIComponent(cta.slug)}`;
+  };
+
   if (!visible) return null;
 
   const showFreeTextArea = selectedOption === "I wouldn't pay — here's why:";
+  const activeCta = selectedOption ? BUY_CTA[selectedOption] : null;
 
   return (
     <div
@@ -200,6 +257,28 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
               ))}
             </div>
 
+            {/* Instant buy CTA — appears when a paying option is selected */}
+            {activeCta && (
+              <div className="px-6 pt-4">
+                <div className="rounded-xl p-4" style={{ backgroundColor: "#fff", border: "2px solid #C87350" }}>
+                  <p className="font-sans font-semibold text-sm mb-1" style={{ color: "#2C5F4D" }}>
+                    Beta pricing is live right now
+                  </p>
+                  <p className="font-serif text-xs mb-3" style={{ color: "#4A5859" }}>
+                    Lock in {activeCta.label} at {activeCta.price} before the price goes up.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleBuyNow(activeCta)}
+                    className="w-full rounded-lg px-5 py-2.5 font-sans font-semibold text-white text-sm transition-colors"
+                    style={{ backgroundColor: "#C87350" }}
+                  >
+                    {activeCta.label} — {activeCta.price} →
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Optional email */}
             <div className="px-6 pt-4 pb-0">
               <label
@@ -230,7 +309,7 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
                 disabled={!selectedOption || submitting}
                 className="w-full rounded-lg px-6 py-3 font-semibold text-white transition-colors"
                 style={{
-                  backgroundColor: !selectedOption || submitting ? "#C87350" : "#C87350",
+                  backgroundColor: "#C87350",
                   opacity: !selectedOption || submitting ? 0.5 : 1,
                   cursor: !selectedOption || submitting ? "not-allowed" : "pointer",
                 }}
