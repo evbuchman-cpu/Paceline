@@ -34,7 +34,7 @@ function mapProductIdToTier(productId: string): "essential" | "custom" | "ultra_
 
 const polarClient = new Polar({
   accessToken: process.env.POLAR_ACCESS_TOKEN,
-  server: process.env.NODE_ENV === "production" ? "production" : "sandbox",
+  server: (process.env.POLAR_SERVER ?? "sandbox") as "production" | "sandbox",
 });
 
 export const auth = betterAuth({
