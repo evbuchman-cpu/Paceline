@@ -26,15 +26,16 @@ export async function GET(
 
   try {
     const checkout = await polar.checkouts.create({
-      productId,
+      products: [productId],
       successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/success?checkout_id={CHECKOUT_ID}`,
     });
 
     return NextResponse.redirect(checkout.url);
   } catch (err) {
-    console.error("Polar checkout creation failed:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Polar checkout creation failed:", message, err);
     return NextResponse.json(
-      { error: "Failed to create checkout session" },
+      { error: "Failed to create checkout session", detail: message },
       { status: 500 }
     );
   }
