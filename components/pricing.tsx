@@ -2,6 +2,8 @@
 import { Check, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import posthog from "posthog-js"
 
 export function Pricing() {
   const router = useRouter();
@@ -22,163 +24,213 @@ export function Pricing() {
     return null;
   }
 
+  useEffect(() => {
+    posthog.capture('training_pricing_viewed', { essential_price: 7, custom_price: 25 })
+  }, [])
+
   return (
     <section id="pricing" className="relative py-20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="font-sans font-semibold text-3xl sm:text-4xl lg:text-5xl text-[#2C5F4D] mb-4 text-balance">
-            Your Race Plan. Zero Stress.
+
+        {/* Section header */}
+        <div className="text-center mb-8">
+          <p className="uppercase tracking-widest text-xs font-sans mb-3" style={{ color: "#C87350" }}>
+            TRAINING PRICING — BETA
+          </p>
+          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl mb-4" style={{ color: "#2C5F4D" }}>
+            We&apos;re Still in Training. So Are Our Prices.
           </h2>
-          <p className="font-serif text-xl text-[#4A5859]">
-            Choose your level of detail. Every tier saves you 25+ hours of race planning.
+          <p className="font-serif italic text-base" style={{ color: "#4A5859" }}>
+            Early supporters get access at our training-pace prices. When we hit the start line for real, prices go up.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-5xl mx-auto">
+        {/* Transparency callout */}
+        <div
+          className="max-w-2xl mx-auto mb-12 rounded-lg px-5 py-4"
+          style={{
+            backgroundColor: "#F5F1EA",
+            borderLeft: "4px solid #2C5F4D",
+            borderRadius: "8px",
+          }}
+        >
+          <p className="font-serif text-sm" style={{ color: "#4A5859" }}>
+            Full transparency: we&apos;re in training. We&apos;re a small team building something we couldn&apos;t find anywhere else. The product works — runners are using it to plan real races. But we&apos;re still figuring out the right price and what matters most to you. Early access pricing is our way of saying thank you for running with us before the start gun fires.
+          </p>
+        </div>
+
+        {/* Pricing cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 max-w-2xl mx-auto">
           {/* Essential Plan */}
           <div className="order-2 md:order-1 p-8 md:p-6 bg-white border-2 border-stone-200 rounded-lg transition-all duration-300 hover:shadow-[0_8px_24px_rgba(44,95,77,0.20)] hover:-translate-y-[3px]">
-            <h3 className="font-sans font-semibold text-2xl text-[#2C5F4D] mb-2">First Ultra Fundamentals</h3>
-            <p className="font-serif text-sm text-[#4A5859] mb-4">Everything you need to toe the line with confidence</p>
-
-            <div className="mb-4">
-              <span className="font-sans font-bold text-4xl text-[#2C5F4D]">$29</span>
-              <span className="font-serif text-[#4A5859]"> per race</span>
-            </div>
-
-            <p className="font-serif text-sm text-[#4A5859] mb-6">
-              Perfect for your first ultra or races where you just need the basics dialed. Get a complete pacing strategy, crew logistics, and drop bag plan—without the 30-hour research spiral. Generate your guide in 10 minutes.
+            <p className="uppercase tracking-wide text-xs font-sans mb-2" style={{ color: "#4A5859" }}>
+              FIRST ULTRA FUNDAMENTALS
             </p>
+            <span
+              className="inline-block rounded-full text-white text-xs px-3 py-1 mb-3 font-sans font-semibold"
+              style={{ backgroundColor: "#C87350" }}
+            >
+              TRAINING PRICE — 75% OFF
+            </span>
+
+            <h3 className="font-sans font-semibold text-2xl mb-2" style={{ color: "#2C5F4D" }}>
+              Essential
+            </h3>
+
+            <div className="mb-1">
+              <span className="font-serif text-sm line-through" style={{ color: "#4A5859" }}>$29</span>
+            </div>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="font-sans font-bold text-4xl" style={{ color: "#2C5F4D" }}>$7</span>
+            </div>
+            <p className="font-serif text-sm mb-6" style={{ color: "#4A5859" }}>per race guide</p>
 
             <ul className="space-y-3 mb-8">
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Section-by-section pacing strategy (flat terrain baseline)</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Section-by-section pacing strategy (flat terrain baseline)</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Aid station cutoff tracker with buffer zones</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Aid station cutoff tracker with buffer zones</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Crew timing sheet with predicted arrivals</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Crew timing sheet with predicted arrivals</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Drop bag checklist by station</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Drop bag checklist by station</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Race overview (elevation, weather, course notes)</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Race overview (elevation, weather, course notes)</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Nutrition timeline template</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Nutrition timeline template</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Mental strategy for tough miles</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Mental strategy for tough miles</span>
               </li>
             </ul>
 
             <Button
-              className="w-full h-14 border-2 border-[#2C5F4D] text-[#2C5F4D] hover:bg-[#2C5F4D] hover:text-white font-semibold bg-transparent"
+              className="w-full border-2 border-[#4A5859] text-[#4A5859] bg-transparent hover:bg-[#4A5859] hover:text-white font-semibold transition-colors"
               variant="outline"
-              onClick={() => handleCheckout(ESSENTIAL_TIER!, ESSENTIAL_SLUG!)}
+              onClick={() => {
+                posthog.capture('training_pricing_cta_clicked', { tier: 'essential', beta_price: 7 })
+                handleCheckout(ESSENTIAL_TIER!, ESSENTIAL_SLUG!)
+              }}
             >
               Start Planning
             </Button>
 
-            <p className="text-xs text-[#4A5859]/60 text-center mt-2">
-              10-minute questionnaire • PDF delivered instantly
-            </p>
-
-            <p className="text-xs text-center text-[#4A5859] mt-4 pt-4 border-t border-stone-200">
-              Need elevation-adjusted pacing? →{' '}
-              <span className="font-semibold text-[#C87350]">Upgrade to Custom for $70 more</span>
+            <p className="text-xs text-center mt-2" style={{ color: "#4A5859" }}>
+              10-minute questionnaire · PDF delivered instantly
             </p>
           </div>
 
           {/* Custom Plan - Most Popular */}
-          <div className="order-1 md:order-2 p-8 bg-white border-2 border-[#C87350] rounded-lg relative transition-all duration-300 hover:shadow-[0_12px_32px_rgba(200,115,80,0.25)] hover:-translate-y-[5px] md:scale-105">
+          <div
+            className="order-1 md:order-2 p-8 bg-white rounded-lg relative transition-all duration-300 hover:shadow-[0_12px_32px_rgba(200,115,80,0.25)] hover:-translate-y-[5px] md:scale-105"
+            style={{ border: "2px solid #C87350" }}
+          >
             <div className="absolute -top-3 right-4">
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#C87350] text-white font-sans font-semibold text-sm rounded-full shadow-md">
-                <Star className="w-4 h-4 fill-white" />
+              <span
+                className="inline-block px-2 py-1 text-white text-xs rounded font-sans font-semibold"
+                style={{ backgroundColor: "#C87350" }}
+              >
                 MOST POPULAR
               </span>
             </div>
 
-            <h3 className="font-sans font-semibold text-2xl text-[#2C5F4D] mb-2">Strava-Powered Race Strategy</h3>
-            <p className="font-serif text-sm text-[#4A5859] mb-4">Your fitness data. Your race. Your custom blueprint.</p>
-
-            <div className="mb-4">
-              <span className="font-sans font-bold text-4xl text-[#2C5F4D]">$99</span>
-              <span className="font-serif text-[#4A5859]"> per race</span>
-            </div>
-
-            <p className="font-serif text-sm text-[#4A5859] mb-6">
-              Built for runners who want every decision made for them. We analyze 90 days of your Strava data to create elevation-adjusted pacing, predict your cutoff buffers down to the minute, and personalize nutrition to your gut. This is the plan that gets you to the finish line—not just the start.
+            <p className="uppercase tracking-wide text-xs font-sans mb-2" style={{ color: "#C87350" }}>
+              STRAVA-POWERED RACE STRATEGY
             </p>
+            <span
+              className="inline-block rounded-full text-white text-xs px-3 py-1 mb-3 font-sans font-semibold"
+              style={{ backgroundColor: "#C87350" }}
+            >
+              TRAINING PRICE — 75% OFF
+            </span>
 
-            <p className="font-serif text-xs text-[#4A5859]/70 mb-3">Everything in Essential, plus:</p>
+            <h3 className="font-sans font-semibold text-2xl mb-2" style={{ color: "#2C5F4D" }}>
+              Custom
+            </h3>
+
+            <div className="mb-1">
+              <span className="font-serif text-sm line-through" style={{ color: "#4A5859" }}>$99</span>
+            </div>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="font-sans font-bold text-4xl" style={{ color: "#2C5F4D" }}>$25</span>
+            </div>
+            <p className="font-serif text-sm mb-6" style={{ color: "#4A5859" }}>per race guide</p>
+
+            <p className="font-serif text-xs mb-3" style={{ color: "#4A5859", opacity: 0.7 }}>
+              Everything in Essential, plus:
+            </p>
 
             <ul className="space-y-3 mb-8">
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>
                   <strong className="font-semibold">Strava-powered pacing</strong> (elevation-adjusted from your actual fitness)
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>
                   <strong className="font-semibold">Cutoff buffer calculator</strong> (🟢🟡🔴 status at every aid station)
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>
                   <strong className="font-semibold">Personalized nutrition</strong> (vegan, GF, caffeine-sensitive options)
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>
                   <strong className="font-semibold">Weather-adjusted drop bag strategy</strong> (race-week forecast integration)
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Crew logistics with minute-by-minute predicted arrivals</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Crew logistics with minute-by-minute predicted arrivals</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Contingency protocols for GI issues, blisters, falling behind</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Contingency protocols for GI issues, blisters, falling behind</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">Mental strategy tailored to your race fears</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>Mental strategy tailored to your race fears</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                <span className="font-serif text-sm text-[#4A5859]">All Essential features included</span>
+                <span className="font-serif text-sm" style={{ color: "#4A5859" }}>All Essential features included</span>
               </li>
             </ul>
 
             <Button
-              className="w-full h-16 bg-[#C87350] hover:bg-[#A85A3C] text-white font-bold text-lg shadow-lg"
-              onClick={() => handleCheckout(CUSTOM_TIER!, CUSTOM_SLUG!)}
+              className="w-full h-14 text-lg font-semibold text-white shadow-lg transition-colors"
+              style={{ backgroundColor: "#C87350" }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#a85e2a" }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#C87350" }}
+              onClick={() => {
+                posthog.capture('training_pricing_cta_clicked', { tier: 'custom', beta_price: 25 })
+                handleCheckout(CUSTOM_TIER!, CUSTOM_SLUG!)
+              }}
             >
               Build My Custom Plan
             </Button>
 
-            <p className="text-xs text-[#4A5859]/60 text-center mt-2">
-              Connect Strava in 1 click • Guide ready in 5 minutes
+            <p className="text-xs text-center mt-2" style={{ color: "#4A5859" }}>
+              Connect Strava in 1 click · Guide ready in 5 minutes
             </p>
-
-            <div className="flex items-center justify-center gap-2 mt-4 text-xs text-green-600">
-              <Check className="w-4 h-4" />
-              <span className="font-serif">60% of runners choose Custom for cutoff peace of mind</span>
-            </div>
           </div>
 
           {/* Ultra Bundle - Hidden for MVP but keeping code for future use */}
@@ -260,8 +312,16 @@ export function Pricing() {
           </div>
         </div>
 
+        {/* Beta disclaimer */}
+        <p
+          className="text-xs italic text-center max-w-lg mx-auto mt-6 mb-12"
+          style={{ color: "#4A5859" }}
+        >
+          Prices will increase when we exit beta. Lock in your training rate now — your guide quality is the same whether you pay $25 or $99.
+        </p>
+
         {/* Money-Back Guarantee */}
-        <div className="mt-16 mb-12">
+        <div className="mt-4 mb-12">
           <div className="max-w-3xl mx-auto p-6 bg-[#F5F1EA] rounded-lg border-2 border-[#2C5F4D] text-center">
             <div className="flex items-center justify-center gap-3 mb-3">
               <div className="text-3xl">✓</div>

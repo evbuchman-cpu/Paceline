@@ -5,6 +5,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 // Better Auth Tables
@@ -191,4 +192,14 @@ export const lead = pgTable("lead", {
   firstName: text("firstName"),
   source: text("source").notNull().default("checklist"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+// Pricing feedback (exit-intent popup responses)
+export const pricingFeedback = pgTable("pricing_feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  selectedOption: text("selected_option").notNull(),
+  customComment: text("custom_comment"),
+  email: text("email"),
+  page: text("page").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
