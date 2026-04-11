@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Suspense } from "react";
@@ -19,6 +19,7 @@ function CheckoutInner() {
   const product = searchParams.get("product")?.trim();
   const slug = searchParams.get("slug")?.trim();
   const triggered = useRef(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (triggered.current) return;
@@ -30,23 +31,44 @@ function CheckoutInner() {
         return;
       }
 
-      const session = await authClient.getSession();
+      try {
+        const session = await authClient.getSession();
 
-      if (!session.data?.user) {
-        // Not signed in — send to sign-in, then come straight back here
-        const returnTo = `/checkout?product=${encodeURIComponent(product)}&slug=${encodeURIComponent(slug)}`;
-        router.replace(`/sign-in?returnTo=${encodeURIComponent(returnTo)}`);
-        return;
+        if (!session.data?.user) {
+          // Not signed in — send to sign-in, then come straight back here
+          const returnTo = `/checkout?product=${encodeURIComponent(product)}&slug=${encodeURIComponent(slug)}`;
+          router.replace(`/sign-in?returnTo=${encodeURIComponent(returnTo)}`);
+          return;
+        }
+
+        // Signed in — navigate to the Better Auth / Polar checkout endpoint.
+        // The plugin registers GET /api/auth/checkout/[slug] which creates the
+        // Polar checkout session and redirects the browser to Polar's payment page.
+        window.location.href = `/api/auth/checkout/${encodeURIComponent(slug)}`;
+      } catch (err) {
+        console.error("Checkout error:", err);
+        setError("Something went wrong starting checkout. Please try again.");
       }
-
-      // Signed in — navigate to the Better Auth / Polar checkout endpoint.
-      // The plugin registers GET /api/auth/checkout/[slug] which creates the
-      // Polar checkout session and redirects the browser to Polar's payment page.
-      window.location.href = `/api/auth/checkout/${encodeURIComponent(slug)}`;
     }
 
     run();
   }, [product, slug, router]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <p className="text-[#4A5859] font-serif mb-4">{error}</p>
+          <button
+            onClick={() => router.back()}
+            className="font-sans font-semibold text-[#C87350] hover:text-[#A85A3C] underline"
+          >
+            Go back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
