@@ -4,6 +4,8 @@ import { Check, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import posthog from "posthog-js";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 type SubscriptionDetails = {
   id: string;
