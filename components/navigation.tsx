@@ -112,7 +112,7 @@ export function Navigation() {
                       <a href="/sign-in">Sign In</a>
                     </Button>
                     <Button className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
-                      <a href="#lead-magnet">Get Your DNF Prevention Checklist</a>
+                      <a href="#lead-magnet">Your Free DNF Prevention Checklist</a>
                     </Button>
                   </>
                 )}
@@ -198,7 +198,7 @@ export function Navigation() {
                     </Button>
                     <Button className="w-full bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold" asChild>
                       <a href="#lead-magnet" onClick={() => setMobileMenuOpen(false)}>
-                        Get Your DNF Prevention Checklist
+                        Your Free DNF Prevention Checklist
                       </a>
                     </Button>
                   </>

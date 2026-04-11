@@ -96,7 +96,7 @@ export function LeadMagnet() {
               disabled={isSubmitting}
               className="w-full bg-[#C87350] hover:bg-[#B86640] text-white font-semibold py-3 text-base"
             >
-              {isSubmitting ? "Sending..." : "Get Free Checklist"}
+              {isSubmitting ? "Sending..." : "Get Your DNF Prevention Checklist"}
             </Button>
 
             <p className="text-sm text-gray-500 text-center mt-4">
