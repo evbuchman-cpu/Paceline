@@ -2,6 +2,8 @@
 
 import { Check, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 type SubscriptionDetails = {
   id: string;
