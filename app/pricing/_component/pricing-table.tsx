@@ -73,7 +73,7 @@ export default function PricingTable({ subscriptionDetails }: PricingTableProps)
           TRAINING PRICING — BETA
         </p>
         <h1
-          className="font-serif text-3xl sm:text-4xl lg:text-5xl mb-4"
+          className="font-sans font-semibold text-3xl sm:text-4xl lg:text-5xl mb-4"
           style={{ color: "#2C5F4D" }}
         >
           We&apos;re Still in Training. So Are Our Prices.
