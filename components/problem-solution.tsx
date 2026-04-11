@@ -134,7 +134,7 @@ export function ProblemSolution({
               </a>
             </Button>
             <p className="text-sm text-[#4A5859] mt-3">
-              Essential $29 | Custom $99
+              Essential $7 | Custom $25 — beta pricing
             </p>
             <div className="flex items-center justify-center gap-4 mt-3 text-xs text-[#4A5859]">
               <span>🔒 Secure Checkout</span>
@@ -216,7 +216,7 @@ function TimelineVariation() {
             </a>
           </Button>
           <p className="text-sm text-[#4A5859] mt-3">
-            Essential $29 | Custom $99 | Ultra Bundle $497
+            Essential $7 | Custom $25 — beta pricing
           </p>
           <div className="flex items-center justify-center gap-4 mt-3 text-xs text-[#4A5859]">
             <span>🔒 Secure Checkout</span>
