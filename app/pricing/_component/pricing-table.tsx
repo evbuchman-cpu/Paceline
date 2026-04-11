@@ -88,14 +88,11 @@ export default function PricingTable({ subscriptionDetails }: PricingTableProps)
 
       {/* Transparency callout */}
       <div
-        className="max-w-2xl mx-auto mb-10 px-5 py-4 mx-4"
+        className="max-w-2xl mx-auto mb-10 px-5 py-4"
         style={{
           backgroundColor: "#F5F1EA",
           borderLeft: "4px solid #2C5F4D",
           borderRadius: "8px",
-          margin: "0 auto 2.5rem",
-          maxWidth: "42rem",
-          padding: "16px 20px",
         }}
       >
         <p className="font-serif text-sm" style={{ color: "#4A5859" }}>
@@ -104,7 +101,7 @@ export default function PricingTable({ subscriptionDetails }: PricingTableProps)
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto px-4 pb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto px-4 pb-6">
 
         {/* Essential */}
         <div

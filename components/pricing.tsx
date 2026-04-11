@@ -60,7 +60,7 @@ export function Pricing() {
         </div>
 
         {/* Pricing cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 max-w-5xl mx-auto">
           {/* Essential Plan */}
           <div className="order-2 md:order-1 p-8 md:p-6 bg-white border-2 border-stone-200 rounded-lg transition-all duration-300 hover:shadow-[0_8px_24px_rgba(44,95,77,0.20)] hover:-translate-y-[3px]">
             <p className="uppercase tracking-wide text-xs font-sans mb-2" style={{ color: "#4A5859" }}>
