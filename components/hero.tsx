@@ -51,7 +51,7 @@ export function Hero() {
                 className="bg-[#C87350] hover:bg-[#A85A3C] text-white text-lg font-bold px-10 py-7 shadow-xl"
                 data-testid="button-hero-primary-cta"
               >
-                Build Your Race Plan
+                Build My Race Plan
               </Button>
             </div>
 
