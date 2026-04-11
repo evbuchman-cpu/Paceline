@@ -130,7 +130,7 @@ export function ProblemSolution({
               asChild
             >
               <a href="#pricing">
-                Stop Second-Guessing. Start Executing with Confidence
+                Start Planning with Confidence
               </a>
             </Button>
             <p className="text-sm text-[#4A5859] mt-3">
@@ -212,7 +212,7 @@ function TimelineVariation() {
             asChild
           >
             <a href="#pricing">
-              Stop Second-Guessing. Start Executing with Confidence →
+              Start Planning with Confidence →
             </a>
           </Button>
           <p className="text-sm text-[#4A5859] mt-3">
