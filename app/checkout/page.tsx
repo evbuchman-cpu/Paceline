@@ -33,7 +33,10 @@ function CheckoutInner() {
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error ?? "Something went wrong starting checkout.");
+          const msg = data.detail
+            ? `${data.error}: ${data.detail}`
+            : (data.error ?? "Something went wrong starting checkout.");
+          setError(msg);
           return;
         }
 
