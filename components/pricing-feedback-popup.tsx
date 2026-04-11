@@ -64,16 +64,12 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
   const shouldShow = (): boolean => {
     if (userHasPurchased) return false;
     if (sessionStorage.getItem("paceline_feedback_shown")) return false;
-    // Suppress for 24 hours after last show/submit, then show again on new sessions
-    const suppressUntil = localStorage.getItem("paceline_feedback_suppress_until");
-    if (suppressUntil && Date.now() < parseInt(suppressUntil)) return false;
     return true;
   };
 
   const showPopup = () => {
     if (!shouldShow()) return;
     sessionStorage.setItem("paceline_feedback_shown", "1");
-    localStorage.setItem("paceline_feedback_suppress_until", String(Date.now() + 24 * 60 * 60 * 1000));
     setVisible(true);
     posthog.capture("pricing_feedback_popup_shown");
   };
@@ -133,7 +129,6 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
           page: "pricing",
         }),
       });
-      localStorage.setItem("paceline_feedback_suppress_until", String(Date.now() + 24 * 60 * 60 * 1000));
       posthog.capture("pricing_feedback_submitted", {
         selected_option: selectedOption,
         has_email: !!email,
@@ -169,7 +164,6 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
         page: "pricing",
       }),
     }).catch(() => {});
-    localStorage.setItem("paceline_feedback_suppress_until", String(Date.now() + 24 * 60 * 60 * 1000));
     window.location.href = `/checkout?slug=${encodeURIComponent(cta.slug)}`;
   };
 
