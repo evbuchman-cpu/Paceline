@@ -182,12 +182,12 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
     >
       {/* Card */}
       <div
-        className="w-full max-w-lg sm:rounded-2xl rounded-t-2xl overflow-hidden"
+        className="w-full max-w-lg sm:rounded-2xl rounded-t-2xl flex flex-col max-h-[90vh]"
         style={{ backgroundColor: "#F5F1EA" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Decorative top bar */}
-        <div className="h-2 rounded-t-2xl" style={{ backgroundColor: "#2C5F4D" }} />
+        {/* Decorative top bar — fixed, never scrolls */}
+        <div className="h-2 rounded-t-2xl shrink-0" style={{ backgroundColor: "#2C5F4D" }} />
 
         {submitted ? (
           /* Success state */
@@ -201,25 +201,25 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
             </p>
           </div>
         ) : (
-          <>
+          <div className="overflow-y-auto">
             {/* Header */}
-            <div className="px-6 pt-6 pb-2">
-              <h3 className="font-serif text-xl" style={{ color: "#2C5F4D" }}>
+            <div className="px-6 pt-4 pb-2">
+              <h3 className="font-serif text-lg" style={{ color: "#2C5F4D" }}>
                 Still on the fence? So are we. 👋
               </h3>
-              <p className="text-sm mt-2" style={{ color: "#4A5859" }}>
-                We&apos;re in training — still figuring out our race-day pricing. What would you actually pay for a personalized race-day plan? Be brutally honest. This directly shapes what we charge.
+              <p className="text-sm mt-1" style={{ color: "#4A5859" }}>
+                What would you actually pay for a personalized race-day plan? Be brutally honest — this shapes what we charge.
               </p>
             </div>
 
             {/* Options */}
-            <div className="px-6 pt-2 pb-0 space-y-2">
+            <div className="px-6 pt-1 pb-0 space-y-1.5">
               {PRICE_OPTIONS.map((option) => (
                 <div key={option}>
                   <button
                     type="button"
                     onClick={() => setSelectedOption(option)}
-                    className="w-full text-left px-4 py-2.5 rounded-full border text-sm transition-colors"
+                    className="w-full text-left px-4 py-2 rounded-full border text-sm transition-colors"
                     style={
                       selectedOption === option
                         ? {
@@ -299,12 +299,12 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
             </div>
 
             {/* Actions */}
-            <div className="px-6 pt-4 pb-6">
+            <div className="px-6 pt-3 pb-5">
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={!selectedOption || submitting}
-                className="w-full rounded-lg px-6 py-3 font-semibold text-white transition-colors"
+                className="w-full rounded-lg px-6 py-2.5 font-semibold text-white transition-colors"
                 style={{
                   backgroundColor: "#C87350",
                   opacity: !selectedOption || submitting ? 0.5 : 1,
@@ -322,7 +322,7 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
                 Skip — just browsing
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
