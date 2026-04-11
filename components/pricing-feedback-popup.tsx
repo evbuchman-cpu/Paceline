@@ -167,7 +167,7 @@ export function PricingFeedbackPopup({ userHasPurchased }: PricingFeedbackPopupP
       }),
     }).catch(() => {});
     localStorage.setItem("paceline_feedback_submitted", "1");
-    window.location.href = `/checkout?product=${encodeURIComponent(cta.productId)}&slug=${encodeURIComponent(cta.slug)}`;
+    window.location.href = `/api/checkout/${encodeURIComponent(cta.slug)}`;
   };
 
   if (!visible) return null;

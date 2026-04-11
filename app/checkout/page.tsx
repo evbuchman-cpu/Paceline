@@ -31,9 +31,8 @@ function CheckoutInner() {
       }
 
       try {
-        // Go straight to the Better Auth / Polar checkout endpoint.
-        // authenticatedUsersOnly: false allows guest checkout through Polar.
-        window.location.href = `/api/auth/checkout/${encodeURIComponent(slug)}`;
+        // Go straight to our direct Polar checkout endpoint (supports guest checkout).
+        window.location.href = `/api/checkout/${encodeURIComponent(slug)}`;
       } catch (err) {
         console.error("Checkout error:", err);
         setError("Something went wrong starting checkout. Please try again.");
