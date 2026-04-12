@@ -22,14 +22,14 @@ export function Hero() {
           <div className="space-y-6">
             <div className="space-y-5">
               {/*
-                Hero headline sizing - optimized for clean single-line display
-                - Smaller font sizes to keep heading on one line
-                - whitespace-nowrap on larger screens for clean formatting
+                Hero headline sizing - optimized for 2 clean lines
+                - Reduced font sizes to keep each line from wrapping
+                - whitespace-nowrap ensures single-line display per span
                 - font-bold - Brand requirement (700 weight)
               */}
-              <h1 className="font-sans text-[22px] sm:text-[28px] lg:text-[34px] xl:text-[38px] font-bold text-foreground leading-[1.2]">
-                <span className="block">A Personalized Ultramarathon Race Plan.</span>
-                <span className="block text-[#2C5F4D] mt-2">Zero Guesswork. One Goal: The Finish Line.</span>
+              <h1 className="font-sans text-[20px] sm:text-[24px] lg:text-[28px] xl:text-[32px] font-bold text-foreground leading-[1.2]">
+                <span className="block whitespace-nowrap">A Personalized Ultramarathon Race Plan.</span>
+                <span className="block whitespace-nowrap text-[#2C5F4D] mt-2">Zero Guesswork. One Goal: The Finish Line.</span>
               </h1>
               <div className="font-serif text-sm sm:text-base lg:text-base text-[#4A5859] leading-[1.6] space-y-2">
                 <p className="sm:whitespace-nowrap">
