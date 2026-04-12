@@ -105,7 +105,7 @@ export function Features() {
               variant="outline"
               className="border-2 border-[#C87350] text-[#C87350] hover:bg-[#C87350] hover:text-white font-semibold"
             >
-              Build My Race Plan
+              Get My Race Day Plan
             </Button>
           </a>
           <p className="font-serif text-base text-[#4A5859] mt-3">

@@ -160,7 +160,7 @@ export function HowItWorks() {
               size="lg"
               className="bg-[#C87350] hover:bg-[#A85A3C] text-white font-semibold mb-3"
             >
-              Build My Race Plan
+              Get My Race Day Plan
             </Button>
           </a>
           <p className="font-serif text-sm text-[#4A5859]">

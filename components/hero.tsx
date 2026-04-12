@@ -22,23 +22,23 @@ export function Hero() {
           <div className="space-y-6">
             <div className="space-y-5">
               {/*
-                Hero headline sizing - optimized for visual impact
-                - text-[26px] sm:text-[32px] lg:text-[38px] xl:text-[44px] - Mobile-friendly sizing
-                - whitespace-nowrap - Keeps each sentence on one line for dramatic effect
+                Hero headline sizing - optimized for 2 clean lines
+                - Reduced font sizes to keep each line from wrapping
+                - whitespace-nowrap ensures single-line display per span
                 - font-bold - Brand requirement (700 weight)
               */}
-              <h1 className="font-sans text-[26px] sm:text-[32px] lg:text-[38px] xl:text-[44px] font-bold text-foreground leading-[1.2]">
-                <span className="block whitespace-nowrap">8 Sections. Zero Guesswork.</span>
-                <span className="block whitespace-nowrap text-[#2C5F4D]">One Goal: The Finish Line.</span>
+              <h1 className="font-sans text-[20px] sm:text-[24px] lg:text-[28px] xl:text-[32px] font-bold text-foreground leading-[1.2]">
+                <span className="block whitespace-nowrap">A Personalized Ultramarathon Race Plan.</span>
+                <span className="block whitespace-nowrap text-[#2C5F4D] mt-2">Zero Guesswork. One Goal: The Finish Line.</span>
               </h1>
               <div className="font-serif text-sm sm:text-base lg:text-base text-[#4A5859] leading-[1.6] space-y-2">
-                <p className="whitespace-nowrap">
+                <p className="sm:whitespace-nowrap">
                   Personalized ultramarathon race guides built for <span className="font-semibold text-[#C87350]">Your fitness</span>, <span className="font-semibold text-[#C87350]">Your crew</span>, <span className="font-semibold text-[#C87350]">Your race</span>.
                 </p>
-                <p className="whitespace-nowrap">
+                <p className="sm:whitespace-nowrap">
                   Strava-powered pacing. Nutrition timelines. Crew logistics. Delivered in 24 hours.
                 </p>
-                <p className="whitespace-nowrap">
+                <p className="sm:whitespace-nowrap">
                   You spend 10 minutes answering questions. We handle the rest.
                 </p>
               </div>
@@ -51,7 +51,7 @@ export function Hero() {
                 className="bg-[#C87350] hover:bg-[#A85A3C] text-white text-lg font-bold px-10 py-7 shadow-xl"
                 data-testid="button-hero-primary-cta"
               >
-                Build My Race Plan
+                Get My Race Day Plan
               </Button>
             </div>
 
