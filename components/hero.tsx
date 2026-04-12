@@ -22,23 +22,23 @@ export function Hero() {
           <div className="space-y-6">
             <div className="space-y-5">
               {/*
-                Hero headline sizing - optimized for readability across all devices
-                - Responsive font sizing with natural text wrapping
-                - Proper line height for multi-line headings
+                Hero headline sizing - optimized for clean single-line display
+                - Smaller font sizes to keep heading on one line
+                - whitespace-nowrap on larger screens for clean formatting
                 - font-bold - Brand requirement (700 weight)
               */}
-              <h1 className="font-sans text-[28px] sm:text-[36px] lg:text-[42px] xl:text-[48px] font-bold text-foreground leading-[1.3]">
+              <h1 className="font-sans text-[22px] sm:text-[28px] lg:text-[34px] xl:text-[38px] font-bold text-foreground leading-[1.2]">
                 <span className="block">A Personalized Ultramarathon Race Plan.</span>
-                <span className="block text-[#2C5F4D] mt-3">Zero Guesswork. One Goal: The Finish Line.</span>
+                <span className="block text-[#2C5F4D] mt-2">Zero Guesswork. One Goal: The Finish Line.</span>
               </h1>
-              <div className="font-serif text-base sm:text-lg lg:text-lg text-[#4A5859] leading-[1.7] space-y-3">
-                <p>
+              <div className="font-serif text-sm sm:text-base lg:text-base text-[#4A5859] leading-[1.6] space-y-2">
+                <p className="sm:whitespace-nowrap">
                   Personalized ultramarathon race guides built for <span className="font-semibold text-[#C87350]">Your fitness</span>, <span className="font-semibold text-[#C87350]">Your crew</span>, <span className="font-semibold text-[#C87350]">Your race</span>.
                 </p>
-                <p>
+                <p className="sm:whitespace-nowrap">
                   Strava-powered pacing. Nutrition timelines. Crew logistics. Delivered in 24 hours.
                 </p>
-                <p>
+                <p className="sm:whitespace-nowrap">
                   You spend 10 minutes answering questions. We handle the rest.
                 </p>
               </div>
