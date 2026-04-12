@@ -28,8 +28,8 @@ export function Hero() {
                 - font-bold - Brand requirement (700 weight)
               */}
               <h1 className="font-sans text-[26px] sm:text-[32px] lg:text-[38px] xl:text-[44px] font-bold text-foreground leading-[1.2]">
-                <span className="block whitespace-nowrap">8 Sections. Zero Guesswork.</span>
-                <span className="block whitespace-nowrap text-[#2C5F4D]">One Goal: The Finish Line.</span>
+                <span className="block">A Personalized Ultramarathon Race Plan.</span>
+                <span className="block whitespace-nowrap text-[#2C5F4D] mt-2">Zero Guesswork. One Goal: The Finish Line.</span>
               </h1>
               <div className="font-serif text-sm sm:text-base lg:text-base text-[#4A5859] leading-[1.6] space-y-2">
                 <p className="whitespace-nowrap">
