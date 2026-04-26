@@ -5,9 +5,9 @@ import { ChevronDown } from "lucide-react"
 
 const faqs = [
   {
-    question: "What's the difference between Essential ($29) and Custom ($99)?",
+    question: "What's the difference between Essential ($7) and Custom ($25)?",
     answer:
-      "Essential ($29) gives you the fundamentals: section-by-section pacing strategy (flat terrain baseline), crew timing sheet, drop bag checklist, cutoff tracker, and nutrition timeline. Perfect for your first ultra or straightforward courses.\n\nCustom ($99) is built for runners who want zero guesswork. We analyze 90 days of YOUR Strava data to create elevation-adjusted pacing specific to your fitness. You get cutoff buffer predictions (🟢🟡🔴 status at every aid station), personalized nutrition based on your dietary needs, drop bag strategy tailored to the course, and contingency protocols for GI issues, blisters, and falling behind pace.\n\n60% of runners choose Custom for the Strava integration and cutoff peace of mind.",
+      "Essential ($7) gives you the fundamentals: section-by-section pacing strategy (flat terrain baseline), crew timing sheet, drop bag checklist, cutoff tracker, and nutrition timeline. Perfect for your first ultra or straightforward courses.\n\nCustom ($25) is built for runners who want zero guesswork. We analyze 90 days of YOUR Strava data to create elevation-adjusted pacing specific to your fitness. You get cutoff buffer predictions (🟢🟡🔴 status at every aid station), personalized nutrition based on your dietary needs, drop bag strategy tailored to the course, and contingency protocols for GI issues, blisters, and falling behind pace.\n\n60% of runners choose Custom for the Strava integration and cutoff peace of mind.",
   },
   {
     question: "How does Strava integration work?",
@@ -30,9 +30,9 @@ const faqs = [
       "Every guide includes 8 comprehensive sections: Race Overview (course profile, elevation, aid stations), Pacing Strategy (section-by-section targets, Strava-adjusted for Custom tier), Cutoff Management (buffer calculator with 🟢🟡🔴 status), Crew Logistics (predicted arrival times, crew instructions), Drop Bag Strategy (station-specific packing lists), Nutrition Timeline (personalized fueling plan, calorie/electrolyte targets), Contingency Protocols (GI issues, blisters, falling behind), and Mental Strategy (mantras, tough section tactics).\n\nCustom tier also includes a one-page Crew Cheat Sheet (printable, laminated-friendly) and Quick Reference Card for race-day carry (wallet-sized).\n\nEmail us at hello@paceline.run to request a redacted sample.",
   },
   {
-    question: "I've already spent $1,200 on this race. Is $99 more really necessary?",
+    question: "I've already spent $1,200 on this race. Is $25 really necessary?",
     answer:
-      "Think of it as insurance for your training investment. You've put in 350+ hours training over 14 months. You've paid for entry ($400-500), travel ($300-500), lodging ($200-400). That's $1,200 and a year of early mornings.\n\n$99 is 8% of your race budget—but it protects 100% of your training. One DNF because you didn't know what to do at mile 70? You're redoing the entire training cycle. That's another year.\n\nPaceline users report 15% higher finish rates and 40% lower pre-race anxiety. What's that worth?",
+      "Think of it as insurance for your training investment. You've put in 350+ hours training over 14 months. You've paid for entry ($400-500), travel ($300-500), lodging ($200-400). That's $1,200 and a year of early mornings.\n\n$25 is 2% of your race budget — and it's a beta price that goes up when we launch. One DNF because you didn't know what to do at mile 70? You're redoing the entire training cycle. That's another year.\n\nPaceline users report 15% higher finish rates and 40% lower pre-race anxiety. What's that worth?",
   },
   {
     question: "What if race conditions change (weather, course reroutes)?",
@@ -52,7 +52,7 @@ const faqs = [
   {
     question: "What if I don't use Strava?",
     answer:
-      "Essential tier ($29) doesn't require Strava at all—it uses proven baseline pacing strategies. Custom tier ($99) Strava integration is optional. You can manually enter your recent race results (times, distances, conditions), typical training paces (flat, hills), weekly mileage, and biggest climb trained.\n\nWe'll use that data to personalize your plan. Strava just makes it faster and more accurate because we can see 90 days of actual performance data instead of you estimating.",
+      "Essential tier ($7) doesn't require Strava at all—it uses proven baseline pacing strategies. Custom tier ($25) Strava integration is optional. You can manually enter your recent race results (times, distances, conditions), typical training paces (flat, hills), weekly mileage, and biggest climb trained.\n\nWe'll use that data to personalize your plan. Strava just makes it faster and more accurate because we can see 90 days of actual performance data instead of you estimating.",
   },
   {
     question: "Can I use this for races outside the US (like UTMB)?",

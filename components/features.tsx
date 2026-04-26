@@ -109,7 +109,7 @@ export function Features() {
             </Button>
           </a>
           <p className="font-serif text-base text-[#4A5859] mt-3">
-            Plans from $29. Ready in 10 minutes.
+            Plans from $7. Ready in 10 minutes.
           </p>
         </div>
       </div>

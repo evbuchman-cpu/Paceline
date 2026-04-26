@@ -31,10 +31,18 @@ export async function GET(
     );
   }
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!appUrl) {
+    return NextResponse.json(
+      { error: "NEXT_PUBLIC_APP_URL env var is not set" },
+      { status: 500 }
+    );
+  }
+
   try {
     const checkout = await polar.checkouts.create({
       products: [productId],
-      successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/success?checkout_id={CHECKOUT_ID}`,
+      successUrl: `${appUrl}/success?checkout_id={CHECKOUT_ID}`,
     });
 
     // Return the URL as JSON so the client can redirect and handle errors gracefully

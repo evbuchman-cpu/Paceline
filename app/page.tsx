@@ -8,6 +8,7 @@ import { LeadMagnet } from "@/components/lead-magnet"
 import { Pricing } from "@/components/pricing"
 import { FAQ } from "@/components/faq"
 import { Footer } from "@/components/footer"
+import { PricingFeedbackPopup } from "@/components/pricing-feedback-popup"
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
       <Pricing />
       <FAQ />
       <Footer />
+      <PricingFeedbackPopup userHasPurchased={false} />
     </main>
   )
 }

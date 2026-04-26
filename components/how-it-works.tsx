@@ -164,7 +164,7 @@ export function HowItWorks() {
             </Button>
           </a>
           <p className="font-serif text-sm text-[#4A5859]">
-            Plans from $29 • Delivered in minutes • 7-day money-back guarantee
+            Plans from $7 — beta pricing • Delivered in minutes • 7-day money-back guarantee
           </p>
         </div>
       </div>
