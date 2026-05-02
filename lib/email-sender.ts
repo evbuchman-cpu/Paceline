@@ -3,6 +3,10 @@ import GuideDeliveryEmail from '@/emails/guide-delivery';
 import GuideFailedEmail from '@/emails/guide-failed';
 import PaymentConfirmationEmail from '@/emails/payment-confirmation';
 import LeadMagnetDeliveryEmail from '@/emails/lead-magnet-delivery';
+import NurtureEmail2 from '@/emails/nurture-2-belief-breaker';
+import NurtureEmail3 from '@/emails/nurture-3-value-drop';
+import NurtureEmail4 from '@/emails/nurture-4-story-bridge';
+import NurtureEmail5 from '@/emails/nurture-5-squeeze';
 import { logger } from '@/lib/logger';
 
 // Type definitions
@@ -165,7 +169,7 @@ export async function sendLeadMagnetEmail(data: LeadMagnetData) {
     () => resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL!,
       to: data.email,
-      subject: 'Your Race Day Readiness Checklist [Download Inside]',
+      subject: 'Your DNF Prevention Checklist [Download Inside]',
       react: LeadMagnetDeliveryEmail({
         email: data.email,
         firstName: data.firstName,
@@ -174,5 +178,91 @@ export async function sendLeadMagnetEmail(data: LeadMagnetData) {
       }),
     }),
     'Lead Magnet Delivery Email'
+  );
+}
+
+// Nurture sequence data type
+interface NurtureData {
+  email: string;
+  firstName: string | null;
+}
+
+// 5. Nurture Email 2 — Belief Breaker (Day 2)
+export async function sendNurtureEmail2(data: NurtureData) {
+  if (!data.email) {
+    logger.error("Cannot send nurture email 2: missing email", undefined);
+    return { success: false, error: 'Missing email' };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://paceline.run';
+
+  return sendWithRetry(
+    () => resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL!,
+      to: data.email,
+      subject: 'the most expensive planning mistake',
+      react: NurtureEmail2({ firstName: data.firstName, appUrl }),
+    }),
+    'Nurture Email 2 (Belief Breaker)'
+  );
+}
+
+// 6. Nurture Email 3 — Value Drop (Day 4)
+export async function sendNurtureEmail3(data: NurtureData) {
+  if (!data.email) {
+    logger.error("Cannot send nurture email 3: missing email", undefined);
+    return { success: false, error: 'Missing email' };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://paceline.run';
+
+  return sendWithRetry(
+    () => resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL!,
+      to: data.email,
+      subject: 'how to know if you will make your cutoffs',
+      react: NurtureEmail3({ firstName: data.firstName, appUrl }),
+    }),
+    'Nurture Email 3 (Value Drop)'
+  );
+}
+
+// 7. Nurture Email 4 — Story Bridge (Day 7)
+export async function sendNurtureEmail4(data: NurtureData) {
+  if (!data.email) {
+    logger.error("Cannot send nurture email 4: missing email", undefined);
+    return { success: false, error: 'Missing email' };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://paceline.run';
+
+  return sendWithRetry(
+    () => resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL!,
+      to: data.email,
+      subject: '8 minutes from a DNF at mile 62',
+      react: NurtureEmail4({ firstName: data.firstName, appUrl }),
+    }),
+    'Nurture Email 4 (Story Bridge)'
+  );
+}
+
+// 8. Nurture Email 5 — Squeeze (Day 10)
+export async function sendNurtureEmail5(data: NurtureData) {
+  if (!data.email) {
+    logger.error("Cannot send nurture email 5: missing email", undefined);
+    return { success: false, error: 'Missing email' };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://paceline.run';
+
+  return sendWithRetry(
+    () => resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL!,
+      to: data.email,
+      subject: 'beta pricing closes soon',
+      react: NurtureEmail5({ firstName: data.firstName, appUrl }),
+    }),
+    'Nurture Email 5 (Squeeze)'
   );
 }

@@ -57,10 +57,10 @@ export function LeadMagnet() {
             FREE DOWNLOAD
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-[#2C5F4D] mb-4">
-            Start planning your race—for free
+            The DNF Prevention Checklist
           </h2>
           <p className="text-lg text-[#4A5859] max-w-2xl mx-auto">
-            Download the Race Day Readiness Checklist and get the same frameworks used in every Paceline guide.
+            Four areas most runners miss before race day. Free in your inbox — the same framework behind every Paceline guide.
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export function LeadMagnet() {
               disabled={isSubmitting}
               className="w-full bg-[#C87350] hover:bg-[#B86640] text-white font-semibold py-3 text-base"
             >
-              {isSubmitting ? "Sending..." : "Get Your DNF Prevention Checklist"}
+              {isSubmitting ? "Sending..." : "Get the Free Checklist"}
             </Button>
 
             <p className="text-sm text-gray-500 text-center mt-4">

@@ -191,6 +191,9 @@ export const lead = pgTable("lead", {
   email: text("email").notNull().unique(),
   firstName: text("firstName"),
   source: text("source").notNull().default("checklist"),
+  // Nurture sequence tracking (0=email 1 sent, 1=email 2 sent, ... 4=complete)
+  sequenceStep: integer("sequenceStep").notNull().default(0),
+  convertedAt: timestamp("convertedAt"), // set when lead purchases
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 
