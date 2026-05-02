@@ -8,41 +8,27 @@ interface PricingFeedbackPopupProps {
 }
 
 const PRICE_OPTIONS = [
-  "$10–15 — I'd try it at that price",
-  "$20–30 — Fair for what it does",
-  "$40–60 — If the plan is genuinely personalized",
+  "$10–20 — I'd try it at that price",
+  "$25–50 — Fair for a personalized plan",
   "$75–100 — Worth it if it helps me finish",
-  "$100+ — Coach-level value, worth premium",
   "I wouldn't pay — here's why:",
 ] as const;
 
 // Map price options to the matching beta product
 const BUY_CTA: Record<string, { label: string; price: string; slug: string; productId: string } | null> = {
-  "$10–15 — I'd try it at that price": {
+  "$10–20 — I'd try it at that price": {
     label: "Get Essential Plan",
     price: "$7",
     slug: process.env.NEXT_PUBLIC_ESSENTIAL_SLUG ?? "",
     productId: process.env.NEXT_PUBLIC_ESSENTIAL_TIER ?? "",
   },
-  "$20–30 — Fair for what it does": {
-    label: "Get Custom Plan",
-    price: "$25",
-    slug: process.env.NEXT_PUBLIC_CUSTOM_SLUG ?? "",
-    productId: process.env.NEXT_PUBLIC_CUSTOM_TIER ?? "",
-  },
-  "$40–60 — If the plan is genuinely personalized": {
+  "$25–50 — Fair for a personalized plan": {
     label: "Get Custom Plan",
     price: "$25",
     slug: process.env.NEXT_PUBLIC_CUSTOM_SLUG ?? "",
     productId: process.env.NEXT_PUBLIC_CUSTOM_TIER ?? "",
   },
   "$75–100 — Worth it if it helps me finish": {
-    label: "Get Custom Plan",
-    price: "$25",
-    slug: process.env.NEXT_PUBLIC_CUSTOM_SLUG ?? "",
-    productId: process.env.NEXT_PUBLIC_CUSTOM_TIER ?? "",
-  },
-  "$100+ — Coach-level value, worth premium": {
     label: "Get Custom Plan",
     price: "$25",
     slug: process.env.NEXT_PUBLIC_CUSTOM_SLUG ?? "",
